@@ -230,6 +230,7 @@
         flex-wrap: wrap;
       }
     </style>
+    <script src="/analytics.js" defer></script>
   </head>
   <body>
     <div class="wrap">
@@ -330,7 +331,7 @@
           <div class="code-head">
             Copy for AI — the architecture example above
             <span class="grow"></span>
-            <button class="btn" type="button" data-copy-from="the-brief">Copy</button>
+            <button class="btn" type="button" data-copy-from="the-brief" data-track="brief_copied">Copy</button>
           </div>
           <pre id="the-brief"># Web app architecture
 
@@ -410,14 +411,14 @@ files 552,880
           <div class="code-head">
             Claude Code — local diagrams in this folder
             <span class="grow"></span>
-            <button class="btn" type="button" data-copy-from="mcp-stdio">Copy</button>
+            <button class="btn" type="button" data-copy-from="mcp-stdio" data-track="mcp_setup_copied">Copy</button>
           </div>
           <pre id="mcp-stdio">
 claude mcp add isketch -- node /path/to/isketch/bin/isketch.mjs mcp .</pre>
           <div class="code-head">
             Any MCP client — the hosted server
             <span class="grow"></span>
-            <button class="btn" type="button" data-copy-from="mcp-http">Copy</button>
+            <button class="btn" type="button" data-copy-from="mcp-http" data-track="mcp_setup_copied">Copy</button>
           </div>
           <pre id="mcp-http">claude mcp add --transport http isketch https://isketch.online/mcp</pre>
         </div>
@@ -428,7 +429,7 @@ claude mcp add isketch -- node /path/to/isketch/bin/isketch.mjs mcp .</pre>
         <a href="/new">Editor</a>
         <a href="https://github.com/raj-khan/flow">GitHub</a>
         <a href="https://github.com/raj-khan/flow#readme">Docs</a>
-        <span>MIT licence. No account, no tracking.</span>
+        <span>MIT licence. No account, no cookies.</span>
       </footer>
     </div>
 

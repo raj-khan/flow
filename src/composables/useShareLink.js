@@ -1,6 +1,7 @@
 import { watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
+import { track } from '@/api/analytics.js'
 import { useFlowQuery } from '@/composables/useFlowQuery.js'
 import { useFlowHistory } from '@/composables/useFlowHistory.js'
 import { useReplaceDocument } from '@/composables/useNodeMutations.js'
@@ -70,10 +71,12 @@ export function useOpenSharedLink() {
       canvas.forgetViewport()
       file.forget()
       replace.mutate(shared, {
-        onSuccess: () =>
+        onSuccess: () => {
+          track('opened_from_link')
           toasts.push('Opened a shared diagram. Undo brings yours back.', {
             action: { label: 'Undo', run: undo },
-          }),
+          })
+        },
       })
     },
     { immediate: true },

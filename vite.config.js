@@ -5,6 +5,8 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
 
+import { analyticsScript } from './src/api/analytics.js'
+
 /** Where links point when the head is built; %SITE_URL% in index.html. */
 const SITE_URL = (process.env.VITE_SITE_URL ?? 'https://isketch.online').replace(/\/+$/, '')
 
@@ -31,6 +33,9 @@ function serveLanding(server) {
   })
 }
 
+/** The GA4 measurement id this build carries, read once the config resolves. */
+let gaId
+
 // One config file, not two: Vitest resolves the same `@` alias the app does.
 export default defineConfig({
   plugins: [
@@ -49,6 +54,27 @@ export default defineConfig({
       name: 'landing-at-root',
       configureServer: serveLanding,
       configurePreviewServer: serveLanding,
+    },
+    {
+      // One /analytics.js for the app and the static pages: GA4 when the build
+      // has VITE_GA_ID, a no-op otherwise, and always a no-op in `vite dev`.
+      name: 'analytics',
+      configResolved(config) {
+        gaId = config.env.VITE_GA_ID
+      },
+      configureServer(server) {
+        server.middlewares.use('/analytics.js', (_req, res) => {
+          res.setHeader('content-type', 'text/javascript')
+          res.end(analyticsScript(undefined))
+        })
+      },
+      generateBundle() {
+        this.emitFile({
+          type: 'asset',
+          fileName: 'analytics.js',
+          source: analyticsScript(gaId),
+        })
+      },
     },
   ],
 

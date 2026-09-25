@@ -348,6 +348,7 @@ async function page(path, { title, description, body, ogImage }) {
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any">
 ${STYLES}
+<script src="/analytics.js" defer></script>
 </head>
 <body>
 <div class="wrap">

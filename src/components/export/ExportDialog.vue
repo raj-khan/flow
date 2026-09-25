@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, watchEffect } from 'vue'
 
+import { track } from '@/api/analytics.js'
 import BaseModal from '@/components/ui/BaseModal.vue'
 import { downloadBlob, downloadText } from '@/composables/download.js'
 import { sketchFontData, svgToPng } from '@/composables/exportImage.js'
@@ -58,6 +59,7 @@ async function download() {
     else if (format.value === 'drawio') {
       downloadText(name, toDrawio(document.value), 'application/xml')
     } else downloadBlob(name, await svgToPng(svg.value))
+    track('exported', { format: format.value })
     toasts.push(`Downloaded ${name}`)
     emit('close')
   } catch {

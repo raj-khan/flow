@@ -1,5 +1,6 @@
 import { computed, ref } from 'vue'
 
+import { track } from '@/api/analytics.js'
 import { STORAGE_KEYS } from '@/api/storageKeys.js'
 import { publishDiagram, publishServer, unpublishDiagram, updateDiagram } from '@/api/publishApi.js'
 import { useFlowQuery } from '@/composables/useFlowQuery.js'
@@ -60,6 +61,7 @@ export function usePublish() {
       if (current) {
         try {
           await updateDiagram(current.id, current.editToken, text)
+          track('published')
           return
         } catch (failure) {
           // Unpublished elsewhere, or the server forgot it: publish afresh below.
@@ -74,6 +76,7 @@ export function usePublish() {
         editToken: published.editToken,
       }
       remember(link.value)
+      track('published')
     })
 
   const unpublish = () =>
