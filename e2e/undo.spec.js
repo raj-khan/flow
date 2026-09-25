@@ -5,7 +5,7 @@ const nodeAt = (page, id) => page.locator(`.vue-flow__node[data-id="${id}"]`)
 const undoButton = (page) => page.getByRole('banner').getByRole('button', { name: 'Undo' })
 
 test('undoes a delete, and the button names the change', async ({ page }) => {
-  await page.goto('/flow/node/b6a0c1')
+  await page.goto('/new/node/b6a0c1')
 
   await page.getByRole('button', { name: 'Delete node' }).click()
   await page.getByRole('button', { name: 'Confirm delete' }).click()
@@ -17,7 +17,7 @@ test('undoes a delete, and the button names the change', async ({ page }) => {
 })
 
 test('undoes an edit with the keyboard', async ({ page }) => {
-  await page.goto('/flow/node/b6a0c1')
+  await page.goto('/new/node/b6a0c1')
 
   await page.getByLabel('Title').fill('Renamed')
   await page.getByRole('button', { name: 'Save changes' }).click()
@@ -32,7 +32,7 @@ test('undoes an edit with the keyboard', async ({ page }) => {
 })
 
 test('undoes one change per Ctrl+Z, even with the drawer open', async ({ page }) => {
-  await page.goto('/flow/node/b6a0c1')
+  await page.goto('/new/node/b6a0c1')
 
   for (const [index, name] of ['First', 'Second'].entries()) {
     await page.getByLabel('Title').fill(name)

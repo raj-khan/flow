@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 
 test('copies the diagram as a brief a coding agent can build from', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])
-  await page.goto('/flow')
+  await page.goto('/new')
   await page.getByRole('button', { name: 'New diagram' }).click()
   await page.getByRole('button', { name: /Web app architecture/ }).click()
   await expect(page.locator('.vue-flow__node')).toHaveCount(9)
@@ -22,7 +22,7 @@ test('notes for the builder show on the shape and travel with the brief', async 
   context,
 }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])
-  await page.goto('/flow/node/b6a0c1')
+  await page.goto('/new/node/b6a0c1')
 
   await page.getByLabel('Notes for the builder').fill('Only between 9pm and 7am')
   await page.getByRole('button', { name: 'Save changes' }).click()

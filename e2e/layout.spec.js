@@ -4,7 +4,7 @@ const nodeAt = (page, id) => page.locator(`.vue-flow__node[data-id="${id}"]`)
 const transform = (page, id) => nodeAt(page, id).evaluate((node) => node.style.transform)
 
 test('tidies up a hand-placed diagram, and undo puts it back', async ({ page }) => {
-  await page.goto('/flow')
+  await page.goto('/new')
   await expect(nodeAt(page, 'b6a0c1')).toBeVisible()
   const laidOut = await transform(page, 'b6a0c1')
 

@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 const outlines = (page) => page.getByTestId('sketch-outline')
 
 test('switches the diagram to a hand-drawn sketch, and back with undo', async ({ page }) => {
-  await page.goto('/flow')
+  await page.goto('/new')
   await expect(page.locator('.vue-flow__node').first()).toBeVisible()
   await expect(outlines(page)).toHaveCount(0)
 

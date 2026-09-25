@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/flow')
+  await page.goto('/new')
   await expect(page.locator('.vue-flow__node[data-id="b6a0c1"]')).toBeVisible()
 })
 
@@ -13,7 +13,7 @@ test('arrows move focus between nodes and Enter opens the focused one', async ({
   await expect(focused).toHaveCount(1)
 
   await page.keyboard.press('Enter')
-  await expect(page).toHaveURL(/\/flow\/node\//)
+  await expect(page).toHaveURL(/\/new\/node\//)
 })
 
 test('the canvas releases the keyboard while a dialog is open', async ({ page }) => {

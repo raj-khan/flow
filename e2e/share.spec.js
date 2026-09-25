@@ -8,7 +8,7 @@ test('a copied link opens the same diagram in another browser, as an undoable ch
   browser,
 }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])
-  await page.goto('/flow')
+  await page.goto('/new')
   await page.getByRole('button', { name: 'New diagram' }).click()
   await page.getByRole('button', { name: /Web app architecture/ }).click()
   await expect(shapes(page)).toHaveCount(9)
@@ -17,7 +17,7 @@ test('a copied link opens the same diagram in another browser, as an undoable ch
   await page.getByRole('button', { name: 'Copy private link' }).click()
   await expect(page.getByText(/Link copied/)).toBeVisible()
   const link = await page.evaluate(() => navigator.clipboard.readText())
-  expect(link).toMatch(/\/flow#flow=z[\w-]+$/)
+  expect(link).toMatch(/\/new#flow=z[\w-]+$/)
 
   // A different browser profile: nothing in common but the link.
   const other = await browser.newContext()
@@ -26,7 +26,7 @@ test('a copied link opens the same diagram in another browser, as an undoable ch
 
   await expect(shapes(visitor)).toHaveCount(9)
   await expect(visitor.getByTestId('edge-label').filter({ hasText: 'HTTPS' })).toBeVisible()
-  await expect(visitor).toHaveURL(/\/flow$/)
+  await expect(visitor).toHaveURL(/\/new$/)
 
   await visitor.getByRole('banner').getByRole('button', { name: 'Undo' }).click()
   await expect(shapes(visitor)).toHaveCount(5)
@@ -34,9 +34,9 @@ test('a copied link opens the same diagram in another browser, as an undoable ch
 })
 
 test('a damaged link says so and leaves the diagram alone', async ({ page }) => {
-  await page.goto('/flow#flow=zthis-is-not-a-diagram')
+  await page.goto('/new#flow=zthis-is-not-a-diagram')
 
   await expect(page.getByText('This link does not hold a diagram isketch can read.')).toBeVisible()
   await expect(shapes(page)).toHaveCount(5)
-  await expect(page).toHaveURL(/\/flow$/)
+  await expect(page).toHaveURL(/\/new$/)
 })

@@ -7,7 +7,7 @@ const modifier = process.platform === 'darwin' ? 'Meta' : 'Control'
 
 test.beforeEach(async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])
-  await page.goto('/flow')
+  await page.goto('/new')
   await expect(shapes(page)).toHaveCount(5)
 })
 

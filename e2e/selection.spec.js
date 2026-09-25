@@ -13,7 +13,7 @@ const saved = (page) =>
   )
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/flow')
+  await page.goto('/new')
   await expect(shapes(page)).toHaveCount(5)
 })
 
@@ -22,7 +22,7 @@ test('Shift+click builds a selection that moves as one, and undoes as one', asyn
   await shape(page, 'e879e4').click({ modifiers: ['Shift'] })
   await expect(page.locator('.vue-flow__node.selected')).toHaveCount(2)
   // Modifier clicks select; they do not open the drawer.
-  await expect(page).toHaveURL(/\/flow$/)
+  await expect(page).toHaveURL(/\/new$/)
 
   const box = await shape(page, 'b6a0c1').boundingBox()
   await page.mouse.move(box.x + box.width / 2, box.y + 12)

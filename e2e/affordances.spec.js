@@ -28,24 +28,24 @@ const expectAllExplained = (controls) => {
 }
 
 test('every control on the canvas explains itself', async ({ page }) => {
-  await page.goto('/flow')
+  await page.goto('/new')
   await page.waitForSelector('.vue-flow__node')
 
   expectAllExplained(await auditButtons(page.locator('body')))
 })
 
 test('every control in the drawer and the help dialog explains itself', async ({ page }) => {
-  await page.goto('/flow/node/b0653a')
+  await page.goto('/new/node/b0653a')
   await page.getByLabel('Title').waitFor()
   expectAllExplained(await auditButtons(page.locator('body')))
 
-  await page.goto('/flow')
+  await page.goto('/new')
   await page.getByRole('button', { name: 'Keyboard shortcuts' }).click()
   expectAllExplained(await auditButtons(page.locator('body')))
 })
 
 test('a disabled control still says why it is disabled', async ({ page }) => {
-  await page.goto('/flow')
+  await page.goto('/new')
   await page.waitForSelector('.vue-flow__node')
 
   const undo = page.getByRole('button', { name: 'Undo' })

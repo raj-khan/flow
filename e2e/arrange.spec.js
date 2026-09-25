@@ -5,7 +5,7 @@ const NODE = { start: '1', away: 'b6a0c1', welcome: 'b0653a', comment: 'e879e4' 
 const toolbar = (page) => page.getByRole('toolbar', { name: 'Arrange the selection' })
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/flow')
+  await page.goto('/new')
   await expect(nodeAt(page, NODE.away)).toBeVisible()
 })
 

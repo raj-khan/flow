@@ -4,7 +4,7 @@ const shape = (page, id) => page.locator(`.vue-flow__node[data-id="${id}"]`)
 const labels = (page) => page.getByTestId('edge-label')
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/flow')
+  await page.goto('/new')
   await expect(page.locator('.vue-flow__node')).toHaveCount(5)
 })
 

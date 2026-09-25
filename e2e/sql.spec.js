@@ -13,7 +13,7 @@ CREATE TABLE orders (
 test('draws SQL tables with their columns, and foreign keys as labelled edges', async ({
   page,
 }) => {
-  await page.goto('/flow')
+  await page.goto('/new')
   await page.getByRole('banner').getByRole('button', { name: 'Import' }).click()
 
   const dialog = page.getByRole('dialog', { name: 'Import' })

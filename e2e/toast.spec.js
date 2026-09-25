@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 test('confirms a save, and offers to take it back', async ({ page }) => {
-  await page.goto('/flow/node/b6a0c1')
+  await page.goto('/new/node/b6a0c1')
 
   await page.getByLabel('Title').fill('Renamed')
   await page.getByRole('button', { name: 'Save changes' }).click()

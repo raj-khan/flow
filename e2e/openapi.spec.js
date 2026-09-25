@@ -24,7 +24,7 @@ components:
 `
 
 test('maps an OpenAPI spec: tags as services, schemas as data', async ({ page }) => {
-  await page.goto('/flow')
+  await page.goto('/new')
   await page.getByRole('banner').getByRole('button', { name: 'Import' }).click()
 
   const dialog = page.getByRole('dialog', { name: 'Import' })

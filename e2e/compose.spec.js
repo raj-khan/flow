@@ -26,7 +26,7 @@ async function importCompose(page, text) {
 }
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/flow')
+  await page.goto('/new')
   await expect(shapes(page)).toHaveCount(5)
 })
 

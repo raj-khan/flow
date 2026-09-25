@@ -5,7 +5,7 @@ const NODE = { away: 'b6a0c1', hours: 'd09c08' }
 const nodeAt = (page, id) => page.locator(`.vue-flow__node[data-id="${id}"]`)
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/flow')
+  await page.goto('/new')
   await expect(nodeAt(page, NODE.away)).toBeVisible()
 })
 
@@ -45,7 +45,7 @@ test('drags a node and keeps it there after a reload', async ({ page }) => {
 
 test('opens a node by clicking it', async ({ page }) => {
   await nodeAt(page, NODE.away).click()
-  await expect(page).toHaveURL(/\/flow\/node\/b6a0c1/)
+  await expect(page).toHaveURL(/\/new\/node\/b6a0c1/)
 })
 
 test('draws each node as its shape, and labels the branches on their edges', async ({ page }) => {
@@ -86,7 +86,7 @@ test('clicking a shape opens it without moving the canvas', async ({ page }) => 
 
   // The Welcome Message sits on the right, under where the drawer opens.
   await nodeAt(page, 'b0653a').click()
-  await expect(page).toHaveURL(/\/flow\/node\/b0653a/)
+  await expect(page).toHaveURL(/\/new\/node\/b0653a/)
   await page.waitForTimeout(400)
 
   expect(await pane.evaluate((element) => element.style.transform)).toBe(before)

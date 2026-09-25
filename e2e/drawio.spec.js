@@ -12,7 +12,7 @@ const DRAWIO = `<mxfile><diagram name="Checkout"><mxGraphModel><root>
 </root></mxGraphModel></diagram></mxfile>`
 
 test('imports a draw.io file, and downloads the diagram as one', async ({ page }) => {
-  await page.goto('/flow')
+  await page.goto('/new')
   await expect(shapes(page)).toHaveCount(5)
 
   await page.getByRole('banner').getByRole('button', { name: 'Import' }).click()

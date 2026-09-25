@@ -10,7 +10,7 @@ const transform = (page) =>
   page.locator('.vue-flow__transformationpane').evaluate((element) => element.style.transform)
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/flow')
+  await page.goto('/new')
   await expect(shapes(page)).toHaveCount(5)
 })
 
@@ -21,7 +21,7 @@ test('adds a shape on click, selected, with its title ready to type over', async
   await expect(titleField(page)).toBeFocused()
   await expect(titleField(page)).toHaveValue('Decision')
   // No drawer: the shape is named where it sits.
-  await expect(page).toHaveURL(/\/flow$/)
+  await expect(page).toHaveURL(/\/new$/)
 
   await page.keyboard.type('In stock?')
   await page.keyboard.press('Enter')

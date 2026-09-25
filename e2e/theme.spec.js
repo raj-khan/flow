@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 const setDark = async (page) => {
-  await page.goto('/flow')
+  await page.goto('/new')
   await page.evaluate(() => localStorage.setItem('flow:theme', 'dark'))
   await page.reload()
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
@@ -17,7 +17,7 @@ test('remembers an explicit theme across a reload', async ({ page }) => {
 
 test('leaves no form control transparent in dark', async ({ page }) => {
   await setDark(page)
-  await page.goto('/flow/node/d09c08')
+  await page.goto('/new/node/d09c08')
 
   // A transparent select opens a white native popup on a dark page.
   const transparent = await page.evaluate(() =>

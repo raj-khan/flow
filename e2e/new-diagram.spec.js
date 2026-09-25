@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 const shapes = (page) => page.locator('.vue-flow__node')
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/flow')
+  await page.goto('/new')
   await expect(shapes(page)).toHaveCount(5)
 })
 

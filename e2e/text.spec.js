@@ -4,7 +4,7 @@ const shapes = (page) => page.locator('.vue-flow__node')
 const editor = (page) => page.getByLabel('Diagram as .flow text')
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/flow')
+  await page.goto('/new')
   await expect(shapes(page)).toHaveCount(5)
   await page.getByRole('button', { name: 'Edit as text' }).click()
 })

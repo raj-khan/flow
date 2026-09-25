@@ -4,7 +4,7 @@ const shapes = (page) => page.locator('.vue-flow__node')
 const strokes = (page) => page.getByTestId('ink-stroke')
 
 test('draws a stroke with the pen, as a shape that undo takes back', async ({ page }) => {
-  await page.goto('/flow')
+  await page.goto('/new')
   await expect(shapes(page)).toHaveCount(5)
 
   const pen = page.getByRole('button', { name: 'Pen', exact: true })
@@ -37,7 +37,7 @@ test('draws a stroke with the pen, as a shape that undo takes back', async ({ pa
 })
 
 test('picks the pen up with P', async ({ page }) => {
-  await page.goto('/flow')
+  await page.goto('/new')
   await expect(shapes(page)).toHaveCount(5)
   await page.keyboard.press('p')
   await expect(page.getByTestId('pen-layer')).toBeVisible()
@@ -46,7 +46,7 @@ test('picks the pen up with P', async ({ page }) => {
 })
 
 test('lets clicks through a stroke to the shape it circles', async ({ page }) => {
-  await page.goto('/flow')
+  await page.goto('/new')
   const target = page.locator('.vue-flow__node[data-id="b0653a"]')
   const box = await target.boundingBox()
   const x = box.x + box.width / 2
@@ -63,5 +63,5 @@ test('lets clicks through a stroke to the shape it circles', async ({ page }) =>
   await expect(strokes(page)).toHaveCount(1)
 
   await page.mouse.click(x, y)
-  await expect(page).toHaveURL(/\/flow\/node\/b0653a$/)
+  await expect(page).toHaveURL(/\/new\/node\/b0653a$/)
 })

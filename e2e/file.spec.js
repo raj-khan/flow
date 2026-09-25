@@ -16,7 +16,7 @@ test.describe('without the File System Access API', () => {
       delete window.showOpenFilePicker
       delete window.showSaveFilePicker
     })
-    await page.goto('/flow')
+    await page.goto('/new')
     await expect(shapes(page)).toHaveCount(5)
   })
 
@@ -95,7 +95,7 @@ test('with the File System Access API, Save writes back to the file that was ope
     }
   }, HAND_WRITTEN)
 
-  await page.goto('/flow')
+  await page.goto('/new')
   await page.getByRole('button', { name: 'Open file' }).click()
   await expect(shapes(page)).toHaveCount(2)
 

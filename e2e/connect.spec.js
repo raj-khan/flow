@@ -58,7 +58,7 @@ async function removeControl(page, edgeId) {
 }
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/flow')
+  await page.goto('/new')
   await expect(node(page, 'b6a0c1')).toBeVisible()
 })
 

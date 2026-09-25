@@ -39,7 +39,7 @@ test('publishes a public link, updates it in place, and unpublishes it', async (
     return route.fulfill({ status: 204 })
   })
 
-  await page.goto('/flow')
+  await page.goto('/new')
   await expect(page.locator('.vue-flow__node').first()).toBeVisible()
   const share = () => page.getByRole('banner').getByRole('button', { name: 'Share' }).click()
 
@@ -79,7 +79,7 @@ test('says what went wrong when the server refuses', async ({ page }) => {
       },
     }),
   )
-  await page.goto('/flow')
+  await page.goto('/new')
   await expect(page.locator('.vue-flow__node').first()).toBeVisible()
   await page.getByRole('banner').getByRole('button', { name: 'Share' }).click()
   await page.getByRole('button', { name: 'Publish a public link' }).click()

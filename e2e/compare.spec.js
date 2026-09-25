@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 test('compares another version with the diagram on screen, as a list and a picture', async ({
   page,
 }) => {
-  await page.goto('/flow')
+  await page.goto('/new')
   await expect(page.locator('.vue-flow__node')).toHaveCount(5)
 
   // The version on screen, as text, then an older version of it: no note, and a different name.

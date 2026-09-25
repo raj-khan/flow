@@ -4,7 +4,7 @@ const firstEdge = (page) => page.locator('.vue-flow__edge').first()
 const textPane = (page) => page.getByLabel('Diagram as .flow text')
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/flow')
+  await page.goto('/new')
   await expect(page.locator('.vue-flow__node').first()).toBeVisible()
 })
 

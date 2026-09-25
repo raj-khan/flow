@@ -17,7 +17,7 @@ async function exportAs(page, format, look = 'Light') {
 }
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/flow')
+  await page.goto('/new')
   await expect(page.locator('.vue-flow__node').first()).toBeVisible()
 })
 
