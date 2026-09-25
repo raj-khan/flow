@@ -218,7 +218,49 @@ page that carries the brief as text to people and AI fetchers, and `.md`, `.flow
 
 ### FL-72 · Remote MCP ⏭️
 
-The MCP tools over HTTP, so an agent in the cloud can read and update hosted diagrams.
+Tracked in `backlog/`.
+
+## Where the gaps are (audit, 2026-09-26)
+
+A product this good at being read by agents is almost invisible to search engines and people:
+
+- **Search and sharing.** `index.html` has a title and nothing else: no description, canonical,
+  Open Graph or Twitter tags, no `robots.txt`, `sitemap.xml`, web manifest, `apple-touch-icon` or
+  structured data. A shared `isketch.online` link unfurls as a bare URL. The hosted page
+  (`server/src/diagrams/page.ts`) has one generic description and no preview image.
+- **Nothing to index.** `/` redirects straight into the editor, a client-rendered SPA. There is no
+  landing page, no docs page for the `.flow` format, no templates and no pages for the converters
+  that already exist (Mermaid, draw.io, SQL, compose, OpenAPI).
+- **Phones and tablets.** No responsive classes anywhere in `src/`, a fixed 192px palette and a
+  fixed header with every button in one row, no touch gestures. Anyone opening a shared link on a
+  phone gets a broken desktop layout.
+- **The canvas is boxed in.** Header, palette and text panel take the edges of the screen, where
+  Excalidraw and tldraw give the whole viewport to the canvas and float the tools over it.
+- **No way to measure.** "How we will know" counts briefs copied and MCP installs, and nothing
+  records either.
+
+The patterns to reuse are already in the owner's other projects: metadata, `opengraph-image`,
+JSON-LD and `llms.txt` in idemo.video; `sitemap.ts`, `robots.ts`, `manifest.ts`, `compare/[slug]`
+and `llms-full.txt` in openlookup-web; free single-purpose tool pages in shipseo; `use-cases/[slug]`
+in aiagentflow.dev.
+
+**Order:** Milestone 8 first (cheap, and every later launch depends on links that unfurl), then 9
+and 10 together, then 11. None of it pays off until isketch.online is live (FL-71).
+
+## Milestones 8 to 11
+
+From FL-72 on, each ticket is a task in `backlog/` ([Backlog.md](https://github.com/MrLesk/Backlog.md)),
+with its description and acceptance criteria. `backlog board` shows them; `backlog browser` opens
+the web board.
+
+| Milestone                            | Tickets                                                                      |
+| ------------------------------------ | ---------------------------------------------------------------------------- |
+| M8 Findable                          | FL-73 head tags, FL-74 landing page, FL-75 diagram previews, FL-76 llms.txt  |
+|                                      | FL-77 templates, converters, comparisons; FL-78 analytics                    |
+| M9 The whole screen, on every screen | FL-79 canvas first, FL-80 full screen, FL-81 phones, FL-82 PWA, FL-83 extras |
+| M10 Own the niche                    | FL-84 Excalidraw, FL-85 Prisma, FL-86 scan, FL-87 live edits, FL-88 embeds   |
+|                                      | FL-89 agent plugins, FL-90 diagram from words                                |
+| M11 Launch                           | FL-91 launch kit                                                             |
 
 ## Milestone 4: Editing essentials (continues alongside)
 
@@ -237,5 +279,4 @@ The MCP tools over HTTP, so an agent in the cloud can read and update hosted dia
 
 - Many documents with a home page, and IndexedDB storage
 - Terraform and Kubernetes import
-- Describe a diagram in words and get one, built on the text format
 - A backend, accounts and live collaboration
