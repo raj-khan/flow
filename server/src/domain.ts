@@ -26,6 +26,16 @@ export interface Domain {
   renderSvg(document: FlowDocument, options?: { theme?: string; sketchFont?: string }): string
   encodeShare(document: FlowDocument): Promise<string>
   sketchFont(): Promise<string>
+  diffDocuments(before: FlowDocument, after: FlowDocument): DocumentDiff
+  describeDiff(before: FlowDocument, after: FlowDocument, diff: DocumentDiff): string[]
+  isUnchanged(diff: DocumentDiff): boolean
+  /** The shape names a .flow file may use, so tool instructions list them all. */
+  shapeOptions(): string[]
+}
+
+export interface DocumentDiff {
+  nodes: { added: string[]; removed: string[]; changed: string[]; moved: string[] }
+  edges: { added: string[]; removed: string[]; changed: string[] }
 }
 
 const domainFile = (name: string) => new URL(`../../../src/domain/${name}`, import.meta.url).href
@@ -34,11 +44,13 @@ let loaded: Promise<Domain> | undefined
 
 export function loadDomain(): Promise<Domain> {
   loaded ??= (async () => {
-    const [flowText, brief, svg, share] = await Promise.all([
+    const [flowText, brief, svg, share, diff, nodeMeta] = await Promise.all([
       import(domainFile('flowText.js')),
       import(domainFile('brief.js')),
       import(domainFile('renderSvg.js')),
       import(domainFile('shareLink.js')),
+      import(domainFile('diff.js')),
+      import(domainFile('nodeMeta.js')),
     ])
     return {
       parseFlow: flowText.parseFlow,
@@ -47,6 +59,11 @@ export function loadDomain(): Promise<Domain> {
       renderSvg: svg.renderSvg,
       encodeShare: share.encodeShare,
       sketchFont: loadFont,
+      diffDocuments: diff.diffDocuments,
+      describeDiff: diff.describeDiff,
+      isUnchanged: diff.isUnchanged,
+      shapeOptions: () =>
+        (nodeMeta.SHAPE_OPTIONS as Array<{ value: string }>).map((option) => option.value),
     }
   })()
   return loaded

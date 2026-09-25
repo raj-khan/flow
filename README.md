@@ -268,6 +268,31 @@ For Claude Desktop, or any client with a JSON config:
 Then ask: _"Read docs/architecture.flow and scaffold the services it shows"_, or _"Add the cache
 you just built to the architecture diagram"_.
 
+### The same tools over HTTP
+
+The hosted server exposes the same five tools at `/mcp` over
+[Streamable HTTP](https://modelcontextprotocol.io/docs/concepts/transports), for agents that run
+in the cloud rather than on your machine. Reads take the link, writes take the edit token that was
+returned when the diagram was published:
+
+```bash
+# Claude Code, pointing at a hosted server
+claude mcp add --transport http isketch https://isketch.online/mcp
+```
+
+For Claude Desktop, or any client with a JSON config:
+
+```json
+{
+  "mcpServers": {
+    "isketch": { "type": "http", "url": "https://isketch.online/mcp" }
+  }
+}
+```
+
+Then ask: _"Update the diagram at https://isketch.online/d/xyz… with the new checkout flow, using
+this edit token"_.
+
 ## Hosted links for agents
 
 `server/` is a small NestJS and PostgreSQL service that stores a diagram behind an unguessable link
