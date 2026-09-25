@@ -18,6 +18,7 @@ import { CONFIG, type Config } from '../config.js'
 import { loadDomain } from '../domain.js'
 import { DiagramsService } from './diagrams.service.js'
 import { renderPage } from './page.js'
+import { renderOgPng } from './preview.js'
 
 /** A text body arrives as a string; a JSON one may carry `{ text }`. */
 const textOf = (body: unknown) =>
@@ -36,6 +37,21 @@ export class DiagramsController {
   @Get('health')
   health() {
     return { ok: true }
+  }
+
+  /** The diagram itself as the link preview, one PNG per revision. */
+  @Get('d/:id/og.png')
+  async ogImage(@Param('id') id: string, @Res() res: Response) {
+    const { row, document } = await this.diagrams.load(id)
+    const domain = await loadDomain()
+    const svg = domain.renderSvg(document)
+    const png = renderOgPng(svg, document.title)
+
+    res.setHeader('ETag', `"${row.id}-${row.revision}"`)
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
+    res.setHeader('X-Robots-Tag', 'noindex')
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    return res.type('image/png').send(png)
   }
 
   @Post('api/diagrams')
@@ -90,6 +106,7 @@ export class DiagramsController {
             brief: domain.toBrief(document),
             links,
             openUrl,
+            image: `${links.page}/og.png`,
             updatedAt: new Date(row.updatedAt),
           }),
         )

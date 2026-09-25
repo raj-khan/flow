@@ -12,6 +12,8 @@ COPY server server
 RUN cd server && npm run build && npm prune --omit=dev
 
 FROM node:22-alpine
+# DejaVu Sans is the font the link-preview PNGs draw text with.
+RUN apk add --no-cache font-dejavu
 WORKDIR /repo
 ENV NODE_ENV=production PORT=3000
 COPY --from=build /repo/node_modules node_modules

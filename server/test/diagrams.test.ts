@@ -118,6 +118,45 @@ describe('reading a link', () => {
     assert.equal(page.headers.get('x-robots-tag'), 'noindex')
   })
 
+  it('is its own preview: og tags name the diagram, and the PNG is the drawing', async () => {
+    const { id, editToken } = await publish()
+
+    const page = await fetch(`${base}/d/${id}`)
+    const html = await page.text()
+    assert.match(html, /<meta property="og:title" content="Shop · isketch">/)
+    assert.match(
+      html,
+      /<meta property="og:description" content="A design sketched in isketch: 2 shapes and 1 connection\./,
+    )
+    assert.match(
+      html,
+      /<meta property="og:image" content="https:\/\/isketch\.test\/d\/[A-Za-z0-9]+\/og\.png">/,
+    )
+    assert.match(html, /<meta name="twitter:card" content="summary_large_image">/)
+
+    const image = await fetch(`${base}/d/${id}/og.png`)
+    assert.equal(image.status, 200)
+    assert.match(image.headers.get('content-type') ?? '', /^image\/png/)
+    const etag = image.headers.get('etag') ?? ''
+    assert.match(etag, /-1"$/)
+    assert.match(image.headers.get('cache-control') ?? '', /immutable/)
+
+    const png = Buffer.from(await image.arrayBuffer())
+    assert.equal(png.subarray(1, 4).toString(), 'PNG')
+    assert.equal(png.readUInt32BE(16), 1200)
+    assert.equal(png.readUInt32BE(20), 630)
+
+    // A new revision is a new image.
+    const updated = await fetch(`${base}/api/diagrams/${id}`, {
+      method: 'PUT',
+      headers: { 'content-type': 'text/plain', authorization: `Bearer ${editToken}` },
+      body: FLOW.replace('"Orders"', '"Order store"'),
+    })
+    assert.equal(updated.status, 200)
+    const after = await fetch(`${base}/d/${id}/og.png`)
+    assert.notEqual(after.headers.get('etag'), etag)
+  })
+
   it('says so for a link that does not exist, or a format it does not have', async () => {
     assert.equal((await fetch(`${base}/d/nothingHere1234`)).status, 404)
     const { id } = await publish()

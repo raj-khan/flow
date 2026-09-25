@@ -273,13 +273,14 @@ you just built to the architecture diagram"_.
 `server/` is a small NestJS and PostgreSQL service that stores a diagram behind an unguessable link
 and serves it in every form a reader wants:
 
-| URL           | What it returns                                                       |
-| ------------- | --------------------------------------------------------------------- |
-| `/d/:id`      | A page with the drawing and the brief as text, so AI fetchers read it |
-| `/d/:id.md`   | The brief, as Markdown                                                |
-| `/d/:id.flow` | The `.flow` source                                                    |
-| `/d/:id.svg`  | The drawing, sketch font embedded                                     |
-| `/d/:id.json` | The document                                                          |
+| URL             | What it returns                                                         |
+| --------------- | ----------------------------------------------------------------------- |
+| `/d/:id`        | A page with the drawing and the brief as text, so AI fetchers read it   |
+| `/d/:id.md`     | The brief, as Markdown                                                  |
+| `/d/:id.flow`   | The `.flow` source                                                      |
+| `/d/:id.svg`    | The drawing, sketch font embedded                                       |
+| `/d/:id.json`   | The document                                                            |
+| `/d/:id/og.png` | The drawing itself, as a 1200x630 PNG link preview, cached per revision |
 
 `POST /api/diagrams` with `.flow` text (or JSON `{ "text": … }`) publishes it and returns the link and
 an edit token, shown once and stored only as a hash. `PUT` and `DELETE` on `/api/diagrams/:id` with

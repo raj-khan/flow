@@ -6,20 +6,37 @@
 export function renderPage(input: {
   title: string
   brief: string
-  links: { markdown: string; flow: string; svg: string; json: string }
+  links: { page: string; markdown: string; flow: string; svg: string; json: string }
   openUrl: string
+  image: string
   updatedAt: Date
 }): string {
-  const { title, brief, links, openUrl, updatedAt } = input
+  const { title, brief, links, openUrl, image, updatedAt } = input
+  const description = firstLineOfBrief(brief)
   return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escape(title)} · isketch</title>
-<meta name="description" content="A diagram sketched in isketch, readable by people and AI agents.">
+<meta name="description" content="${escape(description)}">
+<link rel="canonical" href="${escape(links.page)}">
 <link rel="alternate" type="text/markdown" href="${escape(links.markdown)}" title="Brief for AI agents">
 <link rel="alternate" type="text/plain" href="${escape(links.flow)}" title=".flow source">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="isketch">
+<meta property="og:title" content="${escape(title)} · isketch">
+<meta property="og:description" content="${escape(description)}">
+<meta property="og:url" content="${escape(links.page)}">
+<meta property="og:image" content="${escape(image)}">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="${escape(title)}, as a diagram">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${escape(title)} · isketch">
+<meta name="twitter:description" content="${escape(description)}">
+<meta name="twitter:image" content="${escape(image)}">
 <style>
   :root { color-scheme: light dark; --ink: #111827; --muted: #6b7280; --line: #e5e7eb; --bg: #ffffff; --panel: #f9fafb; }
   @media (prefers-color-scheme: dark) { :root { --ink: #e5e7eb; --muted: #9ca3af; --line: #30363d; --bg: #0d1117; --panel: #161b22; } }
@@ -62,4 +79,13 @@ function escape(text: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
+}
+
+/** What the link is, in the brief's own first line after its title. */
+function firstLineOfBrief(brief: string): string {
+  const line = brief
+    .split('\n')
+    .map((candidate) => candidate.trim())
+    .find((candidate) => candidate && !candidate.startsWith('#'))
+  return line ?? 'A diagram sketched in isketch, readable by people and AI agents.'
 }
