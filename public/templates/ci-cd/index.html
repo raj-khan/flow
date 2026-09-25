@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CI/CD pipeline template · isketch</title>
+<meta name="description" content="8 shapes and 9 connections, sketched in isketch.">
+<link rel="canonical" href="https://isketch.online/templates/ci-cd">
+<meta name="theme-color" content="#f4f5f8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="isketch">
+<meta property="og:title" content="CI/CD pipeline template · isketch">
+<meta property="og:description" content="8 shapes and 9 connections, sketched in isketch.">
+<meta property="og:url" content="https://isketch.online/templates/ci-cd">
+<meta property="og:image" content="https://isketch.online/templates/ci-cd/og.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CI/CD pipeline template · isketch">
+<meta name="twitter:description" content="8 shapes and 9 connections, sketched in isketch.">
+<meta name="twitter:image" content="https://isketch.online/templates/ci-cd/og.png">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any">
+<style>
+  :root { --canvas: #f4f5f8; --surface: #ffffff; --ink: #14181f; --muted: #64748b; --line: #e3e7ee; --brand-ink: #4f46e5; }
+  @media (prefers-color-scheme: dark) { :root { --canvas: #0d1117; --surface: #161b22; --ink: #e6edf3; --muted: #94a3b8; --line: #21262d; } }
+  * { box-sizing: border-box }
+  body { margin: 0; background: var(--canvas); color: var(--ink); font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; line-height: 1.65 }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 24px 24px 64px }
+  header { display: flex; align-items: center; gap: 16px; flex-wrap: wrap }
+  header img { width: 28px; height: 27px }
+  header .wordmark { font-weight: 700; margin-right: 8px }
+  header a { color: var(--brand-ink); text-decoration: none }
+  header .spacer { flex: 1 }
+  h1 { font-size: 34px; letter-spacing: -0.02em; margin: 36px 0 8px }
+  h2 { font-size: 22px; margin: 36px 0 6px }
+  .sub { color: var(--muted); font-size: 17px; margin: 0 0 12px; max-width: 46em }
+  .btn { display: inline-block; background: var(--brand-ink); color: #fff; border-radius: 8px; padding: 8px 16px; font-weight: 600; font-size: 15px; text-decoration: none; border: none; cursor: pointer }
+  .btn:hover { opacity: .9 }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; margin: 16px 0 }
+  .drawing svg { display: block; width: 100%; height: auto; padding: 24px }
+  .code-head { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 14px }
+  .code-head .grow { flex: 1 }
+  pre { margin: 0; padding: 16px 20px; overflow-x: auto; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.6 }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: var(--surface); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px }
+  ul li { margin: 8px 0 }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; margin: 20px 0 }
+  .step { display: block; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; text-decoration: none; color: inherit }
+  .step:hover { border-color: var(--brand-ink) }
+  .step b { display: block; margin-bottom: 4px; color: var(--brand-ink) }
+  .step p { margin: 0; color: var(--muted); font-size: 14px }
+  .step .count { margin-top: 8px; font-size: 13px }
+  .convert iframe { display: block; width: 100%; height: 640px; border: 0; background: var(--surface) }
+  footer { border-top: 1px solid var(--line); margin-top: 56px; padding-top: 20px; color: var(--muted); font-size: 14px }
+  footer a { color: var(--brand-ink) }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <img src="/favicon.svg" alt="">
+  <span class="wordmark">isketch</span>
+  <span class="spacer"></span>
+  <a href="/templates">Templates</a>
+  <a href="/convert">Convert</a>
+  <a href="/docs/format">Format</a>
+  <a class="btn" href="/new">Open the editor</a>
+</header>
+
+  <h1>CI/CD pipeline</h1>
+  <p class="sub">8 shapes and 9 connections, sketched in isketch.</p>
+  <p><a class="btn" href="/flow#flow=zXVLLbtswELzzKwYGepNSwEAuAuyicRIgpxpGf4AmV9LWFMmSKwv--0KM7Ag9ETu7s48ZCoujBoeP74dXRI7k2JPyQajBewoD4ugcEv0dKQskIKZgRyMcfIWJpYfGlfOoHUxP5oLgQVdKN1hu2yelYsIOQmlgrx02x1W7Deoah2AJ2ltY1l3SA0yvfUdZnUd2Frt5oKGcsXmZgcL5fYtUplUYPQuEsuQK59FbR4q2tKa9bd8K6ej0bUrc9QLdafbzOT0hJroyTeo-fsV8fWxE5lJ6nMhbShlPrQsTWnaUK7SaXZ7vtolbUZ_9sIMlw5mDx-ZUILI_SpOfiJRy8NAxpnClrIz2Ot3Wow8FKeXP3xBaSNJty6bCpMX0ZNXsw5pxfPhSWO9F5-BcGEXN71mby7r-tGCl-pcnmDAM2tsKTmdBF4JFsaBYWO-X4NOVeg_a0lewiFekr_f4T9IvZNGm3mM5ubmLYFe5x7oNEv0hI2TvEtX78gHRYCBJbDL64NbZFfdeMfuj_gE">Open this template</a></p>
+  <div class="card drawing"><svg xmlns="http://www.w3.org/2000/svg" width="641" height="1048" viewBox="-32 -32 641 1048" font-family="ui-sans-serif, system-ui, -apple-system, &apos;Segoe UI&apos;, Roboto, sans-serif">
+<title>CI/CD pipeline</title>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f97362"/></marker></defs>
+<rect x="-32" y="-32" width="641" height="1048" fill="#ffffff"/>
+<path d="M323,104 V140 H323 V176" fill="none" stroke="#f97362" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M323,280 V316 H185 V352" fill="none" stroke="#f97362" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M323,280 V316 H461 V352" fill="none" stroke="#f97362" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M185,456 V492 H323 V528" fill="none" stroke="#f97362" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M461,456 V492 H323 V528" fill="none" stroke="#f97362" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M323,632 V668 H185 V704" fill="none" stroke="#f97362" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="219.1" y="658" width="69.8" height="20" rx="10" fill="#ffffff" stroke="#e3e7ee"/>
+<text x="254" y="668" font-size="11" fill="#64748b" text-anchor="middle" dominant-baseline="central">approved</text>
+<path d="M323,632 V756 H392 V880" fill="none" stroke="#f97362" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="322.6" y="746" width="69.8" height="20" rx="10" fill="#ffffff" stroke="#e3e7ee"/>
+<text x="357.5" y="756" font-size="11" fill="#64748b" text-anchor="middle" dominant-baseline="central">rejected</text>
+<path d="M185,808 V844 H116 V880" fill="none" stroke="#f97362" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="102.2" y="834" width="96.6" height="20" rx="10" fill="#ffffff" stroke="#e3e7ee"/>
+<text x="150.5" y="844" font-size="11" fill="#64748b" text-anchor="middle" dominant-baseline="central">metrics hold</text>
+<path d="M185,808 V844 H392 V880" fill="none" stroke="#f97362" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="240.2" y="834" width="96.6" height="20" rx="10" fill="#ffffff" stroke="#e3e7ee"/>
+<text x="288.5" y="844" font-size="11" fill="#64748b" text-anchor="middle" dominant-baseline="central">metrics fail</text>
+<g transform="translate(207,0)">
+<path d="M52,1.5 H180 A50.5,50.5 0 0 1 180,102.5 H52 A50.5,50.5 0 0 1 52,1.5 Z" fill="#ffffff" stroke="#e11d48" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="116" y="47" font-size="14" font-weight="600" fill="#14181f" text-anchor="middle">Pull request</text>
+<text x="116" y="67.6" font-size="12" fill="#64748b" text-anchor="middle">Code and diagram changes</text>
+</g>
+<g transform="translate(207,176)">
+<path d="M7.5,1.5 H224.5 Q230.5,1.5 230.5,7.5 V96.5 Q230.5,102.5 224.5,102.5 H7.5 Q1.5,102.5 1.5,96.5 V7.5 Q1.5,1.5 7.5,1.5 Z" fill="#ffffff" stroke="#059669" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="116" y="47" font-size="14" font-weight="600" fill="#14181f" text-anchor="middle">Build</text>
+<text x="116" y="67.6" font-size="12" fill="#64748b" text-anchor="middle">Typecheck, unit tests, bundle</text>
+</g>
+<g transform="translate(69,352)">
+<path d="M7.5,1.5 H224.5 Q230.5,1.5 230.5,7.5 V96.5 Q230.5,102.5 224.5,102.5 H7.5 Q1.5,102.5 1.5,96.5 V7.5 Q1.5,1.5 7.5,1.5 Z" fill="#ffffff" stroke="#059669" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="116" y="47" font-size="14" font-weight="600" fill="#14181f" text-anchor="middle">E2E</text>
+<text x="116" y="67.6" font-size="12" fill="#64748b" text-anchor="middle">Playwright against the preview</text>
+</g>
+<g transform="translate(345,352)">
+<path d="M7.5,1.5 H224.5 Q230.5,1.5 230.5,7.5 V96.5 Q230.5,102.5 224.5,102.5 H7.5 Q1.5,102.5 1.5,96.5 V7.5 Q1.5,1.5 7.5,1.5 Z" fill="#ffffff" stroke="#059669" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="116" y="39.2" font-size="14" font-weight="600" fill="#14181f" text-anchor="middle">Diagram check</text>
+<text x="116" y="59.8" font-size="12" fill="#64748b" text-anchor="middle">Renders .flow files, fails on</text>
+<text x="116" y="75.4" font-size="12" fill="#64748b" text-anchor="middle">drift</text>
+</g>
+<g transform="translate(207,528)">
+<path d="M116,1.5 L230.5,52 L116,102.5 L1.5,52 Z" fill="#ffffff" stroke="#ea580c" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="116" y="47" font-size="14" font-weight="600" fill="#14181f" text-anchor="middle">Reviewed?</text>
+<text x="116" y="67.6" font-size="12" fill="#64748b" text-anchor="middle">A person approves</text>
+</g>
+<g transform="translate(69,704)">
+<path d="M7.5,1.5 H224.5 Q230.5,1.5 230.5,7.5 V96.5 Q230.5,102.5 224.5,102.5 H7.5 Q1.5,102.5 1.5,96.5 V7.5 Q1.5,1.5 7.5,1.5 Z" fill="#ffffff" stroke="#059669" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="116" y="47" font-size="14" font-weight="600" fill="#14181f" text-anchor="middle">Canary</text>
+<text x="116" y="67.6" font-size="12" fill="#64748b" text-anchor="middle">5% of traffic, watched</text>
+</g>
+<g transform="translate(0,880)">
+<path d="M7.5,1.5 H224.5 Q230.5,1.5 230.5,7.5 V96.5 Q230.5,102.5 224.5,102.5 H7.5 Q1.5,102.5 1.5,96.5 V7.5 Q1.5,1.5 7.5,1.5 Z" fill="#ffffff" stroke="#059669" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="116" y="47" font-size="14" font-weight="600" fill="#14181f" text-anchor="middle">Production</text>
+<text x="116" y="67.6" font-size="12" fill="#64748b" text-anchor="middle">Full rollout</text>
+</g>
+<g transform="translate(276,880)">
+<path d="M7.5,1.5 H224.5 Q230.5,1.5 230.5,7.5 V96.5 Q230.5,102.5 224.5,102.5 H7.5 Q1.5,102.5 1.5,96.5 V7.5 Q1.5,1.5 7.5,1.5 Z" fill="#ffffff" stroke="#059669" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="116" y="47" font-size="14" font-weight="600" fill="#14181f" text-anchor="middle">Rollback</text>
+<text x="116" y="67.6" font-size="12" fill="#64748b" text-anchor="middle">One command, last good build</text>
+</g>
+</svg>
+</div>
+  <h2>The .flow source</h2>
+  <p class="sub">The whole template as text: copy it, keep it in your repo, hand it to an agent.</p>
+  <div class="card">
+    <div class="code-head">examples/templates/ci-cd.flow<span class="grow"></span><button class="btn" type="button" data-copy-from="the-source">Copy</button></div>
+    <pre id="the-source">title: CI/CD pipeline
+note: From pull request to production, with a visual check on every diff.
+
+pr = terminal &#34;Pull request&#34; -- Code and diagram changes
+build = process &#34;Build&#34; -- Typecheck, unit tests, bundle
+e2e = process &#34;E2E&#34; -- Playwright against the preview
+diagram = process &#34;Diagram check&#34; -- Renders .flow files, fails on drift
+review = decision &#34;Reviewed?&#34; -- A person approves
+canary = process &#34;Canary&#34; -- 5% of traffic, watched
+prod = process &#34;Production&#34; -- Full rollout
+rollback = process &#34;Rollback&#34; -- One command, last good build
+
+pr -&#62; build
+build -&#62; e2e
+build -&#62; diagram
+e2e -&#62; review
+diagram -&#62; review
+review -&#62; canary : approved
+review -&#62; rollback : rejected
+canary -&#62; prod : metrics hold
+canary -&#62; rollback : metrics fail
+</pre>
+  </div>
+<footer>isketch: sketch it, hand it to your agent · <a href="/">Home</a> · <a href="https://github.com/raj-khan/flow#readme">Docs</a> · MIT licence</footer>
+</div>
+<script>
+  for (const button of document.querySelectorAll('[data-copy-from]')) {
+    button.addEventListener('click', async () => {
+      await navigator.clipboard.writeText(document.getElementById(button.dataset.copyFrom).textContent)
+      const was = button.textContent
+      button.textContent = 'Copied'
+      setTimeout(() => (button.textContent = was), 1500)
+    })
+  }
+</script>
+</body>
+</html>

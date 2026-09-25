@@ -1,0 +1,20 @@
+title: Auth flow
+note: Email and password login with refresh tokens.
+
+user = terminal "User" -- Browser or app
+login = process "Login page" -- Email and password form
+auth = process "Auth service" -- Verifies credentials
+sessions = database "Sessions" -- Refresh tokens, hashed
+access = data "Access token" -- 15 minutes, JWT
+refresh = data "Refresh token" -- 30 days, rotating
+mail = process "Mailer" -- Magic links and resets
+
+user -> login : credentials
+login -> auth : verify
+auth -> sessions : issue refresh
+auth -> access : sign
+user -> access : stores it
+user -> refresh : httpOnly cookie
+refresh -> auth : rotate
+auth -> mail : reset link
+mail -> user

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagram templates · isketch</title>
+<meta name="description" content="Free architecture and UI diagram templates (URL shortener, RAG pipeline, CI/CD, microservices, SaaS database and more), each editable and copyable as text.">
+<link rel="canonical" href="https://isketch.online/templates">
+<meta name="theme-color" content="#f4f5f8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="isketch">
+<meta property="og:title" content="Diagram templates · isketch">
+<meta property="og:description" content="Free architecture and UI diagram templates (URL shortener, RAG pipeline, CI/CD, microservices, SaaS database and more), each editable and copyable as text.">
+<meta property="og:url" content="https://isketch.online/templates">
+<meta property="og:image" content="https://isketch.online/templates/og.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Diagram templates · isketch">
+<meta name="twitter:description" content="Free architecture and UI diagram templates (URL shortener, RAG pipeline, CI/CD, microservices, SaaS database and more), each editable and copyable as text.">
+<meta name="twitter:image" content="https://isketch.online/templates/og.png">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any">
+<style>
+  :root { --canvas: #f4f5f8; --surface: #ffffff; --ink: #14181f; --muted: #64748b; --line: #e3e7ee; --brand-ink: #4f46e5; }
+  @media (prefers-color-scheme: dark) { :root { --canvas: #0d1117; --surface: #161b22; --ink: #e6edf3; --muted: #94a3b8; --line: #21262d; } }
+  * { box-sizing: border-box }
+  body { margin: 0; background: var(--canvas); color: var(--ink); font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; line-height: 1.65 }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 24px 24px 64px }
+  header { display: flex; align-items: center; gap: 16px; flex-wrap: wrap }
+  header img { width: 28px; height: 27px }
+  header .wordmark { font-weight: 700; margin-right: 8px }
+  header a { color: var(--brand-ink); text-decoration: none }
+  header .spacer { flex: 1 }
+  h1 { font-size: 34px; letter-spacing: -0.02em; margin: 36px 0 8px }
+  h2 { font-size: 22px; margin: 36px 0 6px }
+  .sub { color: var(--muted); font-size: 17px; margin: 0 0 12px; max-width: 46em }
+  .btn { display: inline-block; background: var(--brand-ink); color: #fff; border-radius: 8px; padding: 8px 16px; font-weight: 600; font-size: 15px; text-decoration: none; border: none; cursor: pointer }
+  .btn:hover { opacity: .9 }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; margin: 16px 0 }
+  .drawing svg { display: block; width: 100%; height: auto; padding: 24px }
+  .code-head { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 14px }
+  .code-head .grow { flex: 1 }
+  pre { margin: 0; padding: 16px 20px; overflow-x: auto; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.6 }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: var(--surface); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px }
+  ul li { margin: 8px 0 }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; margin: 20px 0 }
+  .step { display: block; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; text-decoration: none; color: inherit }
+  .step:hover { border-color: var(--brand-ink) }
+  .step b { display: block; margin-bottom: 4px; color: var(--brand-ink) }
+  .step p { margin: 0; color: var(--muted); font-size: 14px }
+  .step .count { margin-top: 8px; font-size: 13px }
+  .convert iframe { display: block; width: 100%; height: 640px; border: 0; background: var(--surface) }
+  footer { border-top: 1px solid var(--line); margin-top: 56px; padding-top: 20px; color: var(--muted); font-size: 14px }
+  footer a { color: var(--brand-ink) }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <img src="/favicon.svg" alt="">
+  <span class="wordmark">isketch</span>
+  <span class="spacer"></span>
+  <a href="/templates">Templates</a>
+  <a href="/convert">Convert</a>
+  <a href="/docs/format">Format</a>
+  <a class="btn" href="/new">Open the editor</a>
+</header>
+
+  <h1>Templates</h1>
+  <p class="sub">Every template is a real diagram: open it in the editor, or copy the <code>.flow</code> source into your repo. Adding one is a pull request.</p>
+  <div class="grid">
+    
+    <a class="step" href="/templates/auth-flow">
+      <b>Auth flow</b>
+      <p>7 shapes and 9 connections, sketched in isketch.</p>
+      <p class="count">7 shapes · 9 connections</p>
+    </a>
+    <a class="step" href="/templates/chat-app">
+      <b>Chat app</b>
+      <p>6 shapes and 6 connections, sketched in isketch.</p>
+      <p class="count">6 shapes · 6 connections</p>
+    </a>
+    <a class="step" href="/templates/ci-cd">
+      <b>CI/CD pipeline</b>
+      <p>8 shapes and 9 connections, sketched in isketch.</p>
+      <p class="count">8 shapes · 9 connections</p>
+    </a>
+    <a class="step" href="/templates/event-checkout">
+      <b>Event-driven checkout</b>
+      <p>7 shapes and 7 connections, sketched in isketch.</p>
+      <p class="count">7 shapes · 7 connections</p>
+    </a>
+    <a class="step" href="/templates/microservices">
+      <b>Microservices</b>
+      <p>8 shapes and 8 connections, sketched in isketch.</p>
+      <p class="count">8 shapes · 8 connections</p>
+    </a>
+    <a class="step" href="/templates/mobile-app-screens">
+      <b>Mobile app screens</b>
+      <p>5 shapes and 4 connections, sketched in isketch.</p>
+      <p class="count">5 shapes · 4 connections</p>
+    </a>
+    <a class="step" href="/templates/rag-pipeline">
+      <b>RAG pipeline</b>
+      <p>9 shapes and 8 connections, sketched in isketch.</p>
+      <p class="count">9 shapes · 8 connections</p>
+    </a>
+    <a class="step" href="/templates/rate-limiter">
+      <b>Rate limiter</b>
+      <p>6 shapes and 5 connections, sketched in isketch.</p>
+      <p class="count">6 shapes · 5 connections</p>
+    </a>
+    <a class="step" href="/templates/saas-database">
+      <b>SaaS database</b>
+      <p>6 shapes and 6 connections, sketched in isketch.</p>
+      <p class="count">6 shapes · 6 connections</p>
+    </a>
+    <a class="step" href="/templates/url-shortener">
+      <b>URL shortener</b>
+      <p>6 shapes and 5 connections, sketched in isketch.</p>
+      <p class="count">6 shapes · 5 connections</p>
+    </a>
+  </div>
+<footer>isketch: sketch it, hand it to your agent · <a href="/">Home</a> · <a href="https://github.com/raj-khan/flow#readme">Docs</a> · MIT licence</footer>
+</div>
+<script>
+  for (const button of document.querySelectorAll('[data-copy-from]')) {
+    button.addEventListener('click', async () => {
+      await navigator.clipboard.writeText(document.getElementById(button.dataset.copyFrom).textContent)
+      const was = button.textContent
+      button.textContent = 'Copied'
+      setTimeout(() => (button.textContent = was), 1500)
+    })
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rate limiter template · isketch</title>
+<meta name="description" content="6 shapes and 5 connections, sketched in isketch.">
+<link rel="canonical" href="https://isketch.online/templates/rate-limiter">
+<meta name="theme-color" content="#f4f5f8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="isketch">
+<meta property="og:title" content="Rate limiter template · isketch">
+<meta property="og:description" content="6 shapes and 5 connections, sketched in isketch.">
+<meta property="og:url" content="https://isketch.online/templates/rate-limiter">
+<meta property="og:image" content="https://isketch.online/templates/rate-limiter/og.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Rate limiter template · isketch">
+<meta name="twitter:description" content="6 shapes and 5 connections, sketched in isketch.">
+<meta name="twitter:image" content="https://isketch.online/templates/rate-limiter/og.png">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any">
+<style>
+  :root { --canvas: #f4f5f8; --surface: #ffffff; --ink: #14181f; --muted: #64748b; --line: #e3e7ee; --brand-ink: #4f46e5; }
+  @media (prefers-color-scheme: dark) { :root { --canvas: #0d1117; --surface: #161b22; --ink: #e6edf3; --muted: #94a3b8; --line: #21262d; } }
+  * { box-sizing: border-box }
+  body { margin: 0; background: var(--canvas); color: var(--ink); font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; line-height: 1.65 }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 24px 24px 64px }
+  header { display: flex; align-items: center; gap: 16px; flex-wrap: wrap }
+  header img { width: 28px; height: 27px }
+  header .wordmark { font-weight: 700; margin-right: 8px }
+  header a { color: var(--brand-ink); text-decoration: none }
+  header .spacer { flex: 1 }
+  h1 { font-size: 34px; letter-spacing: -0.02em; margin: 36px 0 8px }
+  h2 { font-size: 22px; margin: 36px 0 6px }
+  .sub { color: var(--muted); font-size: 17px; margin: 0 0 12px; max-width: 46em }
+  .btn { display: inline-block; background: var(--brand-ink); color: #fff; border-radius: 8px; padding: 8px 16px; font-weight: 600; font-size: 15px; text-decoration: none; border: none; cursor: pointer }
+  .btn:hover { opacity: .9 }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; margin: 16px 0 }
+  .drawing svg { display: block; width: 100%; height: auto; padding: 24px }
+  .code-head { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 14px }
+  .code-head .grow { flex: 1 }
+  pre { margin: 0; padding: 16px 20px; overflow-x: auto; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.6 }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: var(--surface); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px }
+  ul li { margin: 8px 0 }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; margin: 20px 0 }
+  .step { display: block; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; text-decoration: none; color: inherit }
+  .step:hover { border-color: var(--brand-ink) }
+  .step b { display: block; margin-bottom: 4px; color: var(--brand-ink) }
+  .step p { margin: 0; color: var(--muted); font-size: 14px }
+  .step .count { margin-top: 8px; font-size: 13px }
+  .convert iframe { display: block; width: 100%; height: 640px; border: 0; background: var(--surface) }
+  footer { border-top: 1px solid var(--line); margin-top: 56px; padding-top: 20px; color: var(--muted); font-size: 14px }
+  footer a { color: var(--brand-ink) }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <img src="/favicon.svg" alt="">
+  <span class="wordmark">isketch</span>
+  <span class="spacer"></span>
+  <a href="/templates">Templates</a>
+  <a href="/convert">Convert</a>
+  <a href="/docs/format">Format</a>
+  <a class="btn" href="/new">Open the editor</a>
+</header>
+
+  <h1>Rate limiter</h1>
+  <p class="sub">6 shapes and 5 connections, sketched in isketch.</p>
+  <p><a class="btn" href="/flow#flow=zXZHNTsMwEITveYpRrm04IC5EaiWEuBUJlb6Aa0-JwbXD2m3o2yMnbhU4Wd6f2W92k02OLbYqEc4ebaJUPiS2eHfWWP-BwXoTBoQzBVsaG5egPwTRNFAJqSNoPnhXVfnBCr0EzRhRv-T_0RrjOChhjabBGwXC7xNjWmLPQxCOEp3yxlGqwjCX2ZRQpJytnmT-welw8plcMh9WMCqpvYpEPRKPLc9TTcRgU4fdblP1wVl9KeWoxx1MsRvqFy_tlTcur-MidfAmVsJP6nQTeLh_hDD2wceJcsskl-bpkOk7KkOpjkxidZz7e51CpSMr0uAcoZwLA03Za7O-3gdtxsKisN5W1qwx-W9hvRYswJ_eCucFxXL2pMzfztFKO915TMzTBbv6BQ">Open this template</a></p>
+  <div class="card drawing"><svg xmlns="http://www.w3.org/2000/svg" width="1124" height="520" viewBox="-32 -32 1124 520" font-family="ui-sans-serif, system-ui, -apple-system, &apos;Segoe UI&apos;, Roboto, sans-serif">
+<title>Rate limiter</title>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f97362"/></marker></defs>
+<rect x="-32" y="-32" width="1124" height="520" fill="#ffffff"/>
+<path d="M530,104 V140 H530 V176" fill="none" stroke="#f97362" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="481.7" y="130" width="96.6" height="20" rx="10" fill="#ffffff" stroke="#e3e7ee"/>
+<text x="530" y="140" font-size="11" fill="#64748b" text-anchor="middle" dominant-baseline="central">key + policy</text>
+<path d="M530,280 V316 H116 V352" fill="none" stroke="#f97362" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="271.3" y="306" width="103.4" height="20" rx="10" fill="#ffffff" stroke="#e3e7ee"/>
+<text x="323" y="316" font-size="11" fill="#64748b" text-anchor="middle" dominant-baseline="central">incr + expire</text>
+<path d="M530,280 V316 H392 V352" fill="none" stroke="#f97362" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="439.6" y="306" width="42.9" height="20" rx="10" fill="#ffffff" stroke="#e3e7ee"/>
+<text x="461" y="316" font-size="11" fill="#64748b" text-anchor="middle" dominant-baseline="central">read</text>
+<path d="M530,280 V316 H668 V352" fill="none" stroke="#f97362" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="557.4" y="306" width="83.2" height="20" rx="10" fill="#ffffff" stroke="#e3e7ee"/>
+<text x="599" y="316" font-size="11" fill="#64748b" text-anchor="middle" dominant-baseline="central">over limit</text>
+<path d="M530,280 V316 H944 V352" fill="none" stroke="#f97362" stroke-width="1.5" marker-end="url(#arrow)"/>
+<g transform="translate(414,0)">
+<path d="M7.5,1.5 H224.5 Q230.5,1.5 230.5,7.5 V96.5 Q230.5,102.5 224.5,102.5 H7.5 Q1.5,102.5 1.5,96.5 V7.5 Q1.5,1.5 7.5,1.5 Z" fill="#ffffff" stroke="#059669" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="116" y="39.2" font-size="14" font-weight="600" fill="#14181f" text-anchor="middle">Edge middleware</text>
+<text x="116" y="59.8" font-size="12" fill="#64748b" text-anchor="middle">Per request, before the</text>
+<text x="116" y="75.4" font-size="12" fill="#64748b" text-anchor="middle">handler</text>
+</g>
+<g transform="translate(414,176)">
+<path d="M7.5,1.5 H224.5 Q230.5,1.5 230.5,7.5 V96.5 Q230.5,102.5 224.5,102.5 H7.5 Q1.5,102.5 1.5,96.5 V7.5 Q1.5,1.5 7.5,1.5 Z" fill="#ffffff" stroke="#059669" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="116" y="47" font-size="14" font-weight="600" fill="#14181f" text-anchor="middle">Limiter service</text>
+<text x="116" y="67.6" font-size="12" fill="#64748b" text-anchor="middle">Sliding window counter</text>
+</g>
+<g transform="translate(0,352)">
+<path d="M1.5,13.5 A114.5,12 0 0 1 230.5,13.5 V90.5 A114.5,12 0 0 1 1.5,90.5 Z M1.5,13.5 A114.5,12 0 0 0 230.5,13.5" fill="#ffffff" stroke="#4f46e5" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="116" y="47" font-size="14" font-weight="600" fill="#14181f" text-anchor="middle">Redis</text>
+<text x="116" y="67.6" font-size="12" fill="#64748b" text-anchor="middle">Counters with TTL</text>
+</g>
+<g transform="translate(276,352)">
+<path d="M28.98,1.5 H230.5 L203.02,102.5 H1.5 Z" fill="#ffffff" stroke="#4f46e5" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="116" y="39.2" font-size="14" font-weight="600" fill="#14181f" text-anchor="middle">Rate policy</text>
+<text x="116" y="59.8" font-size="12" fill="#64748b" text-anchor="middle">Per key: requests, window</text>
+<text x="116" y="75.4" font-size="12" fill="#64748b" text-anchor="middle">seconds</text>
+</g>
+<g transform="translate(552,352)">
+<path d="M28.98,1.5 H230.5 L203.02,102.5 H1.5 Z" fill="#ffffff" stroke="#4f46e5" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="116" y="47" font-size="14" font-weight="600" fill="#14181f" text-anchor="middle">429 response</text>
+<text x="116" y="67.6" font-size="12" fill="#64748b" text-anchor="middle">Retry-After header</text>
+</g>
+<g transform="translate(828,352)">
+<path d="M7.5,1.5 H224.5 Q230.5,1.5 230.5,7.5 V96.5 Q230.5,102.5 224.5,102.5 H7.5 Q1.5,102.5 1.5,96.5 V7.5 Q1.5,1.5 7.5,1.5 Z" fill="#ffffff" stroke="#059669" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="116" y="47" font-size="14" font-weight="600" fill="#14181f" text-anchor="middle">Metrics</text>
+<text x="116" y="67.6" font-size="12" fill="#64748b" text-anchor="middle">Rejected vs allowed</text>
+</g>
+</svg>
+</div>
+  <h2>The .flow source</h2>
+  <p class="sub">The whole template as text: copy it, keep it in your repo, hand it to an agent.</p>
+  <div class="card">
+    <div class="code-head">examples/templates/rate-limiter.flow<span class="grow"></span><button class="btn" type="button" data-copy-from="the-source">Copy</button></div>
+    <pre id="the-source">title: Rate limiter
+note: Sliding window over Redis, enforced at the edge.
+
+edge = process &#34;Edge middleware&#34; -- Per request, before the handler
+limiter = process &#34;Limiter service&#34; -- Sliding window counter
+redis = database &#34;Redis&#34; -- Counters with TTL
+policy = data &#34;Rate policy&#34; -- Per key: requests, window seconds
+reject = data &#34;429 response&#34; -- Retry-After header
+metrics = process &#34;Metrics&#34; -- Rejected vs allowed
+
+edge -&#62; limiter : key + policy
+limiter -&#62; redis : incr + expire
+limiter -&#62; policy : read
+limiter -&#62; reject : over limit
+limiter -&#62; metrics
+</pre>
+  </div>
+<footer>isketch: sketch it, hand it to your agent · <a href="/">Home</a> · <a href="https://github.com/raj-khan/flow#readme">Docs</a> · MIT licence</footer>
+</div>
+<script>
+  for (const button of document.querySelectorAll('[data-copy-from]')) {
+    button.addEventListener('click', async () => {
+      await navigator.clipboard.writeText(document.getElementById(button.dataset.copyFrom).textContent)
+      const was = button.textContent
+      button.textContent = 'Copied'
+      setTimeout(() => (button.textContent = was), 1500)
+    })
+  }
+</script>
+</body>
+</html>

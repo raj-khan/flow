@@ -1,20 +1,37 @@
 /**
- * Writes public/robots.txt and public/sitemap.xml from one list of pages, so
- * the sitemap cannot fall behind the site: add the page here when it ships.
- * Run with `npm run sitemap` and commit the results, so a deploy needs
- * nothing but static files.
+ * Writes public/robots.txt and public/sitemap.xml from the pages that exist:
+ * a short list of hand-placed pages, plus every generated page under
+ * public/templates, public/vs and public/convert (npm run pages creates and
+ * refreshes them). Run with `npm run sitemap` and commit the results, so a
+ * deploy needs nothing but static files.
  */
-import { writeFile } from 'node:fs/promises'
+import { readdir, writeFile } from 'node:fs/promises'
 
 const siteUrl = (process.env.VITE_SITE_URL ?? 'https://isketch.online').replace(/\/+$/, '')
+const publicDir = new URL('../public/', import.meta.url)
 
-/** Every page a person or a crawler can open without knowing a diagram. */
-const PAGES = [
+/** Pages with no directory of their own. */
+const STATIC_PAGES = [
   { path: '/', changefreq: 'weekly', priority: '1.0' },
   { path: '/new', changefreq: 'weekly', priority: '0.8' },
+  { path: '/docs/format', changefreq: 'monthly', priority: '0.9' },
 ]
 
-const publicDir = new URL('../public/', import.meta.url)
+/** Every directory with an index.html in it, deepest last. */
+async function generatedPages() {
+  const pages = []
+  for (const section of ['convert', 'templates', 'vs']) {
+    const base = new URL(`${section}/`, publicDir)
+    const entries = await readdir(base, { withFileTypes: true }).catch(() => [])
+    for (const entry of entries) {
+      if (entry.isDirectory()) pages.push(`/${section}/${entry.name}`)
+    }
+    pages.push(`/${section}`)
+  }
+  return pages.map((path) => ({ path, changefreq: 'weekly', priority: '0.7' }))
+}
+
+const PAGES = [...STATIC_PAGES, ...(await generatedPages())]
 const today = new Date().toISOString().slice(0, 10)
 
 const urls = PAGES.map(

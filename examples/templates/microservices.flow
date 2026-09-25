@@ -1,0 +1,20 @@
+title: Microservices
+note: Four services, one gateway, events between them.
+
+web = terminal "Web app" -- Server-rendered
+gateway = process "API gateway" -- Routing, auth, rate limits
+orders = process "Orders" -- Owns the orders tables
+payments = process "Payments" -- Cards, refunds, webhooks out
+inventory = process "Inventory" -- Stock levels
+events = data "Event bus" -- OrderPlaced, PaymentTaken
+ordersDb = database "Orders DB"
+search = process "Search indexer" -- Builds the read model
+
+web -> gateway
+gateway -> orders
+gateway -> payments
+orders -> ordersDb
+orders -> events : OrderPlaced
+payments -> events : PaymentTaken
+events -> inventory : reserve stock
+events -> search

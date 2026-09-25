@@ -1,0 +1,21 @@
+title: RAG pipeline
+note: Ingest documents, embed chunks, retrieve, answer with citations.
+
+docs = document "Documents" -- PDFs, markdown, tickets
+loader = process "Loader" -- Parses and splits into chunks
+embedder = process "Embedder" -- Batched API calls
+vector = database "Vector store" -- Chunks with embeddings
+query = terminal "Question" -- From the chat UI
+retriever = process "Retriever" -- Top-k similarity search
+reranker = process "Reranker" -- Cheap cross-encoder pass
+answer = process "LLM" -- Answers with the retrieved context
+citations = document "Citations" -- Chunk ids shown to the user
+
+docs -> loader
+loader -> embedder
+embedder -> vector
+query -> retriever
+vector -> retriever
+retriever -> reranker
+reranker -> answer
+answer -> citations

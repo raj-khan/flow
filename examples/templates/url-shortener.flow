@@ -1,0 +1,15 @@
+title: URL shortener
+note: A link service: hash the URL, store it, redirect visitors, count clicks.
+
+redirect = process "Redirect service" -- Reads the hash, 301s to the target
+api = process "Shorten API" -- POST a URL, returns the short link
+hash = process "Hash service" -- Base62 of an autoincrement id
+store = database "Links" -- hash, target, created_at, owner
+counter = data "Click events" -- One per redirect, batched
+stats = process "Stats worker" -- Aggregates clicks per link and day
+
+api -> hash : next id
+hash -> store : save
+redirect -> store : lookup
+redirect -> counter : emit
+counter -> stats

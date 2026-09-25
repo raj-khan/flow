@@ -1,0 +1,15 @@
+title: Rate limiter
+note: Sliding window over Redis, enforced at the edge.
+
+edge = process "Edge middleware" -- Per request, before the handler
+limiter = process "Limiter service" -- Sliding window counter
+redis = database "Redis" -- Counters with TTL
+policy = data "Rate policy" -- Per key: requests, window seconds
+reject = data "429 response" -- Retry-After header
+metrics = process "Metrics" -- Rejected vs allowed
+
+edge -> limiter : key + policy
+limiter -> redis : incr + expire
+limiter -> policy : read
+limiter -> reject : over limit
+limiter -> metrics

@@ -1,0 +1,13 @@
+title: Mobile app screens
+note: Onboarding to home, four screens.
+
+welcome = screen "Welcome" -- Value prop, Sign up, Log in
+signup = screen "Sign up" -- Email, password, Apple and Google
+verify = screen "Verify" -- Six-digit code
+home = screen "Home" -- Your diagrams, FAB to draw
+nav = list "Tab bar" -- Home, Shared, Settings
+
+welcome -> signup : Sign up
+signup -> verify
+verify -> home : verified
+home -> nav

@@ -1,0 +1,16 @@
+title: SaaS database
+note: Multi-tenant by org_id, everything the product needs.
+
+orgs = table "orgs" -- id, name, plan, created_at
+users = table "users" -- id, org_id, email, role
+projects = table "projects" -- id, org_id, owner_id, name
+diagrams = table "diagrams" -- id, project_id, title, document
+tokens = table "api_tokens" -- id, org_id, hash, scopes
+events = table "events" -- id, org_id, name, at, props
+
+orgs -> users : org_id
+orgs -> projects : org_id
+users -> projects : owner_id
+projects -> diagrams : project_id
+orgs -> tokens : org_id
+orgs -> events : org_id

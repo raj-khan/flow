@@ -56,6 +56,15 @@ export default defineConfig({
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
 
+  build: {
+    rollupOptions: {
+      input: {
+        index: fileURLToPath(new URL('./index.html', import.meta.url)),
+        convert: fileURLToPath(new URL('./convert.html', import.meta.url)),
+      },
+    },
+  },
+
   test: {
     environment: 'happy-dom',
     globals: true,

@@ -1,0 +1,16 @@
+title: Chat app
+note: Realtime chat over websockets, with presence and history.
+
+client = terminal "Chat client" -- React or Swift
+ws = process "WebSocket gateway" -- One connection per client, JWT auth
+presence = process "Presence service" -- Online users, typing state
+rooms = database "Rooms" -- Membership and settings
+history = database "Message store" -- Append-only, keyed by room
+queue = data "Fan-out queue" -- Delivers events to every member
+
+client -> ws : connect
+ws -> presence : join/leave
+ws -> rooms : member check
+ws -> history : send
+history -> queue : publish
+queue -> ws : fan out

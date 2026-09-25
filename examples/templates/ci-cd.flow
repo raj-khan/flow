@@ -1,0 +1,21 @@
+title: CI/CD pipeline
+note: From pull request to production, with a visual check on every diff.
+
+pr = terminal "Pull request" -- Code and diagram changes
+build = process "Build" -- Typecheck, unit tests, bundle
+e2e = process "E2E" -- Playwright against the preview
+diagram = process "Diagram check" -- Renders .flow files, fails on drift
+review = decision "Reviewed?" -- A person approves
+canary = process "Canary" -- 5% of traffic, watched
+prod = process "Production" -- Full rollout
+rollback = process "Rollback" -- One command, last good build
+
+pr -> build
+build -> e2e
+build -> diagram
+e2e -> review
+diagram -> review
+review -> canary : approved
+review -> rollback : rejected
+canary -> prod : metrics hold
+canary -> rollback : metrics fail

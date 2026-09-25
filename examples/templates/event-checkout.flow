@@ -1,0 +1,18 @@
+title: Event-driven checkout
+note: Cart to paid, as events between services.
+
+cart = process "Cart service" -- Holds the open cart
+checkout = process "Checkout" -- Creates the order, pending
+payment = process "Payment" -- Provider call, retries
+ledger = database "Ledger" -- Money movements, immutable
+bus = data "Event bus" -- OrderPaid, CartEmptied
+mailer = process "Mailer" -- Receipt and confirmation
+stock = process "Stock" -- Reserves on OrderPaid
+
+cart -> checkout : place order
+checkout -> payment
+payment -> ledger : record
+payment -> bus : OrderPaid
+bus -> mailer
+bus -> stock
+bus -> cart : CartEmptied
