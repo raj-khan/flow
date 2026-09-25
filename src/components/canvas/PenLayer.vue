@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useVueFlow } from '@vue-flow/core'
 
 import { useFlowQuery } from '@/composables/useFlowQuery.js'
@@ -72,19 +72,6 @@ function finish() {
     ],
   })
 }
-
-/** P picks the pen up or puts it down; Escape puts it down. */
-/** @param {KeyboardEvent} event */
-function onKeydown(event) {
-  const target = /** @type {HTMLElement | null} */ (event.target)
-  if (target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return
-  if (event.ctrlKey || event.metaKey || event.altKey) return
-  if (event.key === 'Escape' && canvas.pen) canvas.togglePen()
-  else if (event.key.toLowerCase() === 'p') canvas.togglePen()
-}
-
-onMounted(() => window.addEventListener('keydown', onKeydown))
-onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 </script>
 
 <template>

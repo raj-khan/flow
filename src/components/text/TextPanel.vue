@@ -4,13 +4,15 @@ import { computed, ref, useId, useTemplateRef } from 'vue'
 import { useDiagramText } from '@/composables/useDiagramText.js'
 import { useFlowQuery } from '@/composables/useFlowQuery.js'
 import { toMermaid } from '@/domain/mermaid.js'
+import { useCanvasStore } from '@/stores/canvas.js'
 
-/** The diagram as `.flow` text, beside the canvas. Either side can be edited. */
+/** The diagram as `.flow` text, floating over the canvas. Either side can be edited. */
 const { text, errors, input, focus, blur } = useDiagramText()
 
 const editor = useTemplateRef('editor')
 const errorsId = useId()
 const { document } = useFlowQuery()
+const canvas = useCanvasStore()
 /** Which copy button last worked, so only that one says so. */
 const copied = ref('')
 
@@ -48,13 +50,34 @@ async function copy(format) {
 
 <template>
   <aside
-    class="flex w-[360px] shrink-0 flex-col border-r border-line bg-surface"
+    class="island flex h-full w-[360px] max-w-full flex-col overflow-hidden"
     aria-label="Diagram as text"
   >
     <header class="space-y-2 px-4 pt-4 pb-2">
-      <div>
-        <h2 class="text-xs font-semibold tracking-wide text-muted uppercase">Text</h2>
-        <p class="text-xs text-muted" role="status">{{ status }}</p>
+      <div class="flex items-start gap-2">
+        <div class="min-w-0 flex-1">
+          <h2 class="text-xs font-semibold tracking-wide text-muted uppercase">Text</h2>
+          <p class="text-xs text-muted" role="status">{{ status }}</p>
+        </div>
+        <button
+          type="button"
+          class="rounded-md p-1 text-muted hover:bg-hover"
+          aria-label="Close text"
+          title="Close the text pane"
+          @click="canvas.toggleText"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path d="m6 6 12 12M18 6 6 18" />
+          </svg>
+        </button>
       </div>
 
       <div class="flex flex-wrap gap-1.5">

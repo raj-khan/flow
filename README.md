@@ -63,11 +63,16 @@ nobody hosts it yet: run it yourself, or hand over the `.flow` file or the brief
   go with Copy for AI, the `.flow` file and MCP as instructions to follow.
 - **Wireframes.** Screen, button, input, card, list and image, to sketch an interface next to the
   architecture behind it. The brief reads them as a UI to build: "a screen", "a form field", "a button".
-- **Canvas.** Pan, zoom and drag shapes on a Vue Flow canvas. Dragged positions are kept.
+- **Canvas first.** The canvas fills the screen and the tools float over it, as in Excalidraw:
+  the menu (file, import, export, view, help) at the top left, the tool bar at the top centre,
+  Share and Copy for AI at the top right, undo and the view controls at the bottom left.
+- **Tools** on number keys and letters: Select (`1`/`V`), Hand (`2`/`H`), Shapes (`3`), Connector
+  (`4`/`C`, click one shape then another), Text (`5`/`T`, click the canvas to write), Pen (`6`/`P`)
+  and Eraser (`7`/`E`, click a shape or connection to delete it). Escape goes back to Select.
 - **New diagram and samples.** Start empty, or from a web app architecture or support flow
   sample. Undo brings back whatever was there.
-- **Shape palette.** Drag a shape onto the canvas to drop it there, or click it (or press Enter)
-  to add it in a clear spot near the middle.
+- **Shape library.** The Shapes tool opens it over the canvas. Drag a shape onto the canvas to drop
+  it there, or click it (or press Enter) to add it in a clear spot near the middle.
 - **Resize.** Select a shape and drag its handles; hold Shift to keep its proportions.
 - **Edit in place.** Double-click a shape to rename it, or a connection to add or change its
   label; F2 renames the focused shape. Enter saves, Escape cancels.
@@ -75,7 +80,7 @@ nobody hosts it yet: run it yourself, or hand over the `.flow` file or the brief
   delete them with Delete, as one undoable step.
 - **Align and distribute.** With two or more shapes selected, a toolbar lines them up by any edge or
   centre, and with three or more spaces them evenly, across or down.
-- **Snap to grid.** Dragged shapes snap to the canvas's dots; the switch under the zoom controls
+- **Snap to grid.** Dragged shapes snap to the canvas's dots; the switch beside the zoom controls
   turns it off, and this browser remembers.
 - **Copy, cut, paste and duplicate** (`Ctrl+C`, `Ctrl+X`, `Ctrl+V`, `Ctrl+D`), with the connections
   between copied shapes. The clipboard holds `.flow` text, so shapes paste between tabs, and any
@@ -84,13 +89,13 @@ nobody hosts it yet: run it yourself, or hand over the `.flow` file or the brief
 - **Connections.** Drag from one node to another to connect them, as many in and out as you like.
   Each leaves from the side that faces the shape it goes to, with an arrowhead. From its own
   controls, make one dashed (optional or asynchronous) or two-way, or remove it. The whole diagram's
-  lines run in steps, curves or straight, from the button under the zoom controls.
-- **Undo and redo** for every change, from the toolbar or `Ctrl+Z` / `Ctrl+Shift+Z`.
-- **Deep links.** Each node's details open at `/flow/node/:id`, so a node can be linked to.
+  lines run in steps, curves or straight, from the button beside the zoom controls.
+- **Undo and redo** for every change, from the bottom left or `Ctrl+Z` / `Ctrl+Shift+Z`.
+- **Deep links.** Each node's details open at `/new/node/:id`, so a node can be linked to.
 - **Keyboard first.** Arrow keys walk the nodes, Enter opens one, `?` lists every shortcut.
 - **Automatic layout** for anything you have not placed by hand: a tidy tree for a tree, and layers
   for any other graph, so merges, skipped steps and loops still read top down, with long
-  connections given a lane of their own. _Tidy up_ under the zoom controls lays out the whole
+  connections given a lane of their own. _Tidy up_ beside the zoom controls lays out the whole
   diagram, and undo puts it back.
 - **Pen.** Pick up the pen (`P`) to circle, underline or scribble over the diagram by hand. Each
   stroke moves, resizes and undoes like a shape, clicks pass through it to what it circles, and the

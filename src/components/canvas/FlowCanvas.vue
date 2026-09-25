@@ -37,6 +37,7 @@ import { canConnect, edgeIdFor, toNodeId } from '@/domain/graph.js'
 import { isInView, panDuration } from '@/domain/motion.js'
 import { isSketch } from '@/domain/sketch.js'
 import { GRID } from '@/domain/arrange.js'
+import { TOOL } from '@/domain/tools.js'
 import SelectionToolbar from './SelectionToolbar.vue'
 import PenLayer from './PenLayer.vue'
 import { useToastStore } from '@/stores/toasts.js'
@@ -293,6 +294,19 @@ function drawFromData(list) {
 
 /** @param {{ node: import('@vue-flow/core').GraphNode, event: MouseEvent | TouchEvent }} event */
 function onNodeClick({ node, event }) {
+  if (canvas.tool === TOOL.HAND) return
+  if (canvas.tool === TOOL.ERASER) {
+    removeShapes([node.id])
+    return
+  }
+  if (canvas.tool === TOOL.CONNECTOR) {
+    connectByClicks(node.id)
+    return
+  }
+  if (canvas.tool === TOOL.TEXT) {
+    editingId.value = node.id
+    return
+  }
   // A modifier click adds to the selection; opening the drawer would drop it.
   if (event && 'shiftKey' in event && (event.shiftKey || event.ctrlKey || event.metaKey)) return
   if (!isOpenable(node.data.node)) return
@@ -317,6 +331,46 @@ function onConnectStart(event) {
 
 function onConnectEnd() {
   connectingFrom.value = ''
+}
+
+/**
+ * The connector tool: the first click picks the shape a connection leaves
+ * from, and lights up the shapes it can go to; the second makes it.
+ * @param {string} id
+ */
+function connectByClicks(id) {
+  const from = connectingFrom.value
+  if (!from || from === id) {
+    connectingFrom.value = from === id ? '' : id
+    return
+  }
+  connectingFrom.value = ''
+  onConnect({ source: from, target: id })
+}
+
+// A connection half made by clicks is dropped with the tool.
+watch(
+  () => canvas.tool,
+  () => (connectingFrom.value = ''),
+)
+
+/** @param {{ edge: { id: string } }} event */
+function onEdgeClick({ edge }) {
+  if (canvas.tool === TOOL.ERASER) detach(edge.id)
+}
+
+/**
+ * The text tool writes where the canvas is clicked, then hands back to Select;
+ * a click on empty canvas also drops a connection half made by clicks.
+ * @param {MouseEvent} event
+ */
+function onPaneClick(event) {
+  connectingFrom.value = ''
+  if (canvas.tool !== TOOL.TEXT) return
+  addShape('text', screenToFlowCoordinate({ x: event.clientX, y: event.clientY }), {
+    exact: true,
+  })
+  canvas.setTool(TOOL.SELECT)
 }
 
 /**
@@ -609,6 +663,7 @@ function onDrop(event) {
   const shape = event.dataTransfer?.getData(SHAPE_DRAG_TYPE)
   if (!shape) return
   event.preventDefault()
+  canvas.closeLibrary()
 
   // An empty canvas has no Vue Flow mounted to translate the point.
   const at = nodes.value.length
@@ -642,7 +697,7 @@ watch(
   <div
     ref="container"
     class="h-full w-full"
-    :class="connectingFrom ? 'is-connecting' : ''"
+    :class="[connectingFrom ? 'is-connecting' : '', `tool-${canvas.tool}`]"
     @dragover="onDragOver"
     @drop="onDrop"
   >
@@ -665,7 +720,9 @@ watch(
       :snap-grid="[GRID, GRID]"
       :min-zoom="0.2"
       :max-zoom="2"
-      :nodes-connectable="true"
+      :nodes-connectable="canvas.tool === TOOL.SELECT"
+      :nodes-draggable="canvas.tool === TOOL.SELECT"
+      :elements-selectable="canvas.tool === TOOL.SELECT"
       :is-valid-connection="isValidConnection"
       :connection-radius="28"
       :nodes-deletable="false"
@@ -677,6 +734,8 @@ watch(
       class="h-full w-full"
       @nodes-initialized="onNodesInitialized"
       @node-click="onNodeClick"
+      @edge-click="onEdgeClick"
+      @pane-click="onPaneClick"
       @node-drag-start="isDragging = true"
       @node-drag-stop="onNodeDragStop"
       @connect="onConnect"
@@ -716,3 +775,21 @@ watch(
     </VueFlow>
   </div>
 </template>
+
+<style scoped>
+/* Each tool says what a click will do before it is made. */
+.tool-hand :deep(.vue-flow__pane),
+.tool-hand :deep(.vue-flow__node) {
+  cursor: grab;
+}
+
+.tool-connector :deep(.vue-flow__node),
+.tool-eraser :deep(.vue-flow__node),
+.tool-eraser :deep(.vue-flow__edge) {
+  cursor: crosshair;
+}
+
+.tool-text :deep(.vue-flow__pane) {
+  cursor: text;
+}
+</style>

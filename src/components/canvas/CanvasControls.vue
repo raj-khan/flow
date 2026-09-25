@@ -43,76 +43,85 @@ const step = (direction) => zoomTo(nextZoom(viewport.value.zoom, direction), ZOO
 </script>
 
 <template>
-  <div class="absolute bottom-4 left-4 z-10 flex flex-col items-stretch gap-1">
-    <IconButton
-      label="Zoom in"
-      title="Zoom in to the next step. Scrolling on the canvas zooms freely"
-      @click="step(1)"
-    >
-      <path d="M12 5v14M5 12h14" />
-    </IconButton>
-
-    <IconButton
-      label="Zoom out"
-      title="Zoom out to the previous step. Scrolling on the canvas zooms freely"
-      @click="step(-1)"
-    >
-      <path d="M5 12h14" />
-    </IconButton>
-
-    <IconButton
-      :label="`Lines: ${lines}`"
-      :title="`Connections run ${LINE_NAMES[lines]}. Click for ${LINE_NAMES[next]}`"
-      @click="cycle"
-    >
-      <path v-if="lines === 'curved'" d="M4 19C4 10 20 14 20 5" />
-      <path v-else-if="lines === 'straight'" d="M4 19 20 5" />
-      <path v-else d="M4 19v-7h16V5" />
-    </IconButton>
-
-    <IconButton
-      label="Tidy up"
-      title="Lay out the whole diagram automatically. Undo puts everything back"
-      @click="tidy"
-    >
-      <rect x="9" y="3" width="6" height="5" rx="1" />
-      <rect x="3" y="16" width="6" height="5" rx="1" />
-      <rect x="15" y="16" width="6" height="5" rx="1" />
-      <path d="M12 8v4M6 16v-4h12v4" />
-    </IconButton>
-
-    <IconButton
-      label="Snap to grid"
-      :title="canvas.snap ? 'Shapes snap to the grid as you drag them' : 'Shapes move freely'"
-      :pressed="canvas.snap"
-      @click="canvas.toggleSnap"
-    >
-      <path
-        d="M4 4h.01M12 4h.01M20 4h.01M4 12h.01M12 12h.01M20 12h.01M4 20h.01M12 20h.01M20 20h.01"
-        stroke-width="3"
-      />
-    </IconButton>
-
-    <IconButton
-      label="Fit to screen"
-      title="Bring every node into view"
-      @click="fitView({ padding: 0.2, duration: 200 })"
-    >
-      <path
-        d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"
-      />
-    </IconButton>
-
-    <!-- The zoom level doubles as the control that resets it. -->
-    <span :title="`Zoom is ${percentage}. Click to reset to 100%`">
-      <button
-        type="button"
-        class="w-full rounded-lg border border-line bg-surface px-1 py-1 text-[11px] font-medium text-muted transition-colors hover:bg-hover"
-        aria-label="Reset zoom to 100 percent"
-        @click="zoomTo(1, ZOOM_STEP)"
+  <!-- Drawn beside undo, bottom left; it lives in Vue Flow for useVueFlow. -->
+  <Teleport defer to="#canvas-controls">
+    <div class="island flex items-center gap-0.5 p-1" role="toolbar" aria-label="View">
+      <IconButton
+        variant="bare"
+        label="Zoom in"
+        title="Zoom in to the next step. Scrolling on the canvas zooms freely"
+        @click="step(1)"
       >
-        {{ percentage }}
-      </button>
-    </span>
-  </div>
+        <path d="M12 5v14M5 12h14" />
+      </IconButton>
+
+      <IconButton
+        variant="bare"
+        label="Zoom out"
+        title="Zoom out to the previous step. Scrolling on the canvas zooms freely"
+        @click="step(-1)"
+      >
+        <path d="M5 12h14" />
+      </IconButton>
+
+      <IconButton
+        variant="bare"
+        :label="`Lines: ${lines}`"
+        :title="`Connections run ${LINE_NAMES[lines]}. Click for ${LINE_NAMES[next]}`"
+        @click="cycle"
+      >
+        <path v-if="lines === 'curved'" d="M4 19C4 10 20 14 20 5" />
+        <path v-else-if="lines === 'straight'" d="M4 19 20 5" />
+        <path v-else d="M4 19v-7h16V5" />
+      </IconButton>
+
+      <IconButton
+        variant="bare"
+        label="Tidy up"
+        title="Lay out the whole diagram automatically. Undo puts everything back"
+        @click="tidy"
+      >
+        <rect x="9" y="3" width="6" height="5" rx="1" />
+        <rect x="3" y="16" width="6" height="5" rx="1" />
+        <rect x="15" y="16" width="6" height="5" rx="1" />
+        <path d="M12 8v4M6 16v-4h12v4" />
+      </IconButton>
+
+      <IconButton
+        variant="bare"
+        label="Snap to grid"
+        :title="canvas.snap ? 'Shapes snap to the grid as you drag them' : 'Shapes move freely'"
+        :pressed="canvas.snap"
+        @click="canvas.toggleSnap"
+      >
+        <path
+          d="M4 4h.01M12 4h.01M20 4h.01M4 12h.01M12 12h.01M20 12h.01M4 20h.01M12 20h.01M20 20h.01"
+          stroke-width="3"
+        />
+      </IconButton>
+
+      <IconButton
+        variant="bare"
+        label="Fit to screen"
+        title="Bring every node into view"
+        @click="fitView({ padding: 0.2, duration: 200 })"
+      >
+        <path
+          d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"
+        />
+      </IconButton>
+
+      <!-- The zoom level doubles as the control that resets it. -->
+      <span :title="`Zoom is ${percentage}. Click to reset to 100%`">
+        <button
+          type="button"
+          class="min-w-12 rounded-lg px-1.5 py-2 text-xs font-medium text-muted transition-colors hover:bg-hover"
+          aria-label="Reset zoom to 100 percent"
+          @click="zoomTo(1, ZOOM_STEP)"
+        >
+          {{ percentage }}
+        </button>
+      </span>
+    </div>
+  </Teleport>
 </template>

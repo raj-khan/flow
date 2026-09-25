@@ -9,6 +9,8 @@ defineProps({
   disabled: { type: Boolean, default: false },
   /** For a toggle; left null, the button is a plain action. */
   pressed: { type: /** @type {import('vue').PropType<boolean | null>} */ (Boolean), default: null },
+  /** Bare inside an island, which already draws the border. */
+  variant: { type: String, default: 'outlined' },
 })
 </script>
 
@@ -16,11 +18,14 @@ defineProps({
   <span class="inline-flex" :title="title || label">
     <button
       type="button"
-      class="rounded-lg border border-line bg-surface px-2.5 py-2 text-sm text-ink transition-colors hover:bg-hover disabled:opacity-30"
+      class="rounded-lg px-2.5 py-2 text-sm text-ink transition-colors hover:bg-hover disabled:opacity-30"
+      :class="[
+        variant === 'bare' ? '' : 'border border-line bg-surface',
+        pressed ? 'bg-hover' : '',
+      ]"
       :disabled="disabled"
       :aria-label="label"
       :aria-pressed="pressed === null ? undefined : pressed ? 'true' : 'false'"
-      :class="pressed ? 'bg-hover' : ''"
     >
       <svg
         width="15"

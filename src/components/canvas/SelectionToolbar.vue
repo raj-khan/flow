@@ -51,7 +51,7 @@ const DISTRIBUTIONS = [
     v-if="count >= 2"
     role="toolbar"
     aria-label="Arrange the selection"
-    class="nodrag nopan absolute top-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-0.5 rounded-xl border border-line bg-surface p-1 shadow-sm"
+    class="nodrag nopan absolute top-16 left-1/2 z-10 flex -translate-x-1/2 items-center gap-0.5 rounded-xl border border-line bg-surface p-1 shadow-sm"
   >
     <span class="px-2 text-xs text-muted">{{ count }} selected</span>
     <button

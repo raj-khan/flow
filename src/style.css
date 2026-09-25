@@ -363,3 +363,14 @@ optgroup {
   pointer-events: stroke;
   cursor: move;
 }
+
+/*
+ * The floating tool islands over a full-screen canvas, as in Excalidraw: one
+ * surface, border, radius and shadow, so every island reads as the same kind.
+ */
+.island {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-raised);
+}

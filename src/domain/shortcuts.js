@@ -1,3 +1,5 @@
+import { TOOLS } from './tools.js'
+
 /**
  * Every shortcut the app binds, as data, read by the help dialog so what is
  * documented cannot drift from what works.
@@ -25,8 +27,15 @@ export const SHORTCUT_GROUPS = Object.freeze([
         description: 'Rename a shape, or add or edit a connection label, in place',
       },
       { combos: [['Esc']], description: 'Clear the focused shape' },
-      { combos: [['P']], description: 'Pick up the pen to draw by hand; P or Esc puts it down' },
     ],
+  },
+  {
+    title: 'Tools',
+    note: 'The tool bar at the top. Esc goes back to Select and closes the library.',
+    shortcuts: TOOLS.map((tool) => ({
+      combos: tool.keys.map((key) => [key]),
+      description: `${tool.label}: ${tool.hint.charAt(0).toLowerCase()}${tool.hint.slice(1)}`,
+    })),
   },
   {
     title: 'Selection',

@@ -1,7 +1,8 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 
 import { STORAGE_KEYS } from '@/api/storageKeys.js'
+import { TOOL } from '@/domain/tools.js'
 
 /** A viewer's own habit, so it is kept in this browser, not in the diagram. */
 function savedSnap() {
@@ -27,11 +28,33 @@ export const useCanvasStore = defineStore('canvas', () => {
     isTextOpen.value = !isTextOpen.value
   }
 
+  /** @type {import('vue').Ref<import('@/domain/tools.js').ToolId>} */
+  const tool = ref(TOOL.SELECT)
+
+  /** Whether the shape library is open over the canvas. */
+  const isLibraryOpen = ref(false)
+
+  /**
+   * Shapes is not a mode: it opens or closes the library and leaves the tool.
+   * @param {import('@/domain/tools.js').ToolId} next
+   */
+  function setTool(next) {
+    if (next === TOOL.SHAPES) {
+      isLibraryOpen.value = !isLibraryOpen.value
+      return
+    }
+    tool.value = next
+  }
+
+  function closeLibrary() {
+    isLibraryOpen.value = false
+  }
+
   /** Whether the pen is down: dragging on the canvas draws instead of panning. */
-  const pen = ref(false)
+  const pen = computed(() => tool.value === TOOL.PEN)
 
   function togglePen() {
-    pen.value = !pen.value
+    tool.value = pen.value ? TOOL.SELECT : TOOL.PEN
   }
 
   /** Whether dragged shapes snap to the grid of dots. On unless turned off. */
@@ -88,6 +111,10 @@ export const useCanvasStore = defineStore('canvas', () => {
     toggleText,
     snap,
     toggleSnap,
+    tool,
+    setTool,
+    isLibraryOpen,
+    closeLibrary,
     pen,
     togglePen,
     setViewport,
