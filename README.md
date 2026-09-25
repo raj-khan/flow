@@ -42,6 +42,9 @@ isketch aims at that gap:
 - **Start from real files.** Your existing `.drawio` diagrams, `docker-compose.yml`, OpenAPI and
   SQL DDL, with re-import that keeps your layout. And a `.drawio` back out whenever you want one.
 - **Local first.** No account, no server, works offline, shareable as a link.
+- **Written for AI readers.** [/llms.txt](https://isketch.online/llms.txt) and
+  [/docs/format](https://isketch.online/docs/format) describe the format, the tools and the CLI
+  for agents and crawlers that fetch them.
 
 What is honestly not there yet: a private share link keeps the diagram after the `#`, which
 browsers never send to a server, so an AI that fetches it sees nothing. Public links an agent can

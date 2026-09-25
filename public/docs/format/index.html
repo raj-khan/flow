@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The .flow format — isketch</title>
+    <meta
+      name="description"
+      content="The .flow text format: how an isketch diagram is written as plain text a person reads and an agent edits exactly."
+    />
+    <link rel="canonical" href="https://isketch.online/docs/format" />
+    <meta name="theme-color" content="#f4f5f8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="isketch" />
+    <meta property="og:title" content="The .flow format — isketch" />
+    <meta
+      property="og:description"
+      content="The .flow text format: how an isketch diagram is written as plain text a person reads and an agent edits exactly."
+    />
+    <meta property="og:url" content="https://isketch.online/docs/format" />
+    <meta property="og:image" content="https://isketch.online/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://isketch.online/og.png" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
+    <style>
+      :root {
+        --canvas: #f4f5f8;
+        --surface: #ffffff;
+        --ink: #14181f;
+        --muted: #64748b;
+        --line: #e3e7ee;
+        --brand-ink: #4f46e5;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --canvas: #0d1117;
+          --surface: #161b22;
+          --ink: #e6edf3;
+          --muted: #94a3b8;
+          --line: #21262d;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--canvas);
+        color: var(--ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
+        line-height: 1.65;
+      }
+      .wrap {
+        max-width: 820px;
+        margin: 0 auto;
+        padding: 24px 24px 64px;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      header img {
+        width: 28px;
+        height: 27px;
+      }
+      header .wordmark {
+        font-weight: 700;
+      }
+      header .spacer {
+        flex: 1;
+      }
+      header a {
+        color: var(--brand-ink);
+      }
+      h1 {
+        font-size: 36px;
+        letter-spacing: -0.02em;
+        margin: 40px 0 8px;
+      }
+      .sub {
+        color: var(--muted);
+        font-size: 18px;
+        margin: 0 0 8px;
+      }
+      h2 {
+        font-size: 24px;
+        letter-spacing: -0.01em;
+        margin: 40px 0 8px;
+      }
+      pre {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 16px 20px;
+        overflow-x: auto;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 13.5px;
+        line-height: 1.6;
+      }
+      .pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 720px) {
+        .pair {
+          grid-template-columns: 1fr;
+        }
+      }
+      .pair img {
+        width: 100%;
+        height: auto;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.9em;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        padding: 1px 5px;
+      }
+      ul li {
+        margin: 6px 0;
+      }
+      .btn {
+        display: inline-block;
+        background: var(--brand-ink);
+        color: #fff;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-weight: 600;
+        text-decoration: none;
+      }
+      footer {
+        border-top: 1px solid var(--line);
+        margin-top: 56px;
+        padding-top: 20px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <img src="/favicon.svg" alt="" />
+        <span class="wordmark">isketch</span>
+        <span class="spacer"></span>
+        <a href="/">Home</a>
+        <a class="btn" href="/new">Open the editor</a>
+      </header>
+
+      <h1>The <code>.flow</code> format</h1>
+      <p class="sub">
+        Every isketch diagram can be written as plain text that reads well, diffs cleanly, and that
+        a coding agent reads exactly — and can edit back.
+      </p>
+
+      <div class="pair">
+        <div>
+          <h2>Text</h2>
+          <pre>title: Web app architecture
+
+browser = terminal &#34;Browser&#34; -- Single page app
+cdn = process &#34;CDN&#34; -- Static assets, cached at the edge
+lb = process &#34;Load balancer&#34; -- TLS termination
+api = process &#34;API&#34; -- REST, documented with OpenAPI
+queue = data &#34;Job queue&#34; -- Emails, exports, webhooks
+db = database &#34;PostgreSQL&#34; -- Primary data
+cache = database &#34;Redis&#34; -- Sessions and cache
+worker = process &#34;Worker&#34; -- Runs queued jobs
+files = document &#34;Object storage&#34; -- Uploads and exports
+
+browser -&#62; cdn : assets
+browser -&#62; lb : HTTPS
+lb -&#62; api
+api -&#62; db : SQL
+api -&#62; cache
+api -&#62; queue : enqueue
+queue -&#62; worker
+worker -&#62; files : write
+
+@layout
+browser 276,0
+cdn 0,176
+lb 276,176
+api 276,352
+queue 552,528
+db 0,528
+cache 276,528
+worker 552,704
+files 552,880
+</pre>
+        </div>
+        <div>
+          <h2>Drawn</h2>
+          <img src="/landing-diagram.svg" alt="The example above, drawn" />
+        </div>
+      </div>
+
+      <h2>Every rule</h2>
+      <ul>
+        <li>
+          <code>id = shape "Name" -- description</code> declares a node. The name and description
+          are optional. Shapes: <code>process</code>, <code>terminal</code>, <code>decision</code>,
+          <code>data</code>, <code>database</code>, <code>document</code>, <code>note</code>,
+          <code>table</code>, <code>text</code>; for wireframes <code>screen</code>,
+          <code>button</code>, <code>input</code>, <code>card</code>, <code>list</code>,
+          <code>image</code>.
+        </li>
+        <li>
+          <code>note: ...</code> under the title is a note for the whole diagram, and
+          <code>id note: ...</code> a note for one shape, one line each: instructions for whoever
+          builds from it, person or agent.
+        </li>
+        <li>
+          <code>a -&gt; b : label</code> connects two nodes. The label is optional, and a line may
+          refer to a node defined further down. <code>a --&gt; b</code> is dashed,
+          <code>a &lt;-&gt; b</code> has an arrow at each end, and <code>a &lt;--&gt; b</code> is
+          both.
+        </li>
+        <li>
+          <code>lines: curved</code> or <code>lines: straight</code> under the title changes how
+          every connection runs; the default is steps.
+        </li>
+        <li>
+          <code>@layout</code> starts the positions, one <code>id x,y</code> per line, with
+          <code>&nbsp;WxH</code> after it for a resized shape. A node with no position is laid out
+          automatically, so a hand-written diagram needs no layout block at all.
+        </li>
+        <li>
+          Pen strokes are <code>id = ink</code> shapes, with their points in an <code>@ink</code>
+          block after the layout, so they never clutter the lines that say what the system is.
+        </li>
+        <li>
+          <code>style: sketch</code> under the title draws the diagram by hand. Leave it out for
+          clean lines.
+        </li>
+        <li>
+          <code>#</code> starts a comment. A newline inside a description or label is written
+          <code>\n</code>.
+        </li>
+      </ul>
+
+      <h2>A wireframe, sketched</h2>
+      <div class="pair">
+        <pre>title: Sign up
+style: sketch
+
+page = screen &#34;Sign up page&#34; -- /signup
+email = input &#34;Email&#34;
+password = input &#34;Password&#34;
+submit = button &#34;Create account&#34;
+hero = image &#34;Product shot&#34;
+plans = list &#34;Plans&#34; -- Free, Team, Business
+summary = card &#34;Order summary&#34; -- Plan and price
+done = screen &#34;Welcome&#34; -- /welcome
+
+page -&#62; email
+page -&#62; password
+page -&#62; submit
+page -&#62; hero
+page -&#62; plans
+plans -&#62; summary : pick
+submit -&#62; done : on success
+</pre>
+        <img src="/signup-diagram.svg" alt="The sign-up wireframe, drawn by hand" />
+      </div>
+
+      <h2>Try it</h2>
+      <p>
+        Open the example in the editor, edit the text, and watch the drawing follow:
+        <a class="btn" href="/flow#flow=zVVJdb9swDHzXryD8bANeujRBgBjttgLrEKxunaHPlMTZah3Jk2R4_feDPtJmbyR9J94d7ZUfaQfPxAGnCdCKQXkSfrbEGLdmcWRhD57sSWkcofiSZgVUFXRK9yPBhD0FNhNSwx4mawQ5B8XXbz8TzKNXAtA58q4EgWIgCejBDwQke2Ijv-QdDErgOKIWedHx0J0leGU0w0ldEm7b-wh7uuuOJUgj5hNpTxIW5Qd4mEjftvfsz0wzwR4keoTih-EQJ5F5d0I1uhLo72RsELkQH4x5dUzyTOHoCIrWON9b6h4PkddadUL7FgEsGvsP_URSuZQBOaeMdoBapgTYYuxrDPfdx3OcJCuzdkmfhBfDHfutRnLh8ewOigf-QsKD88Zin2z8mkaDMi3JVj6uWDUQDrTLh7icjxx28P14bLtwiqoBnFQMuWpAhm_d4-HcJ_G5SZnugHSscsZVA8nc2WPVQNK_g8UqT4zdjPhmZv8uYrW5Luv4A9Xlp811kBFGoQyrQn21XuX31-tVuV5tw23qWKTkAyh0eWlAberPObnQbbc1-wc">Open this diagram</a>
+      </p>
+
+      <footer>
+        Machine-readable: <a href="/llms.txt">llms.txt</a> ·
+        <a href="/llms-full.txt">llms-full.txt</a> ·
+        <a href="https://github.com/raj-khan/flow#readme">README</a>
+      </footer>
+    </div>
+  </body>
+</html>

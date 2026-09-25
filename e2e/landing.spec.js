@@ -52,6 +52,25 @@ test('the editor lives at /new, and old /flow links still open it', async ({ pag
   await expect(page.getByRole('heading', { name: 'Greet' })).toBeVisible()
 })
 
+test('the AI readers: llms.txt and the format page', async ({ request }) => {
+  const llms = await request.get('/llms.txt')
+  expect(llms.status()).toBe(200)
+  const index = await llms.text()
+  expect(index).toContain('# isketch')
+  expect(index).toContain('/docs/format')
+
+  const full = await request.get('/llms-full.txt')
+  expect(full.status()).toBe(200)
+  expect(await full.text()).toContain('browser -> api : HTTPS')
+
+  const format = await request.get('/docs/format')
+  expect(format.status()).toBe(200)
+  const html = await format.text()
+  expect(html).toContain('The <code>.flow</code> format')
+  expect(html).toContain('browser = terminal')
+  expect(html).toContain('Open this diagram')
+})
+
 test('the landing and the app are both reachable on one server', async ({ page }) => {
   const landing = await page.request.get('/')
   expect(landing.status()).toBe(200)

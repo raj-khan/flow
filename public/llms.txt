@@ -1,0 +1,39 @@
+# isketch
+
+> isketch is a sketchpad for architecture and UI diagrams whose output is agent-ready: every sketch is also `.flow` text a coding agent reads exactly, and can edit back. Sketch the system, hand it to your agent, and the diagram stays true as the code changes.
+
+Links:
+
+- [The editor](https://isketch.online/new): start drawing, no account.
+- [The .flow format](https://isketch.online/docs/format): the whole text format, with examples. This is the page an agent should read before writing a diagram.
+- [The brief](https://isketch.online/#what-your-agent-receives): what "Copy for AI" puts on the clipboard.
+- [MCP over stdio](https://github.com/raj-khan/flow#connect-your-agent-mcp): `isketch mcp` — list, read, write, render and diff the `.flow` files in a folder.
+- [MCP over HTTP](https://github.com/raj-khan/flow#the-same-tools-over-http): the hosted server at `/mcp` — read a diagram by its link, publish, update with its edit token.
+- [The CLI](https://github.com/raj-khan/flow#command-line): render, check, import and export from a terminal or CI.
+- [Hosted links](https://github.com/raj-khan/flow#hosted-links-for-agents): every diagram behind one link, as a page, `.md`, `.flow`, `.svg`, `.json` or a PNG preview.
+
+## The format in ten lines
+
+```text
+title: Web app architecture
+
+browser = terminal "Browser" -- Single page app
+api = process "API" -- REST, documented with OpenAPI
+db = database "PostgreSQL"
+
+browser -> api : HTTPS
+api -> db : SQL
+```
+
+The full spec, including layouts, notes, wireframe shapes, ink and the sketch
+style, is at [/docs/format](https://isketch.online/docs/format) and in
+[llms-full.txt](https://isketch.online/llms-full.txt).
+
+## The MCP tools
+
+`list_diagrams`, `read_diagram` (brief or `.flow` text), `write_diagram`
+(refuses invalid text, with line numbers), `render_diagram` (SVG),
+`diff_diagrams` — the local server for the diagrams in a folder. The hosted
+endpoint at `/mcp` answers `read_diagram` by link, `publish_diagram` and
+`update_diagram` with the diagram's edit token. Setup lines for both are in
+llms-full.txt.

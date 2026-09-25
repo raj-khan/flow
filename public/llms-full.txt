@@ -1,0 +1,139 @@
+# isketch
+
+> isketch is a sketchpad for architecture and UI diagrams whose output is agent-ready: every sketch is also `.flow` text a coding agent reads exactly, and can edit back. Sketch the system, hand it to your agent, and the diagram stays true as the code changes.
+
+Site: https://isketch.online — Editor: https://isketch.online/new — Format: https://isketch.online/docs/format
+
+## What it is
+
+A whiteboard that thinks in text. Draw loosely (hand-drawn look included), and
+the same diagram exists as precise text: `.flow` source, a Markdown brief,
+Mermaid, SVG. A coding agent reads names, kinds, directions and notes exactly —
+no guessing from pixels — and writes the diagram back through the same text, so
+the design and the code stop drifting apart.
+
+The loop: **sketch the system → Copy for AI → the agent builds from the brief →
+the agent updates the `.flow` file as the code changes → pull requests show the
+diagram diff.**
+
+## The `.flow` format
+
+A diagram is plain text that reads well and diffs cleanly. One node or edge per
+line, in a stable order, with positions kept apart at the end.
+
+```text
+title: Web app architecture
+
+browser = terminal "Browser" -- Single page app
+api = process "API" -- REST, documented with OpenAPI
+db = database "PostgreSQL"
+
+browser -> api : HTTPS
+api -> db : SQL
+
+@layout
+browser 276,0
+api 276,176
+db 276,352
+```
+
+- `id = shape "Name" -- description` declares a node. The name and description
+  are optional. Shapes: `process`, `terminal`, `decision`, `data`, `database`,
+  `document`, `note`, `table`, `text`; for wireframes `screen`, `button`,
+  `input`, `card`, `list`, `image`.
+- `note: ...` under the title is a note for the whole diagram, and
+  `id note: ...` a note for one shape, one line each: instructions for whoever
+  builds from it, person or agent.
+- `a -> b : label` connects two nodes; the label is optional, and a line may
+  refer to a node defined further down. `a --> b` is dashed, `a <-> b` has an
+  arrow at each end, and `a <--> b` is both.
+- `lines: curved` or `lines: straight` under the title changes how every
+  connection runs; the default is steps.
+- `@layout` starts the positions, one `id x,y` per line, with ` WxH` after it
+  for a resized shape. A node with no position is laid out automatically, so a
+  hand-written diagram needs no layout block at all.
+- Pen strokes are `id = ink` shapes, with their points in an `@ink` block after
+  the layout, so they never clutter the lines that say what the system is.
+- `style: sketch` under the title draws the diagram by hand. Leave it out for
+  clean lines.
+- `#` starts a comment. A newline inside a description or label is written `\n`.
+
+`parseFlow` and `serialiseFlow` in `src/domain/flowText.js` read and write it,
+reporting every error with its line number.
+
+A wireframe example:
+
+```text
+title: Sign up
+style: sketch
+
+page = screen "Sign up page" -- /signup
+email = input "Email"
+password = input "Password"
+submit = button "Create account"
+hero = image "Product shot"
+plans = list "Plans" -- Free, Team, Business
+summary = card "Order summary" -- Plan and price
+done = screen "Welcome" -- /welcome
+
+page -> email
+page -> password
+page -> submit
+page -> hero
+page -> plans
+plans -> summary : pick
+submit -> done : on success
+```
+
+## The brief (Copy for AI)
+
+The same diagram as Markdown: every shape with its id, kind, name, description
+and intent ("a data store", "a branch the code must handle"), every connection
+in words ("**API** → **PostgreSQL**: SQL"), the notes, and the `.flow` source
+to edit and hand back. Ids are kept, so an agent can refer to a shape without
+guessing.
+
+## The MCP tools
+
+A local server for the `.flow` files in a folder (`isketch mcp .`):
+
+| Tool             | What it does                                                |
+| ---------------- | ----------------------------------------------------------- |
+| `list_diagrams`  | Every diagram in the folder, with its title and size        |
+| `read_diagram`   | One as a brief, or as `.flow` text                          |
+| `write_diagram`  | Create or replace; invalid text is refused with line numbers|
+| `render_diagram` | Draw one as SVG                                             |
+| `diff_diagrams`  | Compare a diagram with a proposed version                   |
+
+The hosted server speaks Streamable HTTP at `/mcp`: `read_diagram` by its
+public link, `publish_diagram` returning the link and an edit token, and
+`update_diagram` with that token, saying what changed. Anyone with a link can
+read a diagram; only its edit token can change it.
+
+Setup:
+
+```bash
+claude mcp add isketch -- node /path/to/isketch/bin/isketch.mjs mcp .
+claude mcp add --transport http isketch https://isketch.online/mcp
+```
+
+## The CLI
+
+```bash
+isketch render diagram.flow -o diagram.svg   # draw it, add --dark for the dark theme
+isketch check docs/*.flow                    # file:line errors, exit 1 if any
+isketch diff old.flow new.flow -o diff.svg   # what changed, listed and drawn
+isketch brief diagram.flow                   # a Markdown brief for a coding agent
+isketch mcp .                                # the MCP server above
+```
+
+It needs only Node; the renderer is the same pure code the app uses.
+
+## Hosted links
+
+`POST /api/diagrams` with `.flow` text publishes a diagram behind an
+unguessable link and returns an edit token. One link, several readings: the
+page (`/d/:id`), the brief (`.md`), the source (`.flow`), the drawing
+(`.svg`), the document (`.json`) and a 1200x630 PNG preview
+(`/d/:id/og.png`). `PUT`/`DELETE` with `Authorization: Bearer <token>` update
+or unpublish.

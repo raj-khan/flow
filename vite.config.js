@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
@@ -6,10 +8,25 @@ import tailwindcss from '@tailwindcss/vite'
 /** Where links point when the head is built; %SITE_URL% in index.html. */
 const SITE_URL = (process.env.VITE_SITE_URL ?? 'https://isketch.online').replace(/\/+$/, '')
 
-/** Rewrite / to the static landing page, as production servers do. */
+/** Serve the landing at / and content pages at their clean URL, as production does. */
 function serveLanding(server) {
-  server.middlewares.use((req, _res, next) => {
-    if (req.url === '/' || req.url.startsWith('/?')) req.url = '/landing.html'
+  server.middlewares.use((req, res, next) => {
+    const url = new URL(req.url ?? '/', 'http://localhost')
+    if (url.pathname === '/' || url.pathname.startsWith('/?')) {
+      req.url = '/landing.html' + url.search
+      return next()
+    }
+    // A directory with an index, such as /docs/format: its page, not the SPA.
+    const hasIndex =
+      !url.pathname.endsWith('/') &&
+      !url.pathname.split('/').pop()?.includes('.') &&
+      server.config.publicDir &&
+      existsSync(join(server.config.publicDir, `.${url.pathname}`, 'index.html'))
+    if (hasIndex) {
+      res.statusCode = 301
+      res.setHeader('location', `${url.pathname}/${url.search}`)
+      return res.end()
+    }
     next()
   })
 }
