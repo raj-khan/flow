@@ -2,9 +2,63 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>isketch</title>
+    <title>isketch — sketch it, hand it to your agent</title>
+    <meta
+      name="description"
+      content="A sketchpad for architecture and UI diagrams whose output is agent-ready: every sketch is also .flow text a coding agent reads exactly, and can edit back."
+    />
+    <link rel="canonical" href="%SITE_URL%/" />
+
+    <meta name="theme-color" content="#f4f5f8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="isketch" />
+    <meta property="og:title" content="isketch — sketch it, hand it to your agent" />
+    <meta
+      property="og:description"
+      content="Sketch loosely, structure it precisely: every isketch diagram is also text a coding agent reads exactly, and can edit back."
+    />
+    <meta property="og:url" content="%SITE_URL%/" />
+    <meta property="og:image" content="%SITE_URL%/og.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="isketch: a hand-drawn architecture diagram next to its .flow text"
+    />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="isketch — sketch it, hand it to your agent" />
+    <meta
+      name="twitter:description"
+      content="Sketch loosely, structure it precisely: every isketch diagram is also text a coding agent reads exactly, and can edit back."
+    />
+    <meta name="twitter:image" content="%SITE_URL%/og.png" />
+
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
+    <link rel="icon" href="/icon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "isketch",
+        "url": "%SITE_URL%/",
+        "description": "A sketchpad for architecture and UI diagrams whose output is agent-ready: every sketch is also .flow text a coding agent reads exactly, and can edit back.",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Web",
+        "browserRequirements": "Requires JavaScript",
+        "isAccessibleForFree": true,
+        "image": "%SITE_URL%/og.png",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
+    </script>
   </head>
   <body>
     <div id="app"></div>
