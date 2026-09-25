@@ -8,7 +8,10 @@ export const ROUTE = Object.freeze({
 const routes = [
   { path: '/', redirect: { name: ROUTE.FLOW } },
   {
-    path: '/flow',
+    // /new is where the editor lives; /flow stays as its alias, so every link
+    // and share hash made before the landing page still opens.
+    path: '/new',
+    alias: '/flow',
     name: ROUTE.FLOW,
     component: () => import('@/views/FlowView.vue'),
     children: [

@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="848" height="1048" viewBox="-32 -32 848 1048" font-family="ui-sans-serif, system-ui, -apple-system, &apos;Segoe UI&apos;, Roboto, sans-serif">
+<title>Web app architecture</title>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f97362"/></marker></defs>
+<rect x="-32" y="-32" width="848" height="1048" fill="#ffffff"/>
+<path d="M392,104 V140 H116 V176" fill="none" stroke="#f97362" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="225.8" y="130" width="56.3" height="20" rx="10" fill="#ffffff" stroke="#e3e7ee"/>
+<text x="254" y="140" font-size="11" fill="#64748b" text-anchor="middle" dominant-baseline="central">assets</text>
+<path d="M392,104 V140 H392 V176" fill="none" stroke="#f97362" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="367.2" y="130" width="49.6" height="20" rx="10" fill="#ffffff" stroke="#e3e7ee"/>
+<text x="392" y="140" font-size="11" fill="#64748b" text-anchor="middle" dominant-baseline="central">HTTPS</text>
+<path d="M392,280 V316 H392 V352" fill="none" stroke="#f97362" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M392,456 V492 H116 V528" fill="none" stroke="#f97362" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="235.9" y="482" width="36.2" height="20" rx="10" fill="#ffffff" stroke="#e3e7ee"/>
+<text x="254" y="492" font-size="11" fill="#64748b" text-anchor="middle" dominant-baseline="central">SQL</text>
+<path d="M392,456 V492 H392 V528" fill="none" stroke="#f97362" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M392,456 V492 H668 V528" fill="none" stroke="#f97362" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="498.5" y="482" width="63" height="20" rx="10" fill="#ffffff" stroke="#e3e7ee"/>
+<text x="530" y="492" font-size="11" fill="#64748b" text-anchor="middle" dominant-baseline="central">enqueue</text>
+<path d="M668,632 V668 H668 V704" fill="none" stroke="#f97362" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M668,808 V844 H668 V880" fill="none" stroke="#f97362" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="643.2" y="834" width="49.6" height="20" rx="10" fill="#ffffff" stroke="#e3e7ee"/>
+<text x="668" y="844" font-size="11" fill="#64748b" text-anchor="middle" dominant-baseline="central">write</text>
+<g transform="translate(276,0)">
+<path d="M52,1.5 H180 A50.5,50.5 0 0 1 180,102.5 H52 A50.5,50.5 0 0 1 52,1.5 Z" fill="#ffffff" stroke="#e11d48" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="116" y="47" font-size="14" font-weight="600" fill="#14181f" text-anchor="middle">Browser</text>
+<text x="116" y="67.6" font-size="12" fill="#64748b" text-anchor="middle">Single page app</text>
+</g>
+<g transform="translate(0,176)">
+<path d="M7.5,1.5 H224.5 Q230.5,1.5 230.5,7.5 V96.5 Q230.5,102.5 224.5,102.5 H7.5 Q1.5,102.5 1.5,96.5 V7.5 Q1.5,1.5 7.5,1.5 Z" fill="#ffffff" stroke="#059669" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="116" y="39.2" font-size="14" font-weight="600" fill="#14181f" text-anchor="middle">CDN</text>
+<text x="116" y="59.8" font-size="12" fill="#64748b" text-anchor="middle">Static assets, cached at the</text>
+<text x="116" y="75.4" font-size="12" fill="#64748b" text-anchor="middle">edge</text>
+</g>
+<g transform="translate(276,176)">
+<path d="M7.5,1.5 H224.5 Q230.5,1.5 230.5,7.5 V96.5 Q230.5,102.5 224.5,102.5 H7.5 Q1.5,102.5 1.5,96.5 V7.5 Q1.5,1.5 7.5,1.5 Z" fill="#ffffff" stroke="#059669" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="116" y="47" font-size="14" font-weight="600" fill="#14181f" text-anchor="middle">Load balancer</text>
+<text x="116" y="67.6" font-size="12" fill="#64748b" text-anchor="middle">TLS termination</text>
+</g>
+<g transform="translate(276,352)">
+<path d="M7.5,1.5 H224.5 Q230.5,1.5 230.5,7.5 V96.5 Q230.5,102.5 224.5,102.5 H7.5 Q1.5,102.5 1.5,96.5 V7.5 Q1.5,1.5 7.5,1.5 Z" fill="#ffffff" stroke="#059669" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="116" y="47" font-size="14" font-weight="600" fill="#14181f" text-anchor="middle">API</text>
+<text x="116" y="67.6" font-size="12" fill="#64748b" text-anchor="middle">REST, documented with OpenAPI</text>
+</g>
+<g transform="translate(552,528)">
+<path d="M28.98,1.5 H230.5 L203.02,102.5 H1.5 Z" fill="#ffffff" stroke="#4f46e5" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="116" y="47" font-size="14" font-weight="600" fill="#14181f" text-anchor="middle">Job queue</text>
+<text x="116" y="67.6" font-size="12" fill="#64748b" text-anchor="middle">Emails, exports, webhooks</text>
+</g>
+<g transform="translate(0,528)">
+<path d="M1.5,13.5 A114.5,12 0 0 1 230.5,13.5 V90.5 A114.5,12 0 0 1 1.5,90.5 Z M1.5,13.5 A114.5,12 0 0 0 230.5,13.5" fill="#ffffff" stroke="#4f46e5" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="116" y="47" font-size="14" font-weight="600" fill="#14181f" text-anchor="middle">PostgreSQL</text>
+<text x="116" y="67.6" font-size="12" fill="#64748b" text-anchor="middle">Primary data</text>
+</g>
+<g transform="translate(276,528)">
+<path d="M1.5,13.5 A114.5,12 0 0 1 230.5,13.5 V90.5 A114.5,12 0 0 1 1.5,90.5 Z M1.5,13.5 A114.5,12 0 0 0 230.5,13.5" fill="#ffffff" stroke="#4f46e5" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="116" y="47" font-size="14" font-weight="600" fill="#14181f" text-anchor="middle">Redis</text>
+<text x="116" y="67.6" font-size="12" fill="#64748b" text-anchor="middle">Sessions and cache</text>
+</g>
+<g transform="translate(552,704)">
+<path d="M7.5,1.5 H224.5 Q230.5,1.5 230.5,7.5 V96.5 Q230.5,102.5 224.5,102.5 H7.5 Q1.5,102.5 1.5,96.5 V7.5 Q1.5,1.5 7.5,1.5 Z" fill="#ffffff" stroke="#059669" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="116" y="47" font-size="14" font-weight="600" fill="#14181f" text-anchor="middle">Worker</text>
+<text x="116" y="67.6" font-size="12" fill="#64748b" text-anchor="middle">Runs queued jobs</text>
+</g>
+<g transform="translate(552,880)">
+<path d="M1.5,1.5 H230.5 V92.5 C173.25,72.5 58.75,112.5 1.5,92.5 Z" fill="#ffffff" stroke="#0284c7" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="116" y="47" font-size="14" font-weight="600" fill="#14181f" text-anchor="middle">Object storage</text>
+<text x="116" y="67.6" font-size="12" fill="#64748b" text-anchor="middle">Uploads and exports</text>
+</g>
+</svg>

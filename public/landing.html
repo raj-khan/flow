@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>isketch — sketch it, hand it to your agent</title>
+    <meta
+      name="description"
+      content="A sketchpad for architecture and UI diagrams whose output is agent-ready: every sketch is also .flow text a coding agent reads exactly, and can edit back."
+    />
+    <link rel="canonical" href="https://isketch.online/" />
+    <meta name="theme-color" content="#f4f5f8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="isketch" />
+    <meta property="og:title" content="isketch — sketch it, hand it to your agent" />
+    <meta
+      property="og:description"
+      content="Sketch loosely, structure it precisely: every isketch diagram is also text a coding agent reads exactly, and can edit back."
+    />
+    <meta property="og:url" content="https://isketch.online/" />
+    <meta property="og:image" content="https://isketch.online/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://isketch.online/og.png" />
+
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
+    <style>
+      :root {
+        --canvas: #f4f5f8;
+        --surface: #ffffff;
+        --ink: #14181f;
+        --muted: #64748b;
+        --line: #e3e7ee;
+        --brand-ink: #4f46e5;
+        --dark-canvas: #0d1117;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --canvas: #0d1117;
+          --surface: #161b22;
+          --ink: #e6edf3;
+          --muted: #94a3b8;
+          --line: #21262d;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--canvas);
+        color: var(--ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
+        line-height: 1.6;
+      }
+      a {
+        color: var(--brand-ink);
+      }
+      .wrap {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 18px 0;
+      }
+      header .mark {
+        width: 28px;
+        height: 27px;
+      }
+      header .wordmark {
+        font-weight: 700;
+        font-size: 20px;
+        letter-spacing: -0.02em;
+      }
+      header .spacer {
+        flex: 1;
+      }
+      .btn {
+        display: inline-block;
+        background: var(--brand-ink);
+        color: #fff;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-weight: 600;
+        font-size: 15px;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+      }
+      .btn:hover {
+        opacity: 0.9;
+      }
+      .btn.ghost {
+        background: transparent;
+        color: var(--ink);
+        border: 1px solid var(--line);
+      }
+      h1 {
+        font-size: clamp(34px, 6vw, 56px);
+        line-height: 1.08;
+        letter-spacing: -0.03em;
+        margin: 48px 0 12px;
+      }
+      .loop {
+        font-size: clamp(18px, 2.6vw, 24px);
+        color: var(--muted);
+        margin: 0 0 36px;
+        max-width: 46em;
+      }
+      .loop strong {
+        color: var(--brand-ink);
+      }
+      .cta {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 40px;
+        flex-wrap: wrap;
+      }
+      section {
+        margin: 56px 0;
+      }
+      h2 {
+        font-size: 26px;
+        letter-spacing: -0.02em;
+        margin: 0 0 6px;
+      }
+      .sub {
+        color: var(--muted);
+        margin: 0 0 20px;
+        max-width: 52em;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .try {
+        position: relative;
+        min-height: 480px;
+      }
+      .try .static {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background: var(--surface);
+      }
+      .try .static img {
+        width: 100%;
+        max-width: 720px;
+        height: auto;
+      }
+      .try iframe {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        background: var(--surface);
+      }
+      video {
+        width: 100%;
+        height: auto;
+        display: block;
+        background: var(--dark-canvas);
+      }
+      pre {
+        margin: 0;
+        padding: 20px;
+        overflow-x: auto;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 13.5px;
+        line-height: 1.55;
+      }
+      .code-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 16px;
+        border-bottom: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .code-head .grow {
+        flex: 1;
+      }
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin: 0 0 32px;
+      }
+      .step {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 16px;
+      }
+      .step b {
+        display: block;
+        margin-bottom: 4px;
+      }
+      .step p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14.5px;
+      }
+      footer {
+        border-top: 1px solid var(--line);
+        margin-top: 72px;
+        padding: 24px 0 48px;
+        color: var(--muted);
+        font-size: 14px;
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <img class="mark" src="/favicon.svg" alt="" />
+        <span class="wordmark">isketch</span>
+        <span class="spacer"></span>
+        <a class="btn ghost" href="https://github.com/raj-khan/flow">GitHub</a>
+        <a class="btn" href="/new">Open the editor</a>
+      </header>
+
+      <h1>Sketch it. Hand it to your agent.</h1>
+      <p class="loop">
+        <strong
+          >Sketch the system → Copy for AI → your agent builds it → the diagram stays true.</strong
+        >
+        A whiteboard that thinks in text: every diagram is also <code>.flow</code> source a coding
+        agent reads exactly, and can write back.
+      </p>
+      <div class="cta">
+        <a class="btn" href="/new">Start drawing — no account</a>
+        <a class="btn ghost" href="#try">Try it on this page</a>
+      </div>
+
+      <section id="try">
+        <h2>Try it right here</h2>
+        <p class="sub">
+          The real editor, one click away. Drag a shape, rename it, connect two — nothing to
+          install, nothing to sign.
+        </p>
+        <div class="card try">
+          <noscript>
+            <div class="static">
+              <img src="/landing-diagram.svg" alt="A web app architecture sketched in isketch" />
+            </div>
+          </noscript>
+          <iframe title="The isketch editor, live" src="/flow#flow=zVVJdb9swDHzXryD8bANeujRBgBjttgLrEKxunaHPlMTZah3Jk2R4_feDPtJmbyR9J94d7ZUfaQfPxAGnCdCKQXkSfrbEGLdmcWRhD57sSWkcofiSZgVUFXRK9yPBhD0FNhNSwx4mawQ5B8XXbz8TzKNXAtA58q4EgWIgCejBDwQke2Ijv-QdDErgOKIWedHx0J0leGU0w0ldEm7b-wh7uuuOJUgj5hNpTxIW5Qd4mEjftvfsz0wzwR4keoTih-EQJ5F5d0I1uhLo72RsELkQH4x5dUzyTOHoCIrWON9b6h4PkddadUL7FgEsGvsP_URSuZQBOaeMdoBapgTYYuxrDPfdx3OcJCuzdkmfhBfDHfutRnLh8ewOigf-QsKD88Zin2z8mkaDMi3JVj6uWDUQDrTLh7icjxx28P14bLtwiqoBnFQMuWpAhm_d4-HcJ_G5SZnugHSscsZVA8nc2WPVQNK_g8UqT4zdjPhmZv8uYrW5Luv4A9Xlp811kBFGoQyrQn21XuX31-tVuV5tw23qWKTkAyh0eWlAberPObnQbbc1-wc" loading="lazy"></iframe>
+        </div>
+      </section>
+
+      <section>
+        <h2>From sketch to built</h2>
+        <p class="sub">
+          A sketch becomes a brief, the brief becomes code, the code updates the sketch. That is the
+          whole loop, in one short clip.
+        </p>
+        <div class="card">
+          <video
+            controls
+            muted
+            loop
+            playsinline
+            poster="/og.png"
+            aria-label="A short clip: sketching in isketch, copying for AI, and an agent building from it"
+          >
+            <source src="/demo.webm" type="video/webm" />
+          </video>
+        </div>
+      </section>
+
+      <section>
+        <h2>The loop, in four steps</h2>
+        <div class="steps">
+          <div class="step">
+            <b>1 · Sketch</b>
+            <p>Architecture, database, UI screens or flows, hand-drawn look and all.</p>
+          </div>
+          <div class="step">
+            <b>2 · Hand it over</b>
+            <p>
+              Copy for AI puts a structured brief on your clipboard. Or share a link the agent can
+              read.
+            </p>
+          </div>
+          <div class="step">
+            <b>3 · The agent builds</b>
+            <p>
+              Services, tables, components — names and relationships read exactly, not guessed from
+              pixels.
+            </p>
+          </div>
+          <div class="step">
+            <b>4 · Stay true</b>
+            <p>
+              The agent edits the diagram back as the code changes, and pull requests show the diff.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>What your agent receives</h2>
+        <p class="sub">
+          The same diagram above, as the brief an agent reads. Copy it, paste it into Claude,
+          Copilot or Cursor, and ask for the services it names.
+        </p>
+        <div class="card">
+          <div class="code-head">
+            Copy for AI — the architecture example above
+            <span class="grow"></span>
+            <button class="btn" type="button" data-copy-from="the-brief">Copy</button>
+          </div>
+          <pre id="the-brief"># Web app architecture
+
+A design sketched in isketch: 9 shapes and 8 connections. Build from it, and refer to shapes by their ids. To change the diagram, edit the source at the end and hand it back.
+
+## Shapes
+
+- **Browser** `browser`: where a flow starts or ends, or something outside the system. Single page app
+- **CDN** `cdn`: a component or step. Static assets, cached at the edge
+- **Load balancer** `lb`: a component or step. TLS termination
+- **API** `api`: a component or step. REST, documented with OpenAPI
+- **Job queue** `queue`: data going in or out. Emails, exports, webhooks
+- **PostgreSQL** `db`: a data store. Primary data
+- **Redis** `cache`: a data store. Sessions and cache
+- **Worker** `worker`: a component or step. Runs queued jobs
+- **Object storage** `files`: a file or document. Uploads and exports
+
+## Connections
+
+- **Browser** → **CDN**: assets
+- **Browser** → **Load balancer**: HTTPS
+- **Load balancer** → **API**
+- **API** → **PostgreSQL**: SQL
+- **API** → **Redis**
+- **API** → **Job queue**: enqueue
+- **Job queue** → **Worker**
+- **Worker** → **Object storage**: write
+
+## Source
+
+The same diagram in the `.flow` format: `id = shape &#34;Name&#34; -- description`, `id note: ...`, `a -&#62; b : label` (`--&#62;` dashed, `&#60;-&#62;` both ways), and positions under `@layout`.
+
+```text
+title: Web app architecture
+
+browser = terminal &#34;Browser&#34; -- Single page app
+cdn = process &#34;CDN&#34; -- Static assets, cached at the edge
+lb = process &#34;Load balancer&#34; -- TLS termination
+api = process &#34;API&#34; -- REST, documented with OpenAPI
+queue = data &#34;Job queue&#34; -- Emails, exports, webhooks
+db = database &#34;PostgreSQL&#34; -- Primary data
+cache = database &#34;Redis&#34; -- Sessions and cache
+worker = process &#34;Worker&#34; -- Runs queued jobs
+files = document &#34;Object storage&#34; -- Uploads and exports
+
+browser -&#62; cdn : assets
+browser -&#62; lb : HTTPS
+lb -&#62; api
+api -&#62; db : SQL
+api -&#62; cache
+api -&#62; queue : enqueue
+queue -&#62; worker
+worker -&#62; files : write
+
+@layout
+browser 276,0
+cdn 0,176
+lb 276,176
+api 276,352
+queue 552,528
+db 0,528
+cache 276,528
+worker 552,704
+files 552,880
+```
+</pre>
+        </div>
+      </section>
+
+      <section>
+        <h2>Or meet your agent where it works</h2>
+        <p class="sub">
+          An MCP server gives the agent the diagrams itself: list, read, update, redraw. Locally
+          over stdio, or over HTTP for the hosted links.
+        </p>
+        <div class="card">
+          <div class="code-head">
+            Claude Code — local diagrams in this folder
+            <span class="grow"></span>
+            <button class="btn" type="button" data-copy-from="mcp-stdio">Copy</button>
+          </div>
+          <pre id="mcp-stdio">
+claude mcp add isketch -- node /path/to/isketch/bin/isketch.mjs mcp .</pre>
+          <div class="code-head">
+            Any MCP client — the hosted server
+            <span class="grow"></span>
+            <button class="btn" type="button" data-copy-from="mcp-http">Copy</button>
+          </div>
+          <pre id="mcp-http">claude mcp add --transport http isketch https://isketch.online/mcp</pre>
+        </div>
+      </section>
+
+      <footer>
+        <span>isketch — sketch it, hand it to your agent.</span>
+        <a href="/new">Editor</a>
+        <a href="https://github.com/raj-khan/flow">GitHub</a>
+        <a href="https://github.com/raj-khan/flow#readme">Docs</a>
+        <span>MIT licence. No account, no tracking.</span>
+      </footer>
+    </div>
+
+    <script>
+      for (const button of document.querySelectorAll('[data-copy-from]')) {
+        button.addEventListener('click', async () => {
+          const source = document.getElementById(button.dataset.copyFrom)
+          await navigator.clipboard.writeText(source.textContent)
+          const was = button.textContent
+          button.textContent = 'Copied'
+          setTimeout(() => (button.textContent = was), 1500)
+        })
+      }
+    </script>
+  </body>
+</html>

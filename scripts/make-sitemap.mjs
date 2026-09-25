@@ -11,7 +11,7 @@ const siteUrl = (process.env.VITE_SITE_URL ?? 'https://isketch.online').replace(
 /** Every page a person or a crawler can open without knowing a diagram. */
 const PAGES = [
   { path: '/', changefreq: 'weekly', priority: '1.0' },
-  { path: '/flow', changefreq: 'weekly', priority: '0.8' },
+  { path: '/new', changefreq: 'weekly', priority: '0.8' },
 ]
 
 const publicDir = new URL('../public/', import.meta.url)
