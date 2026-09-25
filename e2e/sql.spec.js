@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { fromMenu } from './helpers.js'
+
 const DDL = `CREATE TABLE customers (
   id uuid PRIMARY KEY,
   email text NOT NULL
@@ -14,14 +16,14 @@ test('draws SQL tables with their columns, and foreign keys as labelled edges', 
   page,
 }) => {
   await page.goto('/new')
-  await page.getByRole('banner').getByRole('button', { name: 'Import' }).click()
+  await fromMenu(page, 'Import')
 
   const dialog = page.getByRole('dialog', { name: 'Import' })
   await dialog.getByRole('radio', { name: 'SQL' }).click()
   await dialog.getByLabel('SQL to import').fill(DDL)
   await dialog.getByRole('radio', { name: /A new diagram/ }).check()
   await expect(dialog.getByRole('status')).toContainText('2 shapes and 1 connection')
-  await dialog.getByRole('button', { name: 'Import', exact: true }).click()
+  await dialog.getByRole('button', { name: 'Import' }).click()
 
   const orders = page.locator('.vue-flow__node[data-id="table-orders"]')
   await expect(orders.locator('[data-shape]')).toHaveAttribute('data-shape', 'table')

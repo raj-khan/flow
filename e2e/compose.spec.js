@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { fromMenu } from './helpers.js'
+
 const shapes = (page) => page.locator('.vue-flow__node')
 const shapeOf = (page, id) => page.locator(`.vue-flow__node[data-id="${id}"] [data-shape]`)
 
@@ -18,7 +20,7 @@ services:
 
 /** @param {import('@playwright/test').Page} page @param {string} text */
 async function importCompose(page, text) {
-  await page.getByRole('banner').getByRole('button', { name: 'Import' }).click()
+  await fromMenu(page, 'Import')
   const dialog = page.getByRole('dialog', { name: 'Import' })
   await dialog.getByRole('radio', { name: 'docker-compose' }).click()
   await dialog.getByLabel('docker-compose to import').fill(text)
@@ -34,7 +36,7 @@ test('draws a compose file: services as shapes, dependencies as connections', as
   const dialog = await importCompose(page, COMPOSE)
   await dialog.getByRole('radio', { name: /A new diagram/ }).check()
   await expect(dialog.getByRole('status')).toContainText('3 shapes and 2 connections')
-  await dialog.getByRole('button', { name: 'Import', exact: true }).click()
+  await dialog.getByRole('button', { name: 'Import' }).click()
 
   await expect(shapes(page)).toHaveCount(3)
   await expect(shapeOf(page, 'db')).toHaveAttribute('data-shape', 'database')
@@ -44,7 +46,7 @@ test('draws a compose file: services as shapes, dependencies as connections', as
 test('re-importing updates the diagram and keeps where things were put', async ({ page }) => {
   let dialog = await importCompose(page, COMPOSE)
   await dialog.getByRole('radio', { name: /A new diagram/ }).check()
-  await dialog.getByRole('button', { name: 'Import', exact: true }).click()
+  await dialog.getByRole('button', { name: 'Import' }).click()
   await expect(shapes(page)).toHaveCount(3)
 
   // Move the database somewhere deliberate.
@@ -70,7 +72,7 @@ test('re-importing updates the diagram and keeps where things were put', async (
   )
   // Offered by default, since this format made the diagram on screen.
   await expect(dialog.getByRole('radio', { name: /The current diagram/ })).toBeChecked()
-  await dialog.getByRole('button', { name: 'Import', exact: true }).click()
+  await dialog.getByRole('button', { name: 'Import' }).click()
 
   await expect(shapes(page)).toHaveCount(4)
   expect(await saved()).toEqual(moved)

@@ -1,18 +1,20 @@
 import { expect, test } from '@playwright/test'
 
+import { fromMenu, history } from './helpers.js'
+
 const shapes = (page) => page.locator('.vue-flow__node')
 const textPane = (page) => page.getByRole('complementary', { name: 'Diagram as text' })
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/new')
   await expect(shapes(page)).toHaveCount(5)
-  await page.getByRole('button', { name: 'Edit as text' }).click()
+  await fromMenu(page, 'Edit as text')
 })
 
 test('imports a pasted flowchart, says what it skipped, and undo brings the old one back', async ({
   page,
 }) => {
-  await page.getByRole('banner').getByRole('button', { name: 'Import' }).click()
+  await fromMenu(page, 'Import')
   const dialog = page.getByRole('dialog', { name: 'Import' })
 
   await dialog
@@ -31,7 +33,7 @@ test('imports a pasted flowchart, says what it skipped, and undo brings the old 
     'Line 5',
   )
 
-  await dialog.getByRole('button', { name: 'Import', exact: true }).click()
+  await dialog.getByRole('button', { name: 'Import' }).click()
 
   await expect(shapes(page)).toHaveCount(4)
   await expect(page.locator('.vue-flow__node[data-id="B"] [data-shape]')).toHaveAttribute(
@@ -40,7 +42,7 @@ test('imports a pasted flowchart, says what it skipped, and undo brings the old 
   )
   await expect(page.getByTestId('edge-label').filter({ hasText: 'yes' })).toBeVisible()
 
-  await page.getByRole('banner').getByRole('button', { name: 'Undo' }).click()
+  await history(page).getByRole('button', { name: 'Undo' }).click()
   await expect(shapes(page)).toHaveCount(5)
 })
 

@@ -1,19 +1,18 @@
 import { expect, test } from '@playwright/test'
 
+import { fromMenu, history, menuChecked } from './helpers.js'
+
 const shapes = (page) => page.locator('.vue-flow__node')
 const editor = (page) => page.getByLabel('Diagram as .flow text')
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/new')
   await expect(shapes(page)).toHaveCount(5)
-  await page.getByRole('button', { name: 'Edit as text' }).click()
+  await fromMenu(page, 'Edit as text')
 })
 
 test('shows the diagram as text beside the canvas', async ({ page }) => {
-  await expect(page.getByRole('button', { name: 'Edit as text' })).toHaveAttribute(
-    'aria-pressed',
-    'true',
-  )
+  expect(await menuChecked(page, 'Edit as text')).toBe('true')
   await expect(editor(page)).toHaveValue(/^title: Support flow\n/)
   await expect(editor(page)).toHaveValue(/d09c08 -> b0653a : Success/)
 })
@@ -25,7 +24,7 @@ test('draws what is typed, and undo takes it back', async ({ page }) => {
   await expect(shapes(page)).toHaveCount(6)
   await expect(page.locator('.vue-flow__node[data-id="cache"]')).toContainText('Redis')
 
-  await page.getByRole('banner').getByRole('button', { name: 'Undo' }).click()
+  await history(page).getByRole('button', { name: 'Undo' }).click()
   await expect(shapes(page)).toHaveCount(5)
   await expect(editor(page)).not.toHaveValue(/Redis/)
 })

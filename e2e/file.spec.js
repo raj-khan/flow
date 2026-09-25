@@ -1,6 +1,8 @@
 import { readFile } from 'node:fs/promises'
 import { expect, test } from '@playwright/test'
 
+import { fromMenu, history } from './helpers.js'
+
 const shapes = (page) => page.locator('.vue-flow__node')
 
 const HAND_WRITTEN = `title: Checkout
@@ -22,7 +24,7 @@ test.describe('without the File System Access API', () => {
 
   test('saves by downloading a .flow file named after the diagram', async ({ page }) => {
     const download = page.waitForEvent('download')
-    await page.getByRole('button', { name: 'Save' }).click()
+    await fromMenu(page, 'Save')
 
     const file = await download
     expect(file.suggestedFilename()).toBe('support-flow.flow')
@@ -30,7 +32,7 @@ test.describe('without the File System Access API', () => {
   })
 
   test('Ctrl+S saves too, even from a text field', async ({ page }) => {
-    await page.getByRole('button', { name: 'Edit as text' }).click()
+    await fromMenu(page, 'Edit as text')
     await page.getByLabel('Diagram as .flow text').focus()
 
     const download = page.waitForEvent('download')
@@ -40,7 +42,7 @@ test.describe('without the File System Access API', () => {
 
   test('opens a .flow file as an undoable change, and names it in the header', async ({ page }) => {
     const chooser = page.waitForEvent('filechooser')
-    await page.getByRole('button', { name: 'Open file' }).click()
+    await fromMenu(page, 'Open file')
     await (
       await chooser
     ).setFiles({
@@ -52,13 +54,13 @@ test.describe('without the File System Access API', () => {
     await expect(shapes(page)).toHaveCount(2)
     await expect(page.getByRole('heading', { level: 1 })).toContainText('checkout.flow')
 
-    await page.getByRole('banner').getByRole('button', { name: 'Undo' }).click()
+    await history(page).getByRole('button', { name: 'Undo' }).click()
     await expect(shapes(page)).toHaveCount(5)
   })
 
   test('refuses a file with errors, and says where', async ({ page }) => {
     const chooser = page.waitForEvent('filechooser')
-    await page.getByRole('button', { name: 'Open file' }).click()
+    await fromMenu(page, 'Open file')
     await (
       await chooser
     ).setFiles({
@@ -96,7 +98,7 @@ test('with the File System Access API, Save writes back to the file that was ope
   }, HAND_WRITTEN)
 
   await page.goto('/new')
-  await page.getByRole('button', { name: 'Open file' }).click()
+  await fromMenu(page, 'Open file')
   await expect(shapes(page)).toHaveCount(2)
 
   await page.locator('.vue-flow__node[data-id="pay"]').click()
@@ -111,6 +113,6 @@ test('with the File System Access API, Save writes back to the file that was ope
   expect(writes[0]).toContain('pay = decision "Paid in full?"')
 
   // A new diagram is not that file any more.
-  await page.getByRole('button', { name: 'New diagram' }).click()
+  await fromMenu(page, 'New diagram')
   await expect(page.getByRole('heading', { level: 1 })).not.toContainText('checkout.flow')
 })

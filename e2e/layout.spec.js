@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { history } from './helpers.js'
+
 const nodeAt = (page, id) => page.locator(`.vue-flow__node[data-id="${id}"]`)
 const transform = (page, id) => nodeAt(page, id).evaluate((node) => node.style.transform)
 
@@ -20,6 +22,6 @@ test('tidies up a hand-placed diagram, and undo puts it back', async ({ page }) 
   await expect(page.getByText('Laid out the whole diagram')).toBeVisible()
   await expect.poll(() => transform(page, 'b6a0c1')).toBe(laidOut)
 
-  await page.getByRole('banner').getByRole('button', { name: 'Undo' }).click()
+  await history(page).getByRole('button', { name: 'Undo' }).click()
   await expect.poll(() => transform(page, 'b6a0c1')).toBe(dragged)
 })

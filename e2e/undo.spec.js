@@ -1,8 +1,10 @@
 import { expect, test } from '@playwright/test'
 
+import { history } from './helpers.js'
+
 const nodeAt = (page, id) => page.locator(`.vue-flow__node[data-id="${id}"]`)
 // Scoped to the header: the toast carries an Undo of its own.
-const undoButton = (page) => page.getByRole('banner').getByRole('button', { name: 'Undo' })
+const undoButton = (page) => history(page).getByRole('button', { name: 'Undo' })
 
 test('undoes a delete, and the button names the change', async ({ page }) => {
   await page.goto('/new/node/b6a0c1')

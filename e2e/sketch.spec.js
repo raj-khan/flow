@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { fromMenu, history, menuChecked } from './helpers.js'
+
 const outlines = (page) => page.getByTestId('sketch-outline')
 
 test('switches the diagram to a hand-drawn sketch, and back with undo', async ({ page }) => {
@@ -7,16 +9,15 @@ test('switches the diagram to a hand-drawn sketch, and back with undo', async ({
   await expect(page.locator('.vue-flow__node').first()).toBeVisible()
   await expect(outlines(page)).toHaveCount(0)
 
-  const toggle = page.getByRole('button', { name: 'Sketch style' })
-  await toggle.click()
-  await expect(toggle).toHaveAttribute('aria-pressed', 'true')
+  await fromMenu(page, 'Sketch style')
+  await expect.poll(() => menuChecked(page, 'Sketch style')).toBe('true')
   await expect(outlines(page).first()).toBeVisible()
   await expect(page.locator('.vue-flow__node .font-sketch').first()).toBeVisible()
 
-  await page.getByRole('button', { name: 'Edit as text' }).click()
+  await fromMenu(page, 'Edit as text')
   await expect(page.getByLabel('Diagram as .flow text')).toHaveValue(/^title: .*\nstyle: sketch\n/)
 
-  await page.getByRole('banner').getByRole('button', { name: 'Undo' }).click()
+  await history(page).getByRole('button', { name: 'Undo' }).click()
   await expect(outlines(page)).toHaveCount(0)
-  await expect(toggle).toHaveAttribute('aria-pressed', 'false')
+  await expect.poll(() => menuChecked(page, 'Sketch style')).toBe('false')
 })

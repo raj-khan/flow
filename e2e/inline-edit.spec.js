@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { history } from './helpers.js'
+
 const shape = (page, id) => page.locator(`.vue-flow__node[data-id="${id}"]`)
 const labels = (page) => page.getByTestId('edge-label')
 
@@ -17,7 +19,7 @@ test('double-click renames a shape in place, and undo takes it back', async ({ p
   await field.press('Enter')
   await expect(shape(page, 'e879e4').getByRole('heading')).toHaveText('Log it')
 
-  await page.getByRole('banner').getByRole('button', { name: 'Undo' }).click()
+  await history(page).getByRole('button', { name: 'Undo' }).click()
   await expect(shape(page, 'e879e4').getByRole('heading')).toHaveText('Add Comment #1')
 })
 
@@ -34,7 +36,7 @@ test('Escape leaves the title as it was, and an empty title is not saved', async
 })
 
 test('F2 renames the shape the keyboard is on', async ({ page }) => {
-  await page.locator('.vue-flow__pane').click({ position: { x: 20, y: 20 } })
+  await page.locator('.vue-flow__pane').click({ position: { x: 20, y: 300 } })
   await page.keyboard.press('ArrowDown')
   await page.keyboard.press('F2')
 

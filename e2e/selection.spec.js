@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { history } from './helpers.js'
+
 const shapes = (page) => page.locator('.vue-flow__node')
 const shape = (page, id) => page.locator(`.vue-flow__node[data-id="${id}"]`)
 const saved = (page) =>
@@ -35,7 +37,7 @@ test('Shift+click builds a selection that moves as one, and undoes as one', asyn
   const after = await saved(page)
   expect(after.b6a0c1).toBeTruthy()
 
-  await page.getByRole('banner').getByRole('button', { name: 'Undo' }).click()
+  await history(page).getByRole('button', { name: 'Undo' }).click()
   await expect.poll(async () => (await saved(page)).e879e4 ?? null).toBeNull()
   expect((await saved(page)).b6a0c1 ?? null).toBeNull()
 })
@@ -43,7 +45,7 @@ test('Shift+click builds a selection that moves as one, and undoes as one', asyn
 test('Ctrl+A then Delete removes everything in one step, and Undo brings it back', async ({
   page,
 }) => {
-  await page.locator('.vue-flow__pane').click({ position: { x: 20, y: 20 } })
+  await page.locator('.vue-flow__pane').click({ position: { x: 20, y: 300 } })
   await page.keyboard.press('Control+a')
   await expect(page.locator('.vue-flow__node.selected')).toHaveCount(5)
 

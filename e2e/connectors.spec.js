@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { fromMenu, history } from './helpers.js'
+
 const firstEdge = (page) => page.locator('.vue-flow__edge').first()
 const textPane = (page) => page.getByLabel('Diagram as .flow text')
 
@@ -25,10 +27,10 @@ test('dashes a connection and gives it an arrow at each end, from its own contro
     /isketch-arrow/,
   )
 
-  await page.getByRole('button', { name: 'Edit as text' }).click()
+  await fromMenu(page, 'Edit as text')
   await expect(textPane(page)).toHaveValue(/ <--> /)
 
-  await page.getByRole('banner').getByRole('button', { name: 'Undo' }).click()
+  await history(page).getByRole('button', { name: 'Undo' }).click()
   await expect(textPane(page)).toHaveValue(/ --> /)
 })
 
@@ -41,7 +43,7 @@ test('switches every connection between steps, curves and straight lines', async
   await page.getByRole('button', { name: 'Lines: curved' }).click()
   await expect(path).toHaveAttribute('d', /^M[\d.]+,[\d.]+ L[\d.]+,[\d.]+$/)
 
-  await page.getByRole('button', { name: 'Edit as text' }).click()
+  await fromMenu(page, 'Edit as text')
   await expect(textPane(page)).toHaveValue(/\nlines: straight\n/)
   await page.getByRole('button', { name: 'Lines: straight' }).click()
   await expect(textPane(page)).not.toHaveValue(/lines:/)

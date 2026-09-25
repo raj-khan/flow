@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { history } from './helpers.js'
+
 const nodeAt = (page, id) => page.locator(`.vue-flow__node[data-id="${id}"]`)
 const NODE = { start: '1', away: 'b6a0c1', welcome: 'b0653a', comment: 'e879e4' }
 const toolbar = (page) => page.getByRole('toolbar', { name: 'Arrange the selection' })
@@ -22,7 +24,7 @@ test('aligns a selection, as one undoable change', async ({ page }) => {
     .poll(async () => (await nodeAt(page, NODE.welcome).boundingBox()).x)
     .toBeCloseTo((await nodeAt(page, NODE.away).boundingBox()).x, 0)
 
-  await page.getByRole('banner').getByRole('button', { name: 'Undo' }).click()
+  await history(page).getByRole('button', { name: 'Undo' }).click()
   await expect
     .poll(async () => Math.round((await nodeAt(page, NODE.welcome).boundingBox()).x))
     .toBe(Math.round(before.x))

@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { fromMenu, history } from './helpers.js'
+
 const shapes = (page) => page.locator('.vue-flow__node')
 const strokes = (page) => page.getByTestId('ink-stroke')
 
@@ -29,10 +31,10 @@ test('draws a stroke with the pen, as a shape that undo takes back', async ({ pa
   await page.keyboard.press('Escape')
   await expect(page.getByTestId('pen-layer')).toHaveCount(0)
 
-  await page.getByRole('button', { name: 'Edit as text' }).click()
+  await fromMenu(page, 'Edit as text')
   await expect(page.getByLabel('Diagram as .flow text')).toHaveValue(/\n@ink\nink-1 [\d., ]+\n$/)
 
-  await page.getByRole('banner').getByRole('button', { name: 'Undo' }).click()
+  await history(page).getByRole('button', { name: 'Undo' }).click()
   await expect(strokes(page)).toHaveCount(0)
 })
 

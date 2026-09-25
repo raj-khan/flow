@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { history, openLibrary } from './helpers.js'
+
 const node = (page, id) => page.locator(`.vue-flow__node[data-id="${id}"]`)
 
 /** Edges are hidden rather than removed, so count the drawn ones. */
@@ -82,7 +84,7 @@ test('removes a connection from the edge, and undo puts it back', async ({ page 
   await expect.poll(() => sourcesInto(page, 'b6a0c1')).toEqual([])
   expect(await drawnEdges(page)).toBe(3)
 
-  await page.getByRole('banner').getByRole('button', { name: 'Undo' }).click()
+  await history(page).getByRole('button', { name: 'Undo' }).click()
   await expect.poll(() => sourcesInto(page, 'b6a0c1')).toEqual(['d09c08'])
   await expect.poll(() => drawnEdges(page)).toBe(4)
 })
@@ -99,10 +101,7 @@ test('leaves the node where it was when its connection goes', async ({ page }) =
 })
 
 test('draws the edge at once when a created node is connected', async ({ page }) => {
-  await page
-    .getByRole('complementary', { name: 'Shapes' })
-    .getByRole('button', { name: 'Process', exact: true })
-    .click()
+  await (await openLibrary(page)).getByRole('button', { name: 'Process', exact: true }).click()
   const created = await page.locator('.vue-flow__node.selected').getAttribute('data-id')
   await page.getByRole('textbox', { name: 'Shape title' }).press('Enter')
   expect(await drawnEdges(page)).toBe(4)

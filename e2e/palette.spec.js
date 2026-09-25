@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { openLibrary } from './helpers.js'
+
 const palette = (page) => page.getByRole('complementary', { name: 'Shapes' })
 const shapeButton = (page, label) => palette(page).getByRole('button', { name: label, exact: true })
 const shapes = (page) => page.locator('.vue-flow__node')
@@ -12,6 +14,7 @@ const transform = (page) =>
 test.beforeEach(async ({ page }) => {
   await page.goto('/new')
   await expect(shapes(page)).toHaveCount(5)
+  await openLibrary(page)
 })
 
 test('adds a shape on click, selected, with its title ready to type over', async ({ page }) => {
@@ -30,7 +33,7 @@ test('adds a shape on click, selected, with its title ready to type over', async
 
 test('drops a dragged shape where it was let go', async ({ page }) => {
   const pane = await page.locator('.vue-flow__pane').boundingBox()
-  const drop = { x: Math.round(pane.width * 0.2), y: Math.round(pane.height * 0.6) }
+  const drop = { x: Math.round(pane.width * 0.45), y: Math.round(pane.height * 0.6) }
 
   // Where that point is in the diagram, from the viewport transform before the drop.
   const [x, y, zoom] = (await transform(page)).match(/-?[\d.]+/g).map(Number)

@@ -2,9 +2,11 @@ import { readFile } from 'node:fs/promises'
 
 import { expect, test } from '@playwright/test'
 
+import { fromMenu } from './helpers.js'
+
 /** Click Download in the Export dialog and read what the browser saved. */
 async function exportAs(page, format, look = 'Light') {
-  await page.getByRole('banner').getByRole('button', { name: 'Export' }).click()
+  await fromMenu(page, 'Export')
   const dialog = page.getByRole('dialog', { name: 'Export' })
   await dialog.getByText(format, { exact: true }).click()
   if (format !== 'draw.io') await dialog.getByLabel(look).check()
@@ -32,7 +34,7 @@ test('downloads the diagram as a sharp PNG', async ({ page }) => {
 })
 
 test('downloads a sketch as SVG, carrying its handwriting font', async ({ page }) => {
-  await page.getByRole('button', { name: 'Sketch style' }).click()
+  await fromMenu(page, 'Sketch style')
   const { name, bytes } = await exportAs(page, 'SVG')
   const svg = bytes.toString()
 

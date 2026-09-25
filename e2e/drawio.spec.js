@@ -2,6 +2,8 @@ import { readFile } from 'node:fs/promises'
 
 import { expect, test } from '@playwright/test'
 
+import { fromMenu } from './helpers.js'
+
 const shapes = (page) => page.locator('.vue-flow__node')
 
 const DRAWIO = `<mxfile><diagram name="Checkout"><mxGraphModel><root>
@@ -15,13 +17,13 @@ test('imports a draw.io file, and downloads the diagram as one', async ({ page }
   await page.goto('/new')
   await expect(shapes(page)).toHaveCount(5)
 
-  await page.getByRole('banner').getByRole('button', { name: 'Import' }).click()
+  await fromMenu(page, 'Import')
   const dialog = page.getByRole('dialog', { name: 'Import' })
   await dialog.getByRole('radio', { name: 'draw.io' }).click()
   await dialog.getByLabel('draw.io to import').fill(DRAWIO)
   await dialog.getByRole('radio', { name: /A new diagram/ }).check()
   await expect(dialog.getByRole('status')).toContainText('2 shapes and 1 connection')
-  await dialog.getByRole('button', { name: 'Import', exact: true }).click()
+  await dialog.getByRole('button', { name: 'Import' }).click()
 
   await expect(shapes(page)).toHaveCount(2)
   await expect(page.locator('.vue-flow__node[data-id="paid"] [data-shape]')).toHaveAttribute(
@@ -30,7 +32,7 @@ test('imports a draw.io file, and downloads the diagram as one', async ({ page }
   )
   await expect(page.getByTestId('edge-label').filter({ hasText: 'pay' })).toBeVisible()
 
-  await page.getByRole('banner').getByRole('button', { name: 'Export' }).click()
+  await fromMenu(page, 'Export')
   const exporting = page.getByRole('dialog', { name: 'Export' })
   await exporting.getByText('draw.io', { exact: true }).click()
   const download = page.waitForEvent('download')

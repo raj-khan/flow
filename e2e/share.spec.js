@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { fromMenu, history } from './helpers.js'
+
 const shapes = (page) => page.locator('.vue-flow__node')
 
 test('a copied link opens the same diagram in another browser, as an undoable change', async ({
@@ -9,7 +11,7 @@ test('a copied link opens the same diagram in another browser, as an undoable ch
 }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])
   await page.goto('/new')
-  await page.getByRole('button', { name: 'New diagram' }).click()
+  await fromMenu(page, 'New diagram')
   await page.getByRole('button', { name: /Web app architecture/ }).click()
   await expect(shapes(page)).toHaveCount(9)
 
@@ -28,7 +30,7 @@ test('a copied link opens the same diagram in another browser, as an undoable ch
   await expect(visitor.getByTestId('edge-label').filter({ hasText: 'HTTPS' })).toBeVisible()
   await expect(visitor).toHaveURL(/\/new$/)
 
-  await visitor.getByRole('banner').getByRole('button', { name: 'Undo' }).click()
+  await history(visitor).getByRole('button', { name: 'Undo' }).click()
   await expect(shapes(visitor)).toHaveCount(5)
   await other.close()
 })

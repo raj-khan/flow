@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { fromMenu } from './helpers.js'
+
 const setDark = async (page) => {
   await page.goto('/new')
   await page.evaluate(() => localStorage.setItem('flow:theme', 'dark'))
@@ -10,8 +12,7 @@ const setDark = async (page) => {
 test('remembers an explicit theme across a reload', async ({ page }) => {
   await setDark(page)
 
-  const toggle = page.getByRole('button', { name: /theme/i })
-  await toggle.click()
+  await fromMenu(page, /theme/i)
   await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'dark')
 })
 

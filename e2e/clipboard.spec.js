@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { history } from './helpers.js'
+
 const shapes = (page) => page.locator('.vue-flow__node')
 const NODE = { away: 'b6a0c1', welcome: 'e879e4' }
 const nodeAt = (page, id) => page.locator(`.vue-flow__node[data-id="${id}"]`)
@@ -27,7 +29,7 @@ test('copies shapes as .flow text, and pastes them selected, as one undoable cha
   await expect(page.locator('.vue-flow__node.selected')).toHaveCount(2)
   await expect(nodeAt(page, `${NODE.away}-2`)).toContainText('Away Message')
 
-  await page.getByRole('banner').getByRole('button', { name: 'Undo' }).click()
+  await history(page).getByRole('button', { name: 'Undo' }).click()
   await expect(shapes(page)).toHaveCount(5)
 })
 

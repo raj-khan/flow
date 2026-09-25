@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { fromMenu } from './helpers.js'
+
 /**
  * A tooltip may sit on an ancestor: a disabled control receives no mouse events
  * in Chrome or Safari, so a title on the button itself would never be shown.
@@ -40,7 +42,7 @@ test('every control in the drawer and the help dialog explains itself', async ({
   expectAllExplained(await auditButtons(page.locator('body')))
 
   await page.goto('/new')
-  await page.getByRole('button', { name: 'Keyboard shortcuts' }).click()
+  await fromMenu(page, 'Keyboard shortcuts')
   expectAllExplained(await auditButtons(page.locator('body')))
 })
 
