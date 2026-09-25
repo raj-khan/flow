@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { useVueFlow } from '@vue-flow/core'
 
 import IconButton from '@/components/ui/IconButton.vue'
@@ -9,12 +9,13 @@ import { useCanvasStore } from '@/stores/canvas.js'
 import { useTidyUp } from '@/composables/useTidyUp.js'
 import { useToastStore } from '@/stores/toasts.js'
 import { useFlowHistory } from '@/composables/useFlowHistory.js'
+import { isCanvasKey } from '@/composables/canvasKeys.js'
 
 /**
  * Instead of `@vue-flow/controls`, whose buttons carry no accessible name or
  * tooltip and style themselves outside our tokens. Same `useVueFlow` API.
  */
-const { fitView, zoomTo, viewport } = useVueFlow()
+const { fitView, zoomTo, viewport, getSelectedNodes } = useVueFlow()
 
 const percentage = computed(() => `${Math.round(viewport.value.zoom * 100)}%`)
 
@@ -40,6 +41,33 @@ const LINE_NAMES = { step: 'in steps', curved: 'curved', straight: 'straight' }
 
 /** @param {1 | -1} direction */
 const step = (direction) => zoomTo(nextZoom(viewport.value.zoom, direction), ZOOM_STEP)
+
+const FIT = { padding: 0.2, duration: 200 }
+
+/** Shift+2: the selection, or the whole diagram when nothing is selected. */
+function fitSelection() {
+  const ids = getSelectedNodes.value.map((node) => node.id)
+  fitView(ids.length ? { ...FIT, nodes: ids, maxZoom: 1.5 } : FIT)
+}
+
+/**
+ * Shift+1 and Shift+2, read from the physical keys so every layout agrees.
+ * @param {KeyboardEvent} event
+ */
+function onKeydown(event) {
+  if (!event.shiftKey || event.ctrlKey || event.metaKey || event.altKey) return
+  if (!isCanvasKey(event)) return
+  if (event.code === 'Digit1') {
+    event.preventDefault()
+    fitView(FIT)
+  } else if (event.code === 'Digit2') {
+    event.preventDefault()
+    fitSelection()
+  }
+}
+
+onMounted(() => window.addEventListener('keydown', onKeydown))
+onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 </script>
 
 <template>
@@ -103,12 +131,23 @@ const step = (direction) => zoomTo(nextZoom(viewport.value.zoom, direction), ZOO
       <IconButton
         variant="bare"
         label="Fit to screen"
-        title="Bring every node into view"
-        @click="fitView({ padding: 0.2, duration: 200 })"
+        title="Bring every node into view (Shift+1)"
+        @click="fitView(FIT)"
       >
         <path
           d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"
         />
+      </IconButton>
+
+      <IconButton
+        variant="bare"
+        label="Minimap"
+        :title="canvas.minimap ? 'Hide the minimap' : 'Show a minimap of the whole diagram'"
+        :pressed="canvas.minimap"
+        @click="canvas.toggleMinimap"
+      >
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <rect x="12" y="11" width="6" height="5" rx="1" />
       </IconButton>
 
       <!-- The zoom level doubles as the control that resets it. -->

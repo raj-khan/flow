@@ -43,6 +43,7 @@
   --shadow-card: 0 1px 2px rgb(15 23 42 / 0.06), 0 1px 3px rgb(15 23 42 / 0.08);
   --shadow-raised: 0 4px 12px rgb(15 23 42 / 0.1);
   --shadow-panel: -8px 0 24px rgb(15 23 42 / 0.08);
+  --minimap-mask: rgb(241 245 249 / 0.7);
 }
 
 /*
@@ -94,6 +95,7 @@
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.5);
   --shadow-raised: 0 4px 14px rgb(0 0 0 / 0.55);
   --shadow-panel: -8px 0 28px rgb(0 0 0 / 0.45);
+  --minimap-mask: rgb(13 17 23 / 0.7);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -141,6 +143,7 @@
     --shadow-card: 0 1px 2px rgb(0 0 0 / 0.5);
     --shadow-raised: 0 4px 14px rgb(0 0 0 / 0.55);
     --shadow-panel: -8px 0 28px rgb(0 0 0 / 0.45);
+    --minimap-mask: rgb(13 17 23 / 0.7);
   }
 }
 
@@ -373,4 +376,18 @@ optgroup {
   border: 1px solid var(--line);
   border-radius: 0.75rem;
   box-shadow: var(--shadow-raised);
+}
+
+/* Zen mode: an island fades out, and comes back near its edge or on focus. */
+.zen-hidden {
+  transition: opacity var(--slow) var(--ease);
+}
+
+.zen-hidden:not(:focus-within) {
+  opacity: 0;
+}
+
+.zen-hidden:not(:focus-within),
+.zen-hidden:not(:focus-within) * {
+  pointer-events: none !important;
 }

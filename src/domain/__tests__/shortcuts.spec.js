@@ -7,6 +7,8 @@ describe('shortcuts', () => {
   it('resolves the modifier per platform, showing only one', () => {
     expect(keyLabel('mod', true)).toBe('Cmd')
     expect(keyLabel('mod', false)).toBe('Ctrl')
+    expect(keyLabel('Alt', true)).toBe('Option')
+    expect(keyLabel('Alt', false)).toBe('Alt')
     expect(comboLabel(COMBO.REDO, true)).toBe('Cmd+Shift+Z')
   })
 

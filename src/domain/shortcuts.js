@@ -38,6 +38,18 @@ export const SHORTCUT_GROUPS = Object.freeze([
     })),
   },
   {
+    title: 'View',
+    shortcuts: [
+      { combos: [['F']], description: 'Full screen, and back' },
+      {
+        combos: [['Alt', 'Z']],
+        description: 'Zen mode: tools hide until the pointer nears an edge',
+      },
+      { combos: [['Shift', '1']], description: 'Zoom to fit the whole diagram' },
+      { combos: [['Shift', '2']], description: 'Zoom to the selection' },
+    ],
+  },
+  {
     title: 'Selection',
     shortcuts: [
       {
@@ -108,10 +120,15 @@ export const SHORTCUT_GROUPS = Object.freeze([
 export const HELP_KEY = '?'
 
 /**
- * Only the platform's own modifier is shown: "Ctrl/Cmd+Z" is noise for everyone.
+ * Only the platform's own modifier is shown: "Ctrl/Cmd+Z" is noise for everyone,
+ * and a Mac calls Alt Option.
  * @param {string} key @param {boolean} isMac @returns {string}
  */
-export const keyLabel = (key, isMac) => (key === 'mod' ? (isMac ? 'Cmd' : 'Ctrl') : key)
+export const keyLabel = (key, isMac) => {
+  if (key === 'mod') return isMac ? 'Cmd' : 'Ctrl'
+  if (key === 'Alt' && isMac) return 'Option'
+  return key
+}
 
 /** @param {string[]} combo @param {boolean} isMac @returns {string} */
 export const comboLabel = (combo, isMac) => combo.map((key) => keyLabel(key, isMac)).join('+')
@@ -123,4 +140,6 @@ export const COMBO = Object.freeze({
   HELP: ['?'],
   OPEN: ['mod', 'O'],
   SAVE: ['mod', 'S'],
+  FULL_SCREEN: ['F'],
+  ZEN: ['Alt', 'Z'],
 })

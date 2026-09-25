@@ -13,6 +13,7 @@ import {
 import { useRoute, useRouter } from 'vue-router'
 import { VueFlow, useVueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
+import { MiniMap } from '@vue-flow/minimap'
 
 import { useFlowQuery } from '@/composables/useFlowQuery.js'
 import {
@@ -744,6 +745,17 @@ watch(
       @viewport-change="canvas.setViewport"
     >
       <Background :gap="GRID" :size="1.2" />
+      <MiniMap
+        v-if="canvas.minimap && !canvas.zen"
+        class="island minimap"
+        pannable
+        zoomable
+        aria-label="Minimap"
+        node-color="var(--line-strong)"
+        node-stroke-color="transparent"
+        mask-color="var(--minimap-mask)"
+        :node-border-radius="4"
+      />
       <SelectionToolbar />
       <PenLayer />
       <CanvasControls />
@@ -777,6 +789,12 @@ watch(
 </template>
 
 <style scoped>
+/* Bottom right, clear of the tool islands; its own box is the island. */
+:deep(.vue-flow__minimap.minimap) {
+  margin: 0.75rem;
+  overflow: hidden;
+}
+
 /* Each tool says what a click will do before it is made. */
 .tool-hand :deep(.vue-flow__pane),
 .tool-hand :deep(.vue-flow__node) {

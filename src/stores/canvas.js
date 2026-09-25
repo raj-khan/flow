@@ -4,12 +4,25 @@ import { defineStore } from 'pinia'
 import { STORAGE_KEYS } from '@/api/storageKeys.js'
 import { TOOL } from '@/domain/tools.js'
 
-/** A viewer's own habit, so it is kept in this browser, not in the diagram. */
-function savedSnap() {
+/**
+ * A viewer's own habit, so it is kept in this browser, not in the diagram. On
+ * unless turned off.
+ * @param {string} key
+ */
+function savedSwitch(key) {
   try {
-    return localStorage.getItem(STORAGE_KEYS.SNAP) !== 'off'
+    return localStorage.getItem(key) !== 'off'
   } catch {
     return true
+  }
+}
+
+/** @param {string} key @param {boolean} on */
+function saveSwitch(key, on) {
+  try {
+    localStorage.setItem(key, on ? 'on' : 'off')
+  } catch {
+    // A private window refuses storage; the choice still holds until reload.
   }
 }
 
@@ -58,15 +71,27 @@ export const useCanvasStore = defineStore('canvas', () => {
   }
 
   /** Whether dragged shapes snap to the grid of dots. On unless turned off. */
-  const snap = ref(savedSnap())
+  const snap = ref(savedSwitch(STORAGE_KEYS.SNAP))
 
   function toggleSnap() {
     snap.value = !snap.value
-    try {
-      localStorage.setItem(STORAGE_KEYS.SNAP, snap.value ? 'on' : 'off')
-    } catch {
-      // A private window refuses storage; the choice still holds until reload.
-    }
+    saveSwitch(STORAGE_KEYS.SNAP, snap.value)
+  }
+
+  /** Whether the minimap shows, bottom right. On unless turned off. */
+  const minimap = ref(savedSwitch(STORAGE_KEYS.MINIMAP))
+
+  function toggleMinimap() {
+    minimap.value = !minimap.value
+    saveSwitch(STORAGE_KEYS.MINIMAP, minimap.value)
+  }
+
+  /** Zen mode: every tool hides until the pointer nears an edge. */
+  const zen = ref(false)
+
+  function toggleZen() {
+    zen.value = !zen.value
+    if (zen.value) isLibraryOpen.value = false
   }
 
   /**
@@ -111,6 +136,10 @@ export const useCanvasStore = defineStore('canvas', () => {
     toggleText,
     snap,
     toggleSnap,
+    minimap,
+    toggleMinimap,
+    zen,
+    toggleZen,
     tool,
     setTool,
     isLibraryOpen,

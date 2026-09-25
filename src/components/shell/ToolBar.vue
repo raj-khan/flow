@@ -1,6 +1,7 @@
 <script setup>
 import { onBeforeUnmount, onMounted } from 'vue'
 
+import { isCanvasKey } from '@/composables/canvasKeys.js'
 import { TOOL, TOOLS, toolForKey } from '@/domain/tools.js'
 import { useCanvasStore } from '@/stores/canvas.js'
 
@@ -13,20 +14,9 @@ const canvas = useCanvasStore()
 /** @param {import('@/domain/tools.js').ToolId} id */
 const isOn = (id) => (id === TOOL.SHAPES ? canvas.isLibraryOpen : canvas.tool === id)
 
-/**
- * Keys meant for a field, a menu or a dialog are theirs.
- * @param {KeyboardEvent} event
- */
-function isBlocked(event) {
-  const target = /** @type {HTMLElement | null} */ (event.target)
-  if (target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return true
-  if (target?.isContentEditable || target?.closest?.('[role="menu"]')) return true
-  return Boolean(document.querySelector('[role="dialog"][aria-modal="true"]'))
-}
-
 /** @param {KeyboardEvent} event */
 function onKeydown(event) {
-  if (event.ctrlKey || event.metaKey || event.altKey || isBlocked(event)) return
+  if (event.ctrlKey || event.metaKey || event.altKey || !isCanvasKey(event)) return
 
   if (event.key === 'Escape') {
     if (canvas.isLibraryOpen) canvas.closeLibrary()

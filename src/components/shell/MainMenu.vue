@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } f
 
 import { useDiagramFile } from '@/composables/useDiagramFile.js'
 import { useFlowHistory } from '@/composables/useFlowHistory.js'
+import { useFullScreen } from '@/composables/useFullScreen.js'
 import { usePlatform } from '@/composables/usePlatform.js'
 import { useSketchStyle } from '@/composables/useSketchStyle.js'
 import { useStartDiagram } from '@/composables/useStartDiagram.js'
@@ -27,6 +28,7 @@ const { start, isPending: isStarting } = useStartDiagram()
 const { sketch, toggle: toggleSketch } = useSketchStyle()
 const { label: themeLabel, cycle: cycleTheme } = useTheme()
 const { isMac } = usePlatform()
+const fullScreen = useFullScreen()
 
 const isOpen = ref(false)
 const trigger = useTemplateRef('trigger')
@@ -57,6 +59,19 @@ const groups = computed(
       [
         { label: 'Edit as text', run: canvas.toggleText, checked: canvas.isTextOpen },
         { label: 'Sketch style', run: toggleSketch, checked: sketch.value },
+        {
+          label: 'Full screen',
+          run: fullScreen.toggle,
+          checked: fullScreen.isFullScreen.value,
+          hint: comboLabel(COMBO.FULL_SCREEN, isMac.value),
+          disabled: !fullScreen.isAvailable,
+        },
+        {
+          label: 'Zen mode',
+          run: canvas.toggleZen,
+          checked: canvas.zen,
+          hint: comboLabel(COMBO.ZEN, isMac.value),
+        },
         { label: themeLabel.value, run: cycleTheme },
       ],
       [

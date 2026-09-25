@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { onBeforeUnmount, ref, watch } from 'vue'
 import { RouterView } from 'vue-router'
 
 import FlowCanvas from '@/components/canvas/FlowCanvas.vue'
@@ -16,9 +16,12 @@ import HelpDialog from '@/components/ui/HelpDialog.vue'
 import IconButton from '@/components/ui/IconButton.vue'
 import ToastHost from '@/components/ui/ToastHost.vue'
 import { useCopyBrief } from '@/composables/useCopyBrief.js'
+import { useFullScreen } from '@/composables/useFullScreen.js'
+import { useViewKeys } from '@/composables/useViewKeys.js'
 import { useHelpDialog } from '@/composables/useHelpDialog.js'
 import { useOpenSharedLink } from '@/composables/useShareLink.js'
 import { useCanvasStore } from '@/stores/canvas.js'
+import { useToastStore } from '@/stores/toasts.js'
 
 /**
  * The route view stays a composition surface: the canvas fills the screen and
@@ -33,6 +36,30 @@ useOpenSharedLink()
 const { copyBrief } = useCopyBrief()
 // Bound at the shell: a dialog that is not mounted cannot listen for its own key.
 const help = useHelpDialog()
+const fullScreen = useFullScreen()
+const toasts = useToastStore()
+useViewKeys({ fullScreen: fullScreen.toggle, zen: canvas.toggleZen })
+
+/** In zen mode, the edge the pointer is near brings back that edge's islands. */
+const EDGE = 96
+const near = ref({ top: false, bottom: false })
+
+/** @param {PointerEvent} event */
+function onPointerMove(event) {
+  near.value = { top: event.clientY < EDGE, bottom: event.clientY > window.innerHeight - EDGE }
+}
+
+watch(
+  () => canvas.zen,
+  (zen) => {
+    near.value = { top: false, bottom: false }
+    if (zen) {
+      window.addEventListener('pointermove', onPointerMove)
+      toasts.push('Zen mode. Tools come back near the edges; Alt+Z shows them again.')
+    } else window.removeEventListener('pointermove', onPointerMove)
+  },
+)
+onBeforeUnmount(() => window.removeEventListener('pointermove', onPointerMove))
 </script>
 
 <template>
@@ -44,6 +71,7 @@ const help = useHelpDialog()
     <!-- Islands let the canvas through everywhere they are not. -->
     <header
       class="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-start justify-between gap-3 p-3 *:pointer-events-auto"
+      :class="{ 'zen-hidden': canvas.zen && !near.top }"
     >
       <MainMenu
         @help="help.open"
@@ -85,7 +113,10 @@ const help = useHelpDialog()
       <ShapePalette class="max-h-full" @add="canvas.requestShape" />
     </div>
 
-    <div class="absolute bottom-3 left-3 z-20 flex items-center gap-2">
+    <div
+      class="absolute bottom-3 left-3 z-20 flex items-center gap-2"
+      :class="{ 'zen-hidden': canvas.zen && !near.bottom }"
+    >
       <HistoryControls />
       <!-- CanvasControls teleports here from inside Vue Flow. -->
       <div id="canvas-controls" />
