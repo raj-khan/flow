@@ -55,6 +55,7 @@
     "@vue/test-utils": "^2.5.1",
     "eslint": "^10.11.0",
     "eslint-plugin-vue": "^10.11.0",
+    "gifenc": "^1.0.3",
     "happy-dom": "^20.14.5",
     "husky": "^9.1.7",
     "lint-staged": "^17.5.1",

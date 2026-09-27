@@ -115,6 +115,7 @@ describe('reading a link', () => {
     assert.match(html, /<title>Shop · isketch<\/title>/)
     assert.match(html, /\*\*API\*\* → \*\*Orders\*\*: SQL/)
     assert.match(html, /href="https:\/\/app\.isketch\.test\/flow#flow=z[\w-]+"/)
+    assert.match(html, /Made with <a href="https:\/\/app\.isketch\.test">isketch<\/a>/)
     assert.equal(page.headers.get('x-robots-tag'), 'noindex')
   })
 

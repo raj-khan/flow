@@ -42,3 +42,16 @@ test('downloads a sketch as SVG, carrying its handwriting font', async ({ page }
   expect(svg).toMatch(/^<svg xmlns="http:\/\/www.w3.org\/2000\/svg"/)
   expect(svg).toContain("@font-face{font-family:'Patrick Hand';src:url(data:font/woff2;base64,")
 })
+
+test('marks a picture Made with isketch, unless that is taken off, which is remembered', async ({
+  page,
+}) => {
+  expect((await exportAs(page, 'SVG')).bytes.toString()).toContain('Made with isketch')
+
+  await fromMenu(page, 'Export')
+  const dialog = page.getByRole('dialog', { name: 'Export' })
+  await dialog.getByLabel(/Made with isketch/).uncheck()
+  await page.keyboard.press('Escape')
+
+  expect((await exportAs(page, 'SVG')).bytes.toString()).not.toContain('Made with isketch')
+})

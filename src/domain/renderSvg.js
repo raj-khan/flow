@@ -61,14 +61,15 @@ const GLYPH = 0.56
  * lays them out.
  *
  * @param {import('./types.js').FlowDocument} document
- * @param {{ theme?: 'light' | 'dark', padding?: number, highlight?: Map<string, 'added' | 'removed' | 'changed'>, sketchFont?: string }} [options]
+ * @param {{ theme?: 'light' | 'dark', padding?: number, highlight?: Map<string, 'added' | 'removed' | 'changed'>, sketchFont?: string, credit?: boolean }} [options]
  *   `highlight` marks nodes and edges by id, for a diff; `sketchFont` is the handwriting
- *   font as a data URL, embedded in a sketch so it looks the same wherever it opens
+ *   font as a data URL, embedded in a sketch so it looks the same wherever it opens;
+ *   `credit` adds a small "Made with isketch" in the bottom right corner, linked
  * @returns {string}
  */
 export function renderSvg(
   document,
-  { theme = 'light', padding = 32, highlight = new Map(), sketchFont = '' } = {},
+  { theme = 'light', padding = 32, highlight = new Map(), sketchFont = '', credit = false } = {},
 ) {
   const colours = SVG_THEMES[theme] ?? SVG_THEMES.light
   const nodes = document.nodes.map(normaliseNode)
@@ -136,6 +137,10 @@ export function renderSvg(
           sketch,
         ),
       ),
+    // In the padding, clear of every shape.
+    credit
+      ? `<a href="https://isketch.online"><text x="${round(left + width - 10)}" y="${round(top + height - 10)}" font-size="11" fill="${colours.muted}" text-anchor="end">Made with isketch</text></a>`
+      : '',
     '</svg>',
   ]
 

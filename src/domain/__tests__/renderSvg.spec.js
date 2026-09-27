@@ -102,6 +102,14 @@ describe('sizes', () => {
     expect(svg).toContain('marker-start="url(#arrow)" marker-end="url(#arrow)"')
   })
 
+  it('adds a linked Made with isketch mark only when asked', () => {
+    const document = sampleById('support').document
+    expect(renderSvg(document)).not.toContain('Made with isketch')
+    expect(renderSvg(document, { credit: true })).toMatch(
+      /<a href="https:\/\/isketch\.online"><text [^>]*text-anchor="end">Made with isketch<\/text><\/a>\n<\/svg>/,
+    )
+  })
+
   it('draws a pen stroke as a line, with no outline or text', () => {
     const svg = renderSvg({
       version: 3,

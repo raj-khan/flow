@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, ref, watchEffect } from 'vue'
+import { computed, onBeforeUnmount, ref, watch, watchEffect } from 'vue'
 
 import { track } from '@/api/analytics.js'
 import BaseModal from '@/components/ui/BaseModal.vue'
@@ -12,6 +12,7 @@ import { flowFileName } from '@/domain/flowText.js'
 import { frameDocument, isFrame } from '@/domain/frames.js'
 import { renderSvg } from '@/domain/renderSvg.js'
 import { isSketch } from '@/domain/sketch.js'
+import { STORAGE_KEYS } from '@/api/storageKeys.js'
 import { useCanvasStore } from '@/stores/canvas.js'
 import { useThemeStore } from '@/stores/theme.js'
 import { useToastStore } from '@/stores/toasts.js'
@@ -55,9 +56,27 @@ watchEffect(async () => {
   if (isSketch(document.value) && !font.value) font.value = await sketchFontData()
 })
 
+/** A small "Made with isketch" on pictures, unless it is taken off; remembered here. */
+const credit = ref(readCredit())
+function readCredit() {
+  try {
+    return localStorage.getItem(STORAGE_KEYS.CREDIT) !== 'off'
+  } catch {
+    return true
+  }
+}
+watch(credit, (on) => {
+  try {
+    localStorage.setItem(STORAGE_KEYS.CREDIT, on ? 'on' : 'off')
+  } catch {
+    // A private window refuses storage; the choice holds for this export.
+  }
+})
+
 const svg = computed(() =>
   document.value
     ? renderSvg(document.value, {
+        credit: credit.value,
         theme: look.value === 'dark' ? 'dark' : 'light',
         sketchFont: font.value,
       })
@@ -120,6 +139,11 @@ async function download() {
             Frame: {{ frame.name || frame.id }}
           </option>
         </select>
+      </label>
+
+      <label v-if="!isFile" class="flex items-center gap-2 text-sm">
+        <input v-model="credit" type="checkbox" />
+        A small “Made with isketch” in the corner
       </label>
 
       <fieldset v-if="!isFile" class="flex items-center gap-4 text-sm">

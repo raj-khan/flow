@@ -69,7 +69,7 @@ export function renderPage(input: {
   <h2>Brief</h2>
   <p>For people and AI agents alike: every shape, what it is for, every connection, and the source.</p>
   <pre>${escape(brief)}</pre>
-  <footer>Updated ${escape(updatedAt.toISOString())}. Anyone with this link can read it.</footer>
+  <footer>Updated ${escape(updatedAt.toISOString())}. Anyone with this link can read it. Made with <a href="${escape(new URL(openUrl).origin)}">isketch</a>.</footer>
 </main>
 </body>
 </html>
