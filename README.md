@@ -304,6 +304,11 @@ For Claude Desktop, or any client with a JSON config:
 Then ask: _"Read docs/architecture.flow and scaffold the services it shows"_, or _"Add the cache
 you just built to the architecture diagram"_.
 
+Keep the same file open in isketch (_Open file_, in Chrome or Edge) and watch the agent draw: when
+the file changes on disk, the canvas shows the new version within a second, with what was added or
+changed glowing for a few seconds, and one Undo to go back. If you have edits of your own that are
+not saved, isketch asks which to keep instead.
+
 ## Hosted links for agents
 
 `server/` is a small NestJS and PostgreSQL service that stores a diagram behind an unguessable link

@@ -1,6 +1,7 @@
 <script setup>
 import { computed, inject, ref } from 'vue'
 import { BaseEdge, EdgeLabelRenderer } from '@vue-flow/core'
+import { useCanvasStore } from '@/stores/canvas.js'
 
 /** Carries its own remove control, since an edge is otherwise only deletable by key. */
 const props = defineProps({
@@ -27,6 +28,10 @@ const props = defineProps({
   sourceNode: { type: Object, default: null },
   targetNode: { type: Object, default: null },
 })
+
+/** Just changed on disk: marked for a few seconds. */
+const canvasStore = useCanvasStore()
+const flash = computed(() => canvasStore.flashed.get(props.id) ?? '')
 
 /** @type {(edgeId: string) => void} */
 const detach = inject(DETACH_EDGE, () => {})
@@ -90,7 +95,7 @@ import { sketchPath } from '@/domain/sketch.js'
     :marker-end="arrow"
     :marker-start="both ? arrow : undefined"
     :style="{ strokeWidth: selected ? 2.5 : 1.5, strokeDasharray: dashed ? '6 4' : undefined }"
-    :class="selected ? 'stroke-focus' : ''"
+    :class="[selected ? 'stroke-focus' : '', flash ? `flash-edge flash-${flash}` : '']"
   />
 
   <!-- A wide transparent path, so the thin line is easy to hit. -->

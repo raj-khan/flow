@@ -17,6 +17,7 @@ import { CONNECT_STATE } from './connectKey.js'
 import { EDIT_TEXT } from './editKey.js'
 import InlineText from './InlineText.vue'
 import { FIELD_LIMIT } from '@/domain/validators.js'
+import { useCanvasStore } from '@/stores/canvas.js'
 
 /** One card for every shape: the registry supplies the meaning, `shapes.js` the outline. */
 const props = defineProps({
@@ -83,6 +84,9 @@ const shiftHeld = useShiftKey()
 function onResizeEnd({ params }) {
   resize(props.id, params)
 }
+/** Just changed on disk, by an agent or an editor: marked for a few seconds. */
+const canvasStore = useCanvasStore()
+const flash = computed(() => canvasStore.flashed.get(props.id) ?? '')
 const isText = computed(() => node.value.type === SHAPE.TEXT)
 /** A frame: a region behind the shapes it holds, named at its top left. */
 const isFrame = computed(() => node.value.type === SHAPE.FRAME)
@@ -118,7 +122,9 @@ const strokeWidth = computed(() => (props.selected || isKeyboardFocused.value ? 
       isDropTarget && !acceptsDrop ? 'opacity-40' : '',
       isKeyboardFocused ? 'outline-2 outline-offset-4 outline-focus' : '',
       meta.openable ? 'cursor-pointer' : 'cursor-default',
+      flash ? `flash flash-${flash}` : '',
     ]"
+    :data-flash="flash || undefined"
     :aria-current="isKeyboardFocused ? 'true' : undefined"
     :style="{
       // The wrapper carries the size, so a resize handle can change it.

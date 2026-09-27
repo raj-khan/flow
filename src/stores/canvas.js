@@ -4,6 +4,9 @@ import { defineStore } from 'pinia'
 import { STORAGE_KEYS } from '@/api/storageKeys.js'
 import { TOOL } from '@/domain/tools.js'
 
+/** How long a change made on disk stays marked on the canvas. */
+export const FLASH_MS = 4000
+
 /**
  * A viewer's own habit, so it is kept in this browser, not in the diagram. On
  * unless turned off.
@@ -124,6 +127,28 @@ export const useCanvasStore = defineStore('canvas', () => {
     exportAsked.value += 1
   }
 
+  /**
+   * Shapes and connections that just changed on disk, marked for a few
+   * seconds so a person can see what an agent did.
+   * @type {import('vue').Ref<Map<string, 'added' | 'changed' | 'moved'>>}
+   */
+  const flashed = ref(new Map())
+  /** @type {ReturnType<typeof setTimeout> | undefined} */
+  let flashTimer
+
+  /** @param {Map<string, 'added' | 'changed' | 'moved'>} changes */
+  function flash(changes) {
+    clearTimeout(flashTimer)
+    flashed.value = changes
+    flashTimer = setTimeout(() => (flashed.value = new Map()), FLASH_MS)
+  }
+
+  /**
+   * The open file changed on disk while there are edits here not saved to it.
+   * @type {import('vue').Ref<{ name: string, document: import('@/domain/types.js').FlowDocument, flow: string } | null>}
+   */
+  const fileConflict = ref(null)
+
   /** Zen mode: every tool hides until the pointer nears an edge. */
   const zen = ref(false)
 
@@ -184,6 +209,9 @@ export const useCanvasStore = defineStore('canvas', () => {
     requestView,
     exportFrame,
     exportAsked,
+    flashed,
+    flash,
+    fileConflict,
     requestExport,
     clearViewRequest,
     tool,

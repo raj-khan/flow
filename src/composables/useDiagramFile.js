@@ -34,8 +34,13 @@ export function useDiagramFile({ bindKeys = false } = {}) {
   const canvas = useCanvasStore()
   const toasts = useToastStore()
 
-  /** @param {string} text @param {string} name @param {any} handle */
-  function load(text, name, handle) {
+  /**
+   * @param {string} text
+   * @param {string} name
+   * @param {any} handle
+   * @param {number} [lastModified]
+   */
+  function load(text, name, handle, lastModified = 0) {
     const { document: opened, errors } = parseFlow(text)
     if (!opened) {
       const [first] = errors
@@ -49,7 +54,7 @@ export function useDiagramFile({ bindKeys = false } = {}) {
     canvas.forgetViewport()
     replace.mutate(opened, {
       onSuccess() {
-        file.remember(handle, name)
+        file.remember(handle, name, { flow: serialiseFlow(opened), lastModified })
         toasts.push(`Opened ${name}`, { action: { label: 'Undo', run: undo } })
       },
     })
@@ -61,7 +66,7 @@ export function useDiagramFile({ bindKeys = false } = {}) {
       try {
         const [handle] = await picker({ types: PICKER_TYPES, multiple: false })
         const picked = await handle.getFile()
-        load(await picked.text(), picked.name, handle)
+        load(await picked.text(), picked.name, handle, picked.lastModified)
       } catch (error) {
         if (/** @type {any} */ (error)?.name !== 'AbortError') {
           toasts.push('The file could not be opened.', { tone: 'danger' })
@@ -86,6 +91,7 @@ export function useDiagramFile({ bindKeys = false } = {}) {
     if (file.handle) {
       try {
         await write(file.handle, text)
+        file.markSaved(text, await lastModifiedOf(file.handle))
         toasts.push(`Saved to ${file.name}`)
         return
       } catch {
@@ -102,7 +108,10 @@ export function useDiagramFile({ bindKeys = false } = {}) {
           types: PICKER_TYPES,
         })
         await write(handle, text)
-        file.remember(handle, handle.name)
+        file.remember(handle, handle.name, {
+          flow: text,
+          lastModified: await lastModifiedOf(handle),
+        })
         toasts.push(`Saved to ${handle.name}`)
       } catch (error) {
         if (/** @type {any} */ (error)?.name !== 'AbortError') {
@@ -144,4 +153,13 @@ async function write(handle, text) {
   const writable = await handle.createWritable()
   await writable.write(text)
   await writable.close()
+}
+
+/** When a file was last written, or 0 when that cannot be read. @param {any} handle */
+async function lastModifiedOf(handle) {
+  try {
+    return (await handle.getFile()).lastModified
+  } catch {
+    return 0
+  }
 }

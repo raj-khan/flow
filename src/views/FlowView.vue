@@ -13,6 +13,7 @@ import HistoryControls from '@/components/shell/HistoryControls.vue'
 import MainMenu from '@/components/shell/MainMenu.vue'
 import ToolBar from '@/components/shell/ToolBar.vue'
 import CommandPalette from '@/components/shell/CommandPalette.vue'
+import FileConflictDialog from '@/components/shell/FileConflictDialog.vue'
 import HelpDialog from '@/components/ui/HelpDialog.vue'
 import IconButton from '@/components/ui/IconButton.vue'
 import ToastHost from '@/components/ui/ToastHost.vue'
@@ -24,6 +25,7 @@ import { PHONE, useMediaQuery } from '@/composables/useMediaQuery.js'
 import { useOpenSharedLink } from '@/composables/useShareLink.js'
 import { useLaunch } from '@/composables/useLaunch.js'
 import { useCommands } from '@/composables/useCommands.js'
+import { useWatchFile } from '@/composables/useWatchFile.js'
 import { useFlowQuery } from '@/composables/useFlowQuery.js'
 import { useCanvasStore } from '@/stores/canvas.js'
 import { useToastStore } from '@/stores/toasts.js'
@@ -39,6 +41,8 @@ const isExporting = ref(false)
 const isSharing = ref(false)
 useOpenSharedLink()
 useLaunch()
+// An agent writing to the open file shows up here as it happens.
+const fileWatch = useWatchFile()
 const { copyBrief } = useCopyBrief()
 const { document } = useFlowQuery()
 // Bound at the shell: a dialog that is not mounted cannot listen for its own key.
@@ -213,6 +217,12 @@ onBeforeUnmount(() => window.removeEventListener('pointermove', onPointerMove))
     <CompareDialog v-if="isComparing" @close="isComparing = false" />
     <ExportDialog v-if="isExporting" @close="isExporting = false" />
     <ShareDialog v-if="isSharing" @close="isSharing = false" />
+    <FileConflictDialog
+      v-if="canvas.fileConflict"
+      :name="canvas.fileConflict.name"
+      @theirs="fileWatch.takeTheirs"
+      @mine="fileWatch.keepMine"
+    />
     <CommandPalette v-if="isPaletteOpen" :commands="commands" @close="isPaletteOpen = false" />
     <ToastHost />
   </div>

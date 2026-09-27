@@ -33,7 +33,7 @@ export function useLaunch() {
     const [handle] = params.files ?? []
     if (!handle) return
     const opened = await handle.getFile()
-    openText(await opened.text(), opened.name, handle)
+    openText(await opened.text(), opened.name, handle, opened.lastModified)
   })
 
   watch(

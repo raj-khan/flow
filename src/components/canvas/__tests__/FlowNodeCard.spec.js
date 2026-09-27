@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { createPinia } from 'pinia'
 
 import diagram from '@/tests/fixtures/diagram.json'
 import { SHAPE } from '@/domain/constants.js'
@@ -12,7 +13,10 @@ const nodes = Object.fromEntries(diagram.nodes.map((raw) => [String(raw.id), nor
 const global = { stubs: { Handle: true } }
 
 const render = (node, props = {}) =>
-  mount(FlowNodeCard, { props: { id: node.id, data: { node }, ...props }, global })
+  mount(FlowNodeCard, {
+    props: { id: node.id, data: { node }, ...props },
+    global: { ...global, plugins: [createPinia()] },
+  })
 
 describe('FlowNodeCard', () => {
   it('shows the title and a truncated description', () => {
