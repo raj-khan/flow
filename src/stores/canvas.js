@@ -113,6 +113,17 @@ export const useCanvasStore = defineStore('canvas', () => {
     viewRequest.value = ''
   }
 
+  /** A frame to export on its own, asked for from its menu; empty for the whole diagram. */
+  const exportFrame = ref('')
+  /** Counts the asks, so asking twice for the same frame still opens Export. */
+  const exportAsked = ref(0)
+
+  /** @param {string} frameId */
+  function requestExport(frameId) {
+    exportFrame.value = frameId
+    exportAsked.value += 1
+  }
+
   /** Zen mode: every tool hides until the pointer nears an edge. */
   const zen = ref(false)
 
@@ -171,6 +182,9 @@ export const useCanvasStore = defineStore('canvas', () => {
     setViewing,
     viewRequest,
     requestView,
+    exportFrame,
+    exportAsked,
+    requestExport,
     clearViewRequest,
     tool,
     setTool,

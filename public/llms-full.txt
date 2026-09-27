@@ -52,6 +52,9 @@ db 276,352
 - `@layout` starts the positions, one `id x,y` per line, with ` WxH` after it
   for a resized shape. A node with no position is laid out automatically, so a
   hand-written diagram needs no layout block at all.
+- `id = frame "Name"` is a frame: a named region, with its size under `@layout`.
+  Every shape whose centre is inside it belongs to it, so the brief groups them
+  and Mermaid draws it as a subgraph.
 - Pen strokes are `id = ink` shapes, with their points in an `@ink` block after
   the layout, so they never clutter the lines that say what the system is.
 - `style: sketch` under the title draws the diagram by hand. Leave it out for

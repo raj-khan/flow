@@ -1,6 +1,6 @@
 import { inflateSync, strFromU8 } from 'fflate'
 
-import { MIN_NODE_SIZE, NODE_SIZE, SHAPE } from './constants.js'
+import { MIN_NODE_SIZE, NODE_SIZE, SHAPE, sizeOf } from './constants.js'
 import { DOCUMENT_VERSION, edgeIdFor } from './document.js'
 import { documentPositions } from './graph.js'
 import { isKnownShape } from './nodeMeta.js'
@@ -534,6 +534,8 @@ const EXPORT_STYLE = Object.freeze({
   [SHAPE.CARD]: 'rounded=1;shadow=1;whiteSpace=wrap;html=1;',
   [SHAPE.LIST]: 'rounded=0;whiteSpace=wrap;html=1;',
   [SHAPE.IMAGE]: 'rounded=0;dashed=1;whiteSpace=wrap;html=1;',
+  [SHAPE.FRAME]:
+    'rounded=1;arcSize=3;dashed=1;fillColor=none;verticalAlign=top;align=left;spacingLeft=10;fontStyle=1;whiteSpace=wrap;html=1;',
 })
 
 const ROW_HEIGHT = 26
@@ -564,19 +566,20 @@ export function toDrawio(document) {
   const sketch = document.style === 'sketch' ? SKETCH_STYLE : ''
   const cell = (/** @type {string} */ id) => `n-${id}`
 
-  // draw.io has no freehand shape to carry a pen stroke.
+  // draw.io has no freehand shape to carry a pen stroke. Frames go first, behind.
   const shapes = document.nodes
     .filter((node) => node.type !== SHAPE.INK)
+    .sort((a, b) => Number(b.type === SHAPE.FRAME) - Number(a.type === SHAPE.FRAME))
     .flatMap((node) => {
       const type = isKnownShape(node.type) ? node.type : SHAPE.PROCESS
       const at = positions.get(node.id) ?? { x: 0, y: 0 }
-      const width = node.size?.width || NODE_SIZE.WIDTH
+      const width = sizeOf(node).width
       const description = String(node.data?.description ?? '')
       const isTable = type === SHAPE.TABLE
       const rows = isTable ? description.split(/,\s*/).filter(Boolean) : []
       const height = isTable
         ? Math.max(node.size?.height || 0, ROW_HEIGHT * (rows.length + 1))
-        : node.size?.height || NODE_SIZE.HEIGHT
+        : sizeOf(node).height
 
       const name = escapeHtml(node.name ?? '')
       const value =

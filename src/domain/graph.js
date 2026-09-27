@@ -1,4 +1,4 @@
-import { sizeOf } from './constants.js'
+import { SHAPE, sizeOf } from './constants.js'
 import { edgeIdFor, toNodeId } from './document.js'
 import { layoutTree } from './layout.js'
 
@@ -66,6 +66,8 @@ export function documentToGraph(document) {
       type: 'shape',
       position: node.position ?? positions.get(node.id) ?? { x: 0, y: 0 },
       ...sizeOf(node),
+      // Behind everything, even when selected, so what it holds stays in reach.
+      ...(node.type === SHAPE.FRAME ? { zIndex: -2000 } : {}),
       data: { node },
     })),
     edges,

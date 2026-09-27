@@ -70,6 +70,9 @@ nobody hosts it yet: run it yourself, or hand over the `.flow` file or the brief
   (`4`/`C`, click one shape then another), Text (`5`/`T`, click the canvas to write), Pen (`6`/`P`),
   Eraser (`7`/`E`, click or drag over shapes and connections to delete them, in one undo step)
   and Laser (`8`/`K`, a fading pointer trail for presenting). Escape goes back to Select.
+- **Frames.** A frame (from the library) is a named region behind the shapes inside it: dragging
+  it carries them along, in one undo step. From its menu, copy just that frame for AI or export it
+  on its own. The brief groups shapes by frame, and Mermaid draws frames as subgraphs.
 - **Quick to type.** On a blank diagram, just start typing: the first shape takes the words.
   Double-click empty canvas for a shape there. `Tab` adds the next step below the selected shape,
   connected and ready to name, as in Whimsical. `Ctrl+K` finds any action or shape by name.

@@ -223,6 +223,11 @@ files 552,880
           <code>image</code>.
         </li>
         <li>
+          <code>id = frame "Name"</code> is a frame: a named region, with its size under
+          <code>@layout</code>. Every shape whose centre is inside it belongs to it, so the brief
+          groups them and Mermaid draws it as a subgraph.
+        </li>
+        <li>
           <code>note: ...</code> under the title is a note for the whole diagram, and
           <code>id note: ...</code> a note for one shape, one line each: instructions for whoever
           builds from it, person or agent.

@@ -51,6 +51,11 @@ export const NODE_META = Object.freeze({
   [SHAPE.NOTE]: shape('Note', 'An annotation', 'comment'),
   [SHAPE.TABLE]: shape('Table', 'A database table and its columns', 'branch'),
   [SHAPE.TEXT]: shape('Text', 'A label with no outline', 'unknown'),
+  // Clicked often, to select it or what is inside, so a click never opens its details.
+  [SHAPE.FRAME]: {
+    ...shape('Frame', 'A named region; the shapes inside it belong to it', 'unknown'),
+    openable: false,
+  },
   [SHAPE.SCREEN]: shape('Screen', 'A page or screen of the interface', 'trigger', 'wireframe'),
   [SHAPE.BUTTON]: shape('Button', 'Something to press', 'message', 'wireframe'),
   [SHAPE.INPUT]: shape('Input', 'A form field', 'branch', 'wireframe'),

@@ -441,3 +441,9 @@ optgroup {
 .vue-flow__edge.is-erasing {
   opacity: 0.25;
 }
+
+/* A frame's region: tinted enough to read as an area, clear enough to see lines through. */
+.frame-fill {
+  fill: var(--line);
+  fill-opacity: 0.35;
+}

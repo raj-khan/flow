@@ -56,7 +56,11 @@ import { EDIT_TEXT } from './editKey.js'
 import { RESIZE_NODE } from './resizeKey.js'
 import { LINE_STYLE, SKETCH } from './sketchKey.js'
 import { SHAPE_DRAG_TYPE } from '@/components/palette/dragType.js'
-import { NODE_SIZE } from '@/domain/constants.js'
+import { SHAPE, sizeOf } from '@/domain/constants.js'
+import { frameDocument, frameMembers } from '@/domain/frames.js'
+import { withPositions } from '@/domain/graph.js'
+import { toBrief } from '@/domain/brief.js'
+import { track } from '@/api/analytics.js'
 import { freeSpotNear } from '@/domain/layout.js'
 import FlowEdge from './FlowEdge.vue'
 import CanvasControls from './CanvasControls.vue'
@@ -468,9 +472,63 @@ provide(
  */
 const isDragging = ref(false)
 
+/**
+ * A frame carries what is inside it: the shapes whose centres it holds when
+ * the drag starts, moved by as much as it is.
+ * @type {{ frame: string, from: { x: number, y: number }, members: { id: string, from: { x: number, y: number } }[] } | null}
+ */
+let carrying = null
+
+/**
+ * @param {import('@/domain/types.js').FlowDocument} document
+ * @param {string} frameId
+ */
+const frameMembersOf = (document, frameId) => frameMembers(document).get(frameId) ?? []
+
+/** @param {{ node: import('@vue-flow/core').GraphNode, nodes: import('@vue-flow/core').GraphNode[] }} event */
+function onNodeDragStart({ node, nodes: dragged }) {
+  isDragging.value = true
+  carrying = null
+  if (node.data.node.type !== SHAPE.FRAME || (dragged?.length ?? 1) > 1 || !diagram.value) return
+  const onScreen = withPositions(
+    diagram.value,
+    Object.fromEntries(getNodes.value.map((each) => [each.id, { ...each.position }])),
+  )
+  const members = frameMembersOf(onScreen, node.id)
+  carrying = {
+    frame: node.id,
+    from: { ...node.position },
+    members: members.map((id) => ({ id, from: { ...(findNode(id)?.position ?? { x: 0, y: 0 }) } })),
+  }
+}
+
+/** @param {{ node: import('@vue-flow/core').GraphNode }} event */
+function onNodeDrag({ node }) {
+  if (!carrying || node.id !== carrying.frame) return
+  const dx = node.position.x - carrying.from.x
+  const dy = node.position.y - carrying.from.y
+  carrying.members.forEach(({ id, from }) =>
+    updateFlowNode(id, { position: { x: from.x + dx, y: from.y + dy } }),
+  )
+}
+
 /** @param {{ node: import('@vue-flow/core').GraphNode, nodes: import('@vue-flow/core').GraphNode[] }} event */
 function onNodeDragStop({ node, nodes: dragged }) {
   isDragging.value = false
+  // A frame and what it carried move as one change.
+  if (carrying && node.id === carrying.frame) {
+    const group = [node.id, ...carrying.members.map((member) => member.id)]
+    carrying = null
+    moveNodes.mutate({
+      positions: Object.fromEntries(
+        group.map((id) => {
+          const at = findNode(id)?.position ?? { x: 0, y: 0 }
+          return [id, { x: at.x, y: at.y }]
+        }),
+      ),
+    })
+    return
+  }
   // Plain objects, not Vue Flow's reactive positions.
   if (dragged?.length > 1) {
     moveNodes.mutate({
@@ -656,14 +714,14 @@ function centreOn(node) {
  * @param {{ exact?: boolean, typed?: boolean }} [options] typed: named by what was typed
  */
 function addShape(shape, at, options = {}) {
+  const box = sizeOf({ type: shape })
   const wanted = at
-    ? {
-        x: Math.round(at.x - NODE_SIZE.WIDTH / 2),
-        y: Math.round(at.y - NODE_SIZE.HEIGHT / 2),
-      }
+    ? { x: Math.round(at.x - box.width / 2), y: Math.round(at.y - box.height / 2) }
     : { x: 0, y: 0 }
   // A drop lands exactly where it was let go; a click finds room near the middle.
-  const position = options.exact ? wanted : freeSpotNear(wanted, nodes.value)
+  // A frame goes where it is asked for: its point is to go around things.
+  const position =
+    options.exact || shape === SHAPE.FRAME ? wanted : freeSpotNear(wanted, nodes.value)
 
   createNode.mutate(
     { title: options.typed ? '' : metaFor(shape).label, description: '', shape, position },
@@ -827,6 +885,14 @@ const menuItems = computed(() => {
     ]
   }
   const node = nodes.value.find((candidate) => candidate.id === at.id)?.data.node
+  if (node?.type === SHAPE.FRAME) {
+    return [
+      { label: 'Rename', run: () => (editingId.value = at.id) },
+      { label: 'Copy frame for AI', run: () => copyFrame(at.id) },
+      { label: 'Export frame', run: () => canvas.requestExport(at.id) },
+      { label: 'Delete frame', run: () => removeShapes([at.id]), danger: true },
+    ]
+  }
   return [
     ...(node && isOpenable(node) ? [{ label: 'Open details', run: () => openDetails(at.id) }] : []),
     { label: 'Rename', run: () => (editingId.value = at.id) },
@@ -834,6 +900,25 @@ const menuItems = computed(() => {
     { label: 'Delete', run: () => removeShapes([at.id]), danger: true },
   ]
 })
+
+/**
+ * One frame as a brief of its own: what it holds, and how those connect.
+ * @param {string} id
+ */
+async function copyFrame(id) {
+  const part = diagram.value && frameDocument(diagram.value, id)
+  if (!part) return
+  try {
+    await navigator.clipboard.writeText(toBrief(part))
+  } catch {
+    toasts.push('The brief could not be copied. Your browser refused the clipboard.', {
+      tone: 'danger',
+    })
+    return
+  }
+  track('brief_copied', { scope: 'frame' })
+  toasts.push(`Copied the ${part.title} frame. Paste it into Claude, Copilot or any coding agent.`)
+}
 
 /** @param {string} id */
 function openDetails(id) {
@@ -946,7 +1031,8 @@ watch(
       @node-context-menu="onNodeMenu"
       @edge-context-menu="onEdgeMenu"
       @pane-click="onPaneClick"
-      @node-drag-start="isDragging = true"
+      @node-drag-start="onNodeDragStart"
+      @node-drag="onNodeDrag"
       @node-drag-stop="onNodeDragStop"
       @connect="onConnect"
       @connect-start="onConnectStart"

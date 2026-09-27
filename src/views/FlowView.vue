@@ -49,6 +49,12 @@ const isPhone = useMediaQuery(PHONE)
 const toasts = useToastStore()
 useViewKeys({ fullScreen: fullScreen.toggle, zen: canvas.toggleZen })
 
+// A frame's own Export, from its menu.
+watch(
+  () => canvas.exportAsked,
+  () => (isExporting.value = true),
+)
+
 /** Ctrl+K: every action and shape, by name. */
 const isPaletteOpen = ref(false)
 const commands = useCommands({

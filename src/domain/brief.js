@@ -1,5 +1,6 @@
 import { SHAPE } from './constants.js'
 import { serialiseFlow } from './flowText.js'
+import { frameMembers, isFrame } from './frames.js'
 
 /**
  * What each shape asks of whoever builds from the diagram. The palette's hints
@@ -68,9 +69,10 @@ export function toBrief(document) {
   const count = (/** @type {number} */ n, /** @type {string} */ noun) =>
     `${n} ${noun}${n === 1 ? '' : 's'}`
 
-  // Pen strokes are marks on the picture, not parts of the design.
-  const shapes = document.nodes.filter((node) => node.type !== SHAPE.INK)
-  const strokes = document.nodes.length - shapes.length
+  // Pen strokes are marks on the picture, not parts of the design; frames group the parts.
+  const shapes = document.nodes.filter((node) => node.type !== SHAPE.INK && !isFrame(node))
+  const frames = document.nodes.filter(isFrame)
+  const strokes = document.nodes.filter((node) => node.type === SHAPE.INK).length
 
   const lines = [
     `# ${oneLine(document.title) || 'Untitled diagram'}`,
@@ -95,6 +97,19 @@ export function toBrief(document) {
       lines.push(
         `- ${label(node.id)} \`${node.id}\`: ${intentOf(node.type)}.${detail ? ` ${detail}` : ''}`,
         ...noteLines(node.data?.notes).map((note) => `  - Note: ${note}`),
+      )
+    })
+  }
+
+  if (frames.length) {
+    const members = frameMembers(document)
+    lines.push('', '## Frames', '', 'Named regions; each groups the shapes inside it.', '')
+    frames.forEach((frame) => {
+      const inside = (members.get(frame.id) ?? []).map(label)
+      const description = oneLine(frame.data?.description)
+      lines.push(
+        `- ${label(frame.id)} \`${frame.id}\`: ${inside.length ? `groups ${inside.join(', ')}` : 'empty'}.${description ? ` ${description}` : ''}`,
+        ...noteLines(frame.data?.notes).map((note) => `  - Note: ${note}`),
       )
     })
   }

@@ -1,5 +1,6 @@
 import { SHAPE } from './constants.js'
 import { DEFAULT_TITLE, DOCUMENT_VERSION, edgeIdFor } from './document.js'
+import { frameMembers } from './frames.js'
 
 /**
  * Mermaid flowcharts in and out: the subset a diagram in a README uses. Import
@@ -95,13 +96,32 @@ export function toMermaid(document, { highlight = new Map() } = {}) {
 
   const lines = ['---', `title: ${document.title || DEFAULT_TITLE}`, '---', 'flowchart TD']
 
-  // Mermaid has nothing to draw a pen stroke with.
+  // Mermaid has nothing to draw a pen stroke with, and draws a frame as a subgraph.
   document.nodes
-    .filter((node) => node.type !== SHAPE.INK)
+    .filter((node) => node.type !== SHAPE.INK && node.type !== SHAPE.FRAME)
     .forEach((node) => {
       const [open, close] = BRACKETS[node.type] ?? BRACKETS[SHAPE.PROCESS]
       lines.push(`  ${safe.get(node.id)}${open}"${escapeLabel(node.name ?? '')}"${close}`)
     })
+
+  const frames = new Map(
+    document.nodes.filter((node) => node.type === SHAPE.FRAME).map((node) => [node.id, node]),
+  )
+  if (frames.size) {
+    const members = frameMembers(document)
+    const nested = new Set([...members.values()].flat())
+    /** @param {string} id @param {string} indent */
+    const subgraph = (id, indent) => {
+      const frame = /** @type {import('./types.js').FlowNode} */ (frames.get(id))
+      lines.push(`${indent}subgraph ${safe.get(id)}["${escapeLabel(frame.name ?? '')}"]`)
+      ;(members.get(id) ?? []).forEach((member) => {
+        if (frames.has(member)) subgraph(member, `${indent}  `)
+        else if (safe.has(member)) lines.push(`${indent}  ${safe.get(member)}`)
+      })
+      lines.push(`${indent}end`)
+    }
+    ;[...frames.keys()].filter((id) => !nested.has(id)).forEach((id) => subgraph(id, '  '))
+  }
 
   document.edges.forEach((edge) => {
     const label = edge.label ? `|"${escapeLabel(edge.label)}"|` : ''

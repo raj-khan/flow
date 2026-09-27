@@ -84,6 +84,8 @@ function onResizeEnd({ params }) {
   resize(props.id, params)
 }
 const isText = computed(() => node.value.type === SHAPE.TEXT)
+/** A frame: a region behind the shapes it holds, named at its top left. */
+const isFrame = computed(() => node.value.type === SHAPE.FRAME)
 const isDecision = computed(() => node.value.type === SHAPE.DECISION)
 const isTable = computed(() => node.value.type === SHAPE.TABLE)
 /** A pen stroke: just its line, with no text, outline or connections. */
@@ -108,7 +110,11 @@ const strokeWidth = computed(() => (props.selected || isKeyboardFocused.value ? 
     :class="[
       sketch ? 'font-sketch' : '',
       // A table reads top down: its name in the band, its columns below.
-      isTable ? 'justify-start pt-1.5 text-left' : 'justify-center text-center',
+      isFrame
+        ? 'items-start justify-start text-left'
+        : isTable
+          ? 'justify-start pt-1.5 text-left'
+          : 'justify-center text-center',
       isDropTarget && !acceptsDrop ? 'opacity-40' : '',
       isKeyboardFocused ? 'outline-2 outline-offset-4 outline-focus' : '',
       meta.openable ? 'cursor-pointer' : 'cursor-default',
@@ -119,7 +125,7 @@ const strokeWidth = computed(() => (props.selected || isKeyboardFocused.value ? 
       width: '100%',
       height: '100%',
       // A diamond's inset already leaves room; padding on top would leave none for text.
-      padding: isTable ? undefined : `${inset.y + 8}px ${inset.x || 12}px`,
+      padding: isFrame ? '10px 14px' : isTable ? undefined : `${inset.y + 8}px ${inset.x || 12}px`,
       paddingInline: isTable ? '12px' : undefined,
     }"
     :aria-label="`${meta.label}: ${node.name}${notes ? ', has notes for the builder' : ''}`"
@@ -182,9 +188,11 @@ const strokeWidth = computed(() => (props.selected || isKeyboardFocused.value ? 
     >
       <path
         :d="outline"
-        class="fill-surface transition-[stroke-width] duration-150"
+        class="transition-[stroke-width] duration-150"
+        :class="isFrame ? 'frame-fill' : 'fill-surface'"
         :stroke="drawn ? 'none' : 'currentColor'"
         :stroke-width="acceptsDrop ? 3 : strokeWidth"
+        :stroke-dasharray="isFrame ? '8 5' : undefined"
         stroke-linejoin="round"
       />
       <path
@@ -222,7 +230,7 @@ const strokeWidth = computed(() => (props.selected || isKeyboardFocused.value ? 
     <h3
       v-else-if="!isInk"
       class="relative w-full break-words"
-      :class="[titleSize, isTable ? 'truncate' : 'line-clamp-2']"
+      :class="[titleSize, isTable || isFrame ? 'truncate' : 'line-clamp-2']"
     >
       {{ node.name }}
     </h3>

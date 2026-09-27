@@ -54,6 +54,8 @@ export function shapePath(shape, width, height, inset = 1) {
     case SHAPE.TEXT:
     case SHAPE.INK:
       return ''
+    case SHAPE.FRAME:
+      return roundedRect(l, t, r, b, Math.min(12, h / 6))
     case SHAPE.SCREEN: {
       // A browser window: a title bar with three dots.
       const bar = t + Math.min(h * 0.2, 18)

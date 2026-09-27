@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watchEffect } from 'vue'
+import { computed, onBeforeUnmount, ref, watchEffect } from 'vue'
 
 import { track } from '@/api/analytics.js'
 import BaseModal from '@/components/ui/BaseModal.vue'
@@ -8,15 +8,28 @@ import { sketchFontData, svgToPng } from '@/composables/exportImage.js'
 import { useFlowQuery } from '@/composables/useFlowQuery.js'
 import { toDrawio } from '@/domain/drawio.js'
 import { flowFileName } from '@/domain/flowText.js'
+import { frameDocument, isFrame } from '@/domain/frames.js'
 import { renderSvg } from '@/domain/renderSvg.js'
 import { isSketch } from '@/domain/sketch.js'
+import { useCanvasStore } from '@/stores/canvas.js'
 import { useThemeStore } from '@/stores/theme.js'
 import { useToastStore } from '@/stores/toasts.js'
 
-/** The diagram as a picture, or as a file for draw.io. `.flow` is Save. */
+/** The diagram, or one frame of it, as a picture or a file for draw.io. `.flow` is Save. */
 const emit = defineEmits(['close'])
 
-const { document } = useFlowQuery()
+const { document: whole } = useFlowQuery()
+const canvas = useCanvasStore()
+
+/** The frames there are to export on their own, and which one, if any, is chosen. */
+const frames = computed(() => (whole.value?.nodes ?? []).filter(isFrame))
+const area = ref(canvas.exportFrame)
+onBeforeUnmount(() => (canvas.exportFrame = ''))
+
+/** What is exported: the whole diagram, or the chosen frame and what it holds. */
+const document = computed(() =>
+  whole.value && area.value ? (frameDocument(whole.value, area.value) ?? whole.value) : whole.value,
+)
 const theme = useThemeStore()
 const toasts = useToastStore()
 
@@ -89,6 +102,19 @@ async function download() {
           </label>
         </div>
       </fieldset>
+
+      <label v-if="frames.length" class="block text-sm">
+        <span class="mb-1.5 block text-xs font-medium text-muted">What to export</span>
+        <select
+          v-model="area"
+          class="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink"
+        >
+          <option value="">The whole diagram</option>
+          <option v-for="frame in frames" :key="frame.id" :value="frame.id">
+            Frame: {{ frame.name || frame.id }}
+          </option>
+        </select>
+      </label>
 
       <fieldset v-if="format !== 'drawio'" class="flex items-center gap-4 text-sm">
         <legend class="sr-only">Colours</legend>

@@ -59,7 +59,7 @@ export function analyticsScript(id) {
 /**
  * Count an event, when analytics is on; otherwise nothing happens.
  * @param {'brief_copied' | 'exported' | 'published' | 'opened_from_link' | 'mcp_setup_copied'} name
- * @param {Record<string, string>} [params]
+ * @param {Record<string, string>} [params] such as the scope of a brief, or an export's format
  */
 export function track(name, params) {
   const page =

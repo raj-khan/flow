@@ -108,6 +108,12 @@ export function renderSvg(
       )
       .join('')}</defs>`,
     `<rect x="${round(left)}" y="${round(top)}" width="${round(width)}" height="${round(height)}" fill="${colours.canvas}"/>`,
+    // Frames sit under everything, connections included.
+    ...nodes
+      .filter((node) => node.type === SHAPE.FRAME)
+      .map((node) =>
+        renderFrame(node, /** @type {any} */ (at.get(node.id)), colours, highlight.get(node.id)),
+      ),
     ...edges.map((edge) =>
       renderEdge(
         edge,
@@ -119,19 +125,39 @@ export function renderSvg(
         document.lines,
       ),
     ),
-    ...nodes.map((node) =>
-      renderNode(
-        node,
-        /** @type {any} */ (at.get(node.id)),
-        colours,
-        highlight.get(node.id),
-        sketch,
+    ...nodes
+      .filter((node) => node.type !== SHAPE.FRAME)
+      .map((node) =>
+        renderNode(
+          node,
+          /** @type {any} */ (at.get(node.id)),
+          colours,
+          highlight.get(node.id),
+          sketch,
+        ),
       ),
-    ),
     '</svg>',
   ]
 
   return `${parts.filter(Boolean).join('\n')}\n`
+}
+
+/**
+ * A frame: a light region with its name at the top left, behind what it holds.
+ * @param {import('./types.js').FlowNode} node
+ * @param {{ x: number, y: number }} position
+ * @param {typeof SVG_THEMES.light} colours
+ * @param {'added' | 'removed' | 'changed'} [change]
+ */
+function renderFrame(node, position, colours, change) {
+  const { width, height } = sizeOf(node)
+  const stroke = change ? colours.changes[change] : colours.muted
+  return [
+    `<g transform="translate(${round(position.x)},${round(position.y)})"${change ? ` data-change="${change}"` : ''}>`,
+    `<path d="${shapePath(SHAPE.FRAME, width, height, 1)}" fill="${colours.line}" fill-opacity="0.35" stroke="${stroke}" stroke-width="${change ? 3 : 1.5}" stroke-dasharray="8 5"/>`,
+    `<text x="14" y="24" font-size="${TITLE_SIZE}" font-weight="600" fill="${colours.ink}">${escapeXml(wrap(node.name ?? '', width - 28, TITLE_SIZE, 1)[0] ?? '')}</text>`,
+    '</g>',
+  ].join('\n')
 }
 
 /**
