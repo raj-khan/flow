@@ -29,9 +29,7 @@ test('imports a pasted flowchart, says what it skipped, and undo brings the old 
       ].join('\n'),
     )
   await expect(dialog.getByRole('status')).toContainText('4 shapes and 3 connections')
-  await expect(dialog.getByRole('list', { name: 'Lines that will be skipped' })).toContainText(
-    'Line 5',
-  )
+  await expect(dialog.getByRole('list', { name: 'What will be skipped' })).toContainText('Line 5')
 
   await dialog.getByRole('button', { name: 'Import' }).click()
 

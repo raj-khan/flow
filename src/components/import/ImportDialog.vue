@@ -162,10 +162,10 @@ function submit() {
       <ul
         v-if="result?.warnings.length"
         class="scroll-panel max-h-32 space-y-0.5 text-xs text-muted"
-        aria-label="Lines that will be skipped"
+        aria-label="What will be skipped"
       >
         <li v-for="warning in result.warnings" :key="`${warning.line}-${warning.message}`">
-          Line {{ warning.line }}: {{ warning.message }}
+          {{ warning.line ? `Line ${warning.line}: ` : '' }}{{ warning.message }}
         </li>
       </ul>
 

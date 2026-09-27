@@ -7,6 +7,7 @@ import { downloadBlob, downloadText } from '@/composables/download.js'
 import { sketchFontData, svgToPng } from '@/composables/exportImage.js'
 import { useFlowQuery } from '@/composables/useFlowQuery.js'
 import { toDrawio } from '@/domain/drawio.js'
+import { toExcalidraw } from '@/domain/excalidraw.js'
 import { flowFileName } from '@/domain/flowText.js'
 import { frameDocument, isFrame } from '@/domain/frames.js'
 import { renderSvg } from '@/domain/renderSvg.js'
@@ -37,7 +38,10 @@ const FORMATS = [
   { id: 'png', label: 'PNG', hint: 'An image for slides, docs and chat' },
   { id: 'svg', label: 'SVG', hint: 'Sharp at any size, for docs and the web' },
   { id: 'drawio', label: 'draw.io', hint: 'To carry on in draw.io or diagrams.net' },
+  { id: 'excalidraw', label: 'Excalidraw', hint: 'To carry on sketching in Excalidraw' },
 ]
+/** Files, not pictures: no colours to pick and no preview to show. */
+const isFile = computed(() => format.value === 'drawio' || format.value === 'excalidraw')
 
 const format = ref('png')
 const systemDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false
@@ -71,6 +75,8 @@ async function download() {
     if (format.value === 'svg') downloadText(name, svg.value, 'image/svg+xml')
     else if (format.value === 'drawio') {
       downloadText(name, toDrawio(document.value), 'application/xml')
+    } else if (format.value === 'excalidraw') {
+      downloadText(name, toExcalidraw(document.value), 'application/json')
     } else downloadBlob(name, await svgToPng(svg.value))
     track('exported', { format: format.value })
     toasts.push(`Downloaded ${name}`)
@@ -88,7 +94,7 @@ async function download() {
     <div class="space-y-4 px-5 py-4">
       <fieldset>
         <legend class="mb-1.5 text-xs font-medium text-muted">Format</legend>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-2 gap-2 md:grid-cols-4">
           <label
             v-for="option in FORMATS"
             :key="option.id"
@@ -116,7 +122,7 @@ async function download() {
         </select>
       </label>
 
-      <fieldset v-if="format !== 'drawio'" class="flex items-center gap-4 text-sm">
+      <fieldset v-if="!isFile" class="flex items-center gap-4 text-sm">
         <legend class="sr-only">Colours</legend>
         <label class="flex items-center gap-1.5">
           <input v-model="look" type="radio" name="look" value="light" />
@@ -129,14 +135,18 @@ async function download() {
       </fieldset>
 
       <img
-        v-if="format !== 'drawio'"
+        v-if="!isFile"
         :src="preview"
         alt="What the export will look like"
         class="max-h-[45vh] w-full rounded-lg border border-line object-contain"
       />
-      <p v-else class="text-xs text-muted">
+      <p v-else-if="format === 'drawio'" class="text-xs text-muted">
         Opens in draw.io as it is, positions, sizes and sketch style included, and comes back into
         isketch unchanged through Import.
+      </p>
+      <p v-else class="text-xs text-muted">
+        Opens in Excalidraw with its shapes, labels and bound arrows, and comes back into isketch
+        unchanged through Import: each shape keeps its kind, description and notes.
       </p>
 
       <div class="flex justify-end">

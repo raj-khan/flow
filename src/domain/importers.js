@@ -1,5 +1,6 @@
 import { COMPOSE_ORIGIN, fromCompose } from './compose.js'
 import { DRAWIO_ORIGIN, fromDrawio } from './drawio.js'
+import { fromExcalidraw } from './excalidraw.js'
 import { fromMermaid } from './mermaid.js'
 import { fromOpenApi, OPENAPI_ORIGIN } from './openapi.js'
 import { fromSql, SQL_ORIGIN } from './sql.js'
@@ -60,6 +61,15 @@ export const IMPORT_FORMATS = Object.freeze([
       '<mxGraphModel><root>\n  <mxCell id="0"/><mxCell id="1" parent="0"/>\n  <mxCell id="a" value="API" style="rounded=1;" vertex="1" parent="1">\n    <mxGeometry x="0" y="0" width="120" height="60" as="geometry"/>\n  </mxCell>\n</root></mxGraphModel>',
     origin: DRAWIO_ORIGIN,
     read: fromDrawio,
+  },
+  {
+    id: 'excalidraw',
+    label: 'Excalidraw',
+    accept: '.excalidraw,.json',
+    placeholder:
+      'Open a .excalidraw file, or select shapes in Excalidraw, copy them (Ctrl+C) and paste here.',
+    origin: null,
+    read: fromExcalidraw,
   },
 ])
 

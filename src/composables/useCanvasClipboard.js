@@ -3,13 +3,14 @@ import { onBeforeUnmount, onMounted } from 'vue'
 import { useFlowQuery } from '@/composables/useFlowQuery.js'
 import { useReplaceDocument } from '@/composables/useNodeMutations.js'
 import { copySelection, pasteInto } from '@/domain/clipboard.js'
+import { fromExcalidraw } from '@/domain/excalidraw.js'
 import { parseFlow, serialiseFlow } from '@/domain/flowText.js'
 import { useToastStore } from '@/stores/toasts.js'
 
 /**
  * Copy, cut, paste and duplicate on the canvas. The clipboard carries `.flow`
  * text, so shapes paste between tabs, and into and out of a text editor or an
- * agent. Each paste is one undoable change.
+ * agent; shapes copied in Excalidraw paste too. Each paste is one undoable change.
  *
  * @param {{
  *   selectedIds: () => string[],
@@ -58,7 +59,8 @@ export function useCanvasClipboard(canvas) {
   function onPaste(event) {
     if (canvas.isBlocked(event) || !document.value) return
     const text = event.clipboardData?.getData('text/plain') ?? ''
-    const { document: copy } = parseFlow(text)
+    const flow = parseFlow(text).document
+    const copy = flow?.nodes.length ? flow : fromExcalidraw(text).document
     // Anything else on the clipboard is not ours to take.
     if (!copy?.nodes.length) return
     event.preventDefault()

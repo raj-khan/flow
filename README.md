@@ -39,8 +39,9 @@ isketch aims at that gap:
   itself, and notes on the diagram and its shapes travel as instructions to follow.
 - **Git native.** Files diff cleanly, a CLI renders SVG with no browser, and pull requests get a
   visual diff, so the design and the code stop drifting apart.
-- **Start from real files.** Your existing `.drawio` diagrams, `docker-compose.yml`, OpenAPI and
-  SQL DDL, with re-import that keeps your layout. And a `.drawio` back out whenever you want one.
+- **Start from real files.** Your existing `.drawio` and `.excalidraw` diagrams,
+  `docker-compose.yml`, OpenAPI and SQL DDL, with re-import that keeps your layout. And a `.drawio`
+  or `.excalidraw` back out whenever you want one.
 - **Local first.** No account, no server, works offline, shareable as a link.
 - **Written for AI readers.** [/llms.txt](https://isketch.online/llms.txt) and
   [/docs/format](https://isketch.online/docs/format) describe the format, the tools and the CLI
@@ -134,11 +135,16 @@ nobody hosts it yet: run it yourself, or hand over the `.flow` file or the brief
   Diagram: shapes map to the nearest one here, entity tables keep their rows, and lanes are
   flattened with their shapes kept. _Export_ writes a file draw.io
   opens as it is, sketch style included, and that comes back into isketch unchanged.
+- **Excalidraw, both ways.** Import a `.excalidraw` file, or copy shapes in Excalidraw and paste
+  them onto the canvas: rectangles, ellipses, diamonds, text and frames become shapes named by
+  their text, arrows bound at both ends become connections, and free drawing becomes pen strokes.
+  What cannot come in is listed. _Export_ writes a `.excalidraw` file whose shapes carry their
+  isketch kind, description and notes, so it comes back unchanged.
 - **Copy for AI.** One button copies a Markdown brief for Claude, Copilot or any coding agent: each
   shape with its id and what it means ("a data store", "a branch the code must handle"), each
   connection in words, and the `.flow` source at the end so the agent can change the diagram and
   hand it back. `isketch brief` prints the same from the command line.
-- **Export** as PNG (at twice the size, for slides and chat), SVG or a draw.io file, light or
+- **Export** as PNG (at twice the size, for slides and chat), SVG, a draw.io or an Excalidraw file, light or
   dark, with a preview. Sketches carry their handwriting font inside the file.
 - **Copy as Mermaid** from the text pane, for a README.
 - **Open and save `.flow` files** (`Ctrl+O`, `Ctrl+S`). In Chrome and Edge, Save writes back to
