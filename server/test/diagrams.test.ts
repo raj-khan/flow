@@ -164,6 +164,68 @@ describe('reading a link', () => {
   })
 })
 
+describe('embedding a link', () => {
+  it('serves the drawing so a README image always shows the latest version', async () => {
+    const { id, editToken } = await publish()
+    const first = await fetch(`${base}/d/${id}.svg`)
+    assert.equal(first.headers.get('cache-control'), 'no-cache, max-age=0')
+    const etag = first.headers.get('etag') ?? ''
+    assert.ok(etag)
+
+    // Asked again with what it has: nothing changed, nothing sent.
+    const again = await fetch(`${base}/d/${id}.svg`, { headers: { 'if-none-match': etag } })
+    assert.equal(again.status, 304)
+
+    await fetch(`${base}/api/diagrams/${id}`, {
+      method: 'PUT',
+      headers: { 'content-type': 'text/plain', authorization: `Bearer ${editToken}` },
+      body: FLOW.replace('"Orders"', '"Invoices"'),
+    })
+    const updated = await fetch(`${base}/d/${id}.svg`, { headers: { 'if-none-match': etag } })
+    assert.equal(updated.status, 200)
+    assert.match(await updated.text(), />Invoices<\/text>/)
+  })
+
+  it('offers the drawing alone for an iframe, which any site may frame', async () => {
+    const { id } = await publish()
+    const embed = await fetch(`${base}/d/${id}/embed`)
+    const html = await embed.text()
+    assert.match(embed.headers.get('content-type') ?? '', /^text\/html/)
+    assert.equal(embed.headers.get('content-security-policy'), 'frame-ancestors *')
+    assert.equal(embed.headers.get('x-frame-options'), null)
+    assert.match(html, /<svg /)
+    assert.match(html, new RegExp(`href="https://isketch\\.test/d/${id}"`))
+  })
+
+  it('answers oEmbed, and the page says where to ask', async () => {
+    const { id, url } = await publish()
+    const page = await (await fetch(`${base}/d/${id}`)).text()
+    const discovery = `https://isketch.test/oembed?url=${encodeURIComponent(url)}`
+    assert.ok(
+      page.includes(`type="application/json+oembed" href="${discovery.replace(/&/g, '&amp;')}"`),
+    )
+
+    const response = await fetch(`${base}/oembed?url=${encodeURIComponent(url)}&maxwidth=400`)
+    assert.equal(response.status, 200)
+    const oembed = (await response.json()) as Record<string, unknown>
+    assert.equal(oembed.version, '1.0')
+    assert.equal(oembed.type, 'rich')
+    assert.equal(oembed.title, 'Shop')
+    assert.ok((oembed.width as number) <= 400)
+    assert.match(
+      oembed.html as string,
+      new RegExp(`<iframe src="https://isketch\\.test/d/${id}/embed"`),
+    )
+    assert.equal(oembed.thumbnail_url, `${url}/og.png`)
+
+    assert.equal((await fetch(`${base}/oembed?url=https://elsewhere.test/d/${id}`)).status, 404)
+    assert.equal(
+      (await fetch(`${base}/oembed?url=${encodeURIComponent(url)}&format=xml`)).status,
+      501,
+    )
+  })
+})
+
 describe('changing a link', () => {
   it('updates with the edit token, and refuses without it', async () => {
     const { id, editToken } = await publish()

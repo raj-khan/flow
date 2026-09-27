@@ -1,3 +1,5 @@
+import type { Published } from './diagrams.service.js'
+
 /**
  * The page a link opens. It carries the brief as text, not only a picture, so
  * an AI that fetches the link reads the whole design; a person sees the
@@ -6,7 +8,7 @@
 export function renderPage(input: {
   title: string
   brief: string
-  links: { page: string; markdown: string; flow: string; svg: string; json: string }
+  links: Published['links']
   openUrl: string
   image: string
   updatedAt: Date
@@ -23,6 +25,7 @@ export function renderPage(input: {
 <link rel="canonical" href="${escape(links.page)}">
 <link rel="alternate" type="text/markdown" href="${escape(links.markdown)}" title="Brief for AI agents">
 <link rel="alternate" type="text/plain" href="${escape(links.flow)}" title=".flow source">
+<link rel="alternate" type="application/json+oembed" href="${escape(links.oembed)}" title="${escape(title)}">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="isketch">
 <meta property="og:title" content="${escape(title)} · isketch">
@@ -71,6 +74,42 @@ export function renderPage(input: {
 </body>
 </html>
 `
+}
+
+/**
+ * The drawing alone, for an iframe in Notion, Medium or a docs site: it fills
+ * the frame, keeps its proportions, and links back to the full page.
+ */
+export function renderEmbed(input: { title: string; svg: string; pageUrl: string }): string {
+  const { title, svg, pageUrl } = input
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escape(title)} · isketch</title>
+<link rel="canonical" href="${escape(pageUrl)}">
+<style>
+  html, body { margin: 0; height: 100%; background: #fff; font: 12px/1.4 ui-sans-serif, system-ui, sans-serif; }
+  a.drawing { display: flex; align-items: center; justify-content: center; height: calc(100% - 26px); }
+  a.drawing svg { max-width: 100%; max-height: 100%; width: auto; height: auto; }
+  footer { height: 26px; display: flex; align-items: center; justify-content: flex-end; padding: 0 10px; }
+  footer a { color: #6b7280; text-decoration: none; }
+</style>
+</head>
+<body>
+<a class="drawing" href="${escape(pageUrl)}" target="_blank" rel="noopener" aria-label="${escape(title)}, open in isketch">${svg}</a>
+<footer><a href="${escape(pageUrl)}" target="_blank" rel="noopener">${escape(title)} · isketch</a></footer>
+</body>
+</html>
+`
+}
+
+/** A drawing's own size, from its root element, or a sensible frame. */
+export function svgSize(svg: string): { width: number; height: number } {
+  const width = Number(/<svg[^>]*\swidth="([\d.]+)"/.exec(svg)?.[1])
+  const height = Number(/<svg[^>]*\sheight="([\d.]+)"/.exec(svg)?.[1])
+  return width > 0 && height > 0 ? { width, height } : { width: 800, height: 500 }
 }
 
 function escape(text: string): string {

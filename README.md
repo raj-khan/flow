@@ -322,6 +322,8 @@ and serves it in every form a reader wants:
 | `/d/:id.svg`    | The drawing, sketch font embedded                                       |
 | `/d/:id.json`   | The document                                                            |
 | `/d/:id/og.png` | The drawing itself, as a 1200x630 PNG link preview, cached per revision |
+| `/d/:id/embed`  | The drawing alone, for an iframe on any site                            |
+| `/oembed?url=`  | oEmbed JSON, so Notion, Medium and docs sites embed a pasted link       |
 
 `POST /api/diagrams` with `.flow` text (or JSON `{ "text": … }`) publishes it and returns the link and
 an edit token, shown once and stored only as a hash. `PUT` and `DELETE` on `/api/diagrams/:id` with
@@ -330,6 +332,11 @@ can read, only the token can change it. Invalid text is refused with line number
 
 It reads, briefs and draws with the app's own `src/domain` code, so a link shows exactly what the
 editor and the CLI do.
+
+**Embeds stay current.** `/d/:id.svg` is served with `no-cache` and an ETag per revision, so an
+image in a README (through GitHub's image proxy) shows each new version as it is published, while an
+unchanged one costs a 304. Share copies it ready to paste, `[![Title](…/d/id.svg)](…/d/id)`, and an
+iframe for docs sites; Notion and Medium find the embed themselves through oEmbed.
 
 It is also a remote MCP server, at `/mcp` over Streamable HTTP, so an agent that cannot run a local
 process can still work with diagrams by their links: `read_diagram` (as a brief or `.flow` text),

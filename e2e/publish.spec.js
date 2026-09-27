@@ -55,6 +55,16 @@ test('publishes a public link, updates it in place, and unpublishes it', async (
     'https://isketch.test/d/abc123.md',
   )
 
+  // Placed elsewhere: a README image that shows each new version, and an iframe.
+  await dialog.getByRole('button', { name: 'Copy README image' }).click()
+  await expect
+    .poll(() => page.evaluate(() => navigator.clipboard.readText()))
+    .toBe('[![Support flow](https://isketch.test/d/abc123.svg)](https://isketch.test/d/abc123)')
+  await dialog.getByRole('button', { name: 'Copy embed code' }).click()
+  await expect
+    .poll(() => page.evaluate(() => navigator.clipboard.readText()))
+    .toMatch(/^<iframe src="https:\/\/isketch\.test\/d\/abc123\/embed" /)
+
   // The token is remembered, so a later visit updates the same link.
   await page.keyboard.press('Escape')
   await page.reload()

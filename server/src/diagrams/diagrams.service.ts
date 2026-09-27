@@ -21,7 +21,15 @@ export interface Published {
   id: string
   revision: number
   url: string
-  links: { page: string; markdown: string; flow: string; svg: string; json: string }
+  links: {
+    page: string
+    markdown: string
+    flow: string
+    svg: string
+    json: string
+    embed: string
+    oembed: string
+  }
 }
 
 /** A diagram as it is served: its row, and the document read from it. */
@@ -84,6 +92,8 @@ export class DiagramsService {
         flow: `${url}.flow`,
         svg: `${url}.svg`,
         json: `${url}.json`,
+        embed: `${url}/embed`,
+        oembed: `${this.config.publicUrl}/oembed?url=${encodeURIComponent(url)}`,
       },
     }
   }

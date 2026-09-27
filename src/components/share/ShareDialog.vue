@@ -1,7 +1,8 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 import BaseModal from '@/components/ui/BaseModal.vue'
+import { useFlowQuery } from '@/composables/useFlowQuery.js'
 import { usePublish } from '@/composables/usePublish.js'
 import { useShareLink } from '@/composables/useShareLink.js'
 import { useToastStore } from '@/stores/toasts.js'
@@ -17,6 +18,21 @@ const { share } = useShareLink()
 const { link, isAvailable, isBusy, error, publish, unpublish } = usePublish()
 const toasts = useToastStore()
 const copied = ref('')
+const { document } = useFlowQuery()
+
+/**
+ * The published diagram, placed elsewhere: an image for a README that shows
+ * the latest version, and an iframe for Notion, Medium or a docs site.
+ */
+const embeds = computed(() => {
+  if (!link.value) return null
+  const url = link.value.url
+  const title = (document.value?.title || 'Diagram').replace(/[[\]"]/g, '')
+  return {
+    readme: `[![${title}](${url}.svg)](${url})`,
+    iframe: `<iframe src="${url}/embed" width="800" height="500" style="border:0;max-width:100%" loading="lazy" title="${title}"></iframe>`,
+  }
+})
 
 /** @param {string} text @param {string} which */
 async function copy(text, which) {
@@ -87,6 +103,24 @@ const button =
             <div class="flex flex-wrap gap-2">
               <button type="button" :class="button" @click="copy(link.markdown, 'md')">
                 {{ copied === 'md' ? 'Copied' : 'Copy brief link (.md)' }}
+              </button>
+              <button
+                v-if="embeds"
+                type="button"
+                :class="button"
+                title="A picture of the diagram for a README, linked to it; it shows each new version"
+                @click="copy(embeds.readme, 'readme')"
+              >
+                {{ copied === 'readme' ? 'Copied' : 'Copy README image' }}
+              </button>
+              <button
+                v-if="embeds"
+                type="button"
+                :class="button"
+                title="An iframe for docs sites; Notion and Medium embed the plain link"
+                @click="copy(embeds.iframe, 'iframe')"
+              >
+                {{ copied === 'iframe' ? 'Copied' : 'Copy embed code' }}
               </button>
               <button type="button" :class="button" :disabled="isBusy" @click="publish">
                 Update with this version

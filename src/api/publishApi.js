@@ -3,7 +3,7 @@
  * AI can read. Off unless the build names a server in VITE_ISKETCH_API; the
  * app stays local first either way.
  *
- * @typedef {{ id: string, url: string, revision: number, links: { page: string, markdown: string, flow: string, svg: string, json: string } }} Published
+ * @typedef {{ id: string, url: string, revision: number, links: { page: string, markdown: string, flow: string, svg: string, json: string, embed?: string, oembed?: string } }} Published
  */
 
 /** @returns {string} the server's origin, or '' when publishing is off */
