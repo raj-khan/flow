@@ -1,3 +1,6 @@
 public/landing.html
 public/landing-diagram.svg
 public/demo.webm
+# Bundles, built from formatted source.
+plugin/server/
+vscode/dist/

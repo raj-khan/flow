@@ -1,0 +1,12 @@
+{
+  "name": "isketch",
+  "owner": { "name": "raj-khan", "url": "https://github.com/raj-khan" },
+  "description": "isketch for Claude Code: diagrams your agent reads exactly and edits back.",
+  "plugins": [
+    {
+      "name": "isketch",
+      "source": "./plugin",
+      "description": "Read, write and draw isketch .flow diagrams, with an MCP server that lists, reads, validates, renders and diffs them."
+    }
+  ]
+}

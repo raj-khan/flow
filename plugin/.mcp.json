@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "isketch": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/server/isketch-mcp.mjs", "."]
+    }
+  }
+}

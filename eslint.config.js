@@ -11,6 +11,9 @@ export default [
       'playwright-report/**',
       // The server is TypeScript, checked by its own compiler.
       'server/**',
+      // Bundles, built from source that is linted.
+      'plugin/server/**',
+      'vscode/dist/**',
     ],
   },
 
@@ -27,6 +30,8 @@ export default [
       '.claude/hooks/*.mjs',
       'scripts/*.mjs',
       'bin/*.mjs',
+      'vscode/src/**/*.js',
+      'vscode/test/*.js',
       '.github/actions/**/*.mjs',
     ],
     languageOptions: {

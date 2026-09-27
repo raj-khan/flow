@@ -1,0 +1,10 @@
+{
+  "name": "isketch",
+  "description": "Read, write and draw isketch diagrams: .flow files your agent reads exactly and edits back, with an MCP server to list, read, validate, render and diff them.",
+  "version": "0.1.0",
+  "author": { "name": "raj-khan", "url": "https://github.com/raj-khan" },
+  "homepage": "https://isketch.online",
+  "repository": "https://github.com/raj-khan/flow",
+  "license": "MIT",
+  "keywords": ["diagram", "architecture", "mcp", "flow", "excalidraw", "drawio"]
+}

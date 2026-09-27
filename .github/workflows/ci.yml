@@ -52,6 +52,17 @@ jobs:
           for file in examples/*.flow; do npm run -s isketch -- render "$file" -o "${file%.flow}.svg"; done
           git diff --exit-code examples/
 
+      # The Claude Code plugin ships a bundled MCP server: it must match the source.
+      - name: Claude Code plugin
+        if: '!cancelled()'
+        run: |
+          npm run -s plugin
+          git diff --exit-code plugin/
+
+      - name: VS Code extension builds
+        if: '!cancelled()'
+        run: npm run -s vscode
+
   server:
     name: Server
     runs-on: ubuntu-latest

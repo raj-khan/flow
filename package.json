@@ -26,7 +26,9 @@
     "landing": "node scripts/make-landing.mjs",
     "clip": "npm run build && node scripts/make-demo-clip.mjs",
     "docs": "node scripts/make-docs.mjs",
-    "pages": "node scripts/make-pages.mjs"
+    "pages": "node scripts/make-pages.mjs",
+    "plugin": "node scripts/make-plugin.mjs",
+    "vscode": "node scripts/make-vscode.mjs"
   },
   "dependencies": {
     "@fontsource/patrick-hand": "^5.3.0",

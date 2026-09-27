@@ -1,0 +1,10 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.raj-khan/isketch",
+  "title": "isketch",
+  "description": "Diagrams your agent reads exactly and edits back: read an isketch link as a brief or .flow text, publish a diagram, and update it with its edit token.",
+  "version": "0.1.0",
+  "websiteUrl": "https://isketch.online",
+  "repository": { "url": "https://github.com/raj-khan/flow", "source": "github" },
+  "remotes": [{ "type": "streamable-http", "url": "https://isketch.online/mcp" }]
+}

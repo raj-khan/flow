@@ -280,8 +280,20 @@ a screenshot. It has five tools:
 | `render_diagram` | Draw one as SVG                                                          |
 | `diff_diagrams`  | Compare a diagram with a proposed version                                |
 
-It needs only Node, and only reads and writes inside the folder you give it. isketch is not on npm
-yet, so point at a clone:
+**In Claude Code, the plugin is the quickest way:** it adds the MCP server (bundled, nothing to
+install) and a skill that teaches Claude the `.flow` format and when to read or update a diagram.
+
+```text
+/plugin marketplace add raj-khan/flow
+/plugin install isketch@isketch
+```
+
+**In VS Code**, the extension in `vscode/` previews a `.flow` file beside the text as you type,
+underlines errors by line, colours the syntax and opens the diagram in isketch
+(`npm run vscode`, then `npx @vscode/vsce package` in `vscode/` for a `.vsix`).
+
+To add the server by hand instead, it needs only Node, and only reads and writes inside the folder
+you give it. isketch is not on npm yet, so point at a clone:
 
 ```bash
 # Claude Code, from your project
