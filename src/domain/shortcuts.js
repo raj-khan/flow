@@ -113,7 +113,10 @@ export const SHORTCUT_GROUPS = Object.freeze([
   },
   {
     title: 'Help',
-    shortcuts: [{ combos: [['?']], description: 'Open this dialog' }],
+    shortcuts: [
+      { combos: [['?']], description: 'Open this dialog' },
+      { combos: [['mod', 'K']], description: 'Find any action or shape by name' },
+    ],
   },
 ])
 
@@ -141,5 +144,6 @@ export const COMBO = Object.freeze({
   OPEN: ['mod', 'O'],
   SAVE: ['mod', 'S'],
   FULL_SCREEN: ['F'],
+  COMMANDS: ['mod', 'K'],
   ZEN: ['Alt', 'Z'],
 })

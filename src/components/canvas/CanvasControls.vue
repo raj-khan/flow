@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted } from 'vue'
+import { computed, onBeforeUnmount, onMounted, watch } from 'vue'
 import { useVueFlow } from '@vue-flow/core'
 
 import IconButton from '@/components/ui/IconButton.vue'
@@ -65,6 +65,18 @@ function onKeydown(event) {
     fitSelection()
   }
 }
+
+// Asked for from outside Vue Flow, such as by the command palette.
+watch(
+  () => canvas.viewRequest,
+  (kind) => {
+    if (!kind) return
+    canvas.clearViewRequest()
+    if (kind === 'fit') fitView(FIT)
+    else if (kind === 'selection') fitSelection()
+    else tidy()
+  },
+)
 
 onMounted(() => window.addEventListener('keydown', onKeydown))
 onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))

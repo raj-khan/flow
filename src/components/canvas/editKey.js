@@ -4,6 +4,8 @@
  *
  * @typedef {{
  *   editingId: import('vue').Ref<string>,
+ *   caretAtEnd: import('vue').Ref<boolean>,
+ *   takeTyped: () => { text: string, enter: boolean },
  *   start: (id: string) => void,
  *   stop: () => void,
  *   renameNode: (id: string, name: string) => void,

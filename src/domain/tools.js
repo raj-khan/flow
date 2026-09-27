@@ -2,7 +2,7 @@
  * The tools on the floating tool bar, in its order, each on a number key and
  * a letter, as in Excalidraw. Shapes is not a mode: it opens the library.
  *
- * @typedef {'select' | 'hand' | 'shapes' | 'connector' | 'text' | 'pen' | 'eraser'} ToolId
+ * @typedef {'select' | 'hand' | 'shapes' | 'connector' | 'text' | 'pen' | 'eraser' | 'laser'} ToolId
  * @typedef {{ id: ToolId, label: string, keys: string[], hint: string }} Tool
  */
 
@@ -14,6 +14,7 @@ export const TOOL = Object.freeze({
   TEXT: 'text',
   PEN: 'pen',
   ERASER: 'eraser',
+  LASER: 'laser',
 })
 
 /** @type {readonly Tool[]} */
@@ -33,7 +34,13 @@ export const TOOLS = Object.freeze([
     id: TOOL.ERASER,
     label: 'Eraser',
     keys: ['7', 'E'],
-    hint: 'Click a shape or a connection to delete it',
+    hint: 'Click or drag over shapes and connections to delete them',
+  },
+  {
+    id: TOOL.LASER,
+    label: 'Laser',
+    keys: ['8', 'K'],
+    hint: 'Point at the diagram while presenting; the trail fades',
   },
 ])
 

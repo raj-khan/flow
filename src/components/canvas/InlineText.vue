@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, useTemplateRef } from 'vue'
+import { nextTick, onMounted, ref, useTemplateRef } from 'vue'
 
 /**
  * A text field that edits in place and gets out of the way: Enter or leaving
@@ -10,6 +10,16 @@ const props = defineProps({
   value: { type: String, default: '' },
   label: { type: String, required: true },
   maxlength: { type: Number, default: 60 },
+  /** For a name begun by typing: go on from its last letter rather than replace it. */
+  caretAtEnd: { type: Boolean, default: false },
+  /**
+   * What was typed before this field could take the keys, and whether Enter
+   * came too, handed over once it has focus.
+   */
+  takeTyped: {
+    type: /** @type {import('vue').PropType<() => { text: string, enter: boolean }>} */ (Function),
+    default: null,
+  },
 })
 
 const emit = defineEmits(['save', 'cancel'])
@@ -26,8 +36,21 @@ function takeFocus(attempts = 10) {
   const field = input.value
   if (!field || done) return
   field.focus()
-  if (document.activeElement === field) field.select()
-  else if (attempts > 0) requestAnimationFrame(() => takeFocus(attempts - 1))
+  if (document.activeElement === field) {
+    if (props.caretAtEnd) atEnd(field)
+    else field.select()
+  } else if (attempts > 0) requestAnimationFrame(() => takeFocus(attempts - 1))
+}
+
+/** @param {HTMLInputElement} field */
+async function atEnd(field) {
+  const typed = props.takeTyped?.()
+  if (typed?.text) {
+    draft.value += typed.text
+    await nextTick()
+  }
+  field.setSelectionRange(field.value.length, field.value.length)
+  if (typed?.enter) save()
 }
 
 onMounted(() => takeFocus())

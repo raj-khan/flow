@@ -97,6 +97,22 @@ export const useCanvasStore = defineStore('canvas', () => {
     isViewing.value = on
   }
 
+  /**
+   * A view change asked for from outside the canvas, such as the command
+   * palette; the view controls, inside Vue Flow, carry it out.
+   * @type {import('vue').Ref<'' | 'fit' | 'selection' | 'tidy'>}
+   */
+  const viewRequest = ref('')
+
+  /** @param {'fit' | 'selection' | 'tidy'} kind */
+  function requestView(kind) {
+    viewRequest.value = kind
+  }
+
+  function clearViewRequest() {
+    viewRequest.value = ''
+  }
+
   /** Zen mode: every tool hides until the pointer nears an edge. */
   const zen = ref(false)
 
@@ -153,6 +169,9 @@ export const useCanvasStore = defineStore('canvas', () => {
     toggleZen,
     isViewing,
     setViewing,
+    viewRequest,
+    requestView,
+    clearViewRequest,
     tool,
     setTool,
     isLibraryOpen,

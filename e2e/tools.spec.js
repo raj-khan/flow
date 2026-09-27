@@ -70,7 +70,8 @@ test('the text tool writes where the canvas is clicked, then hands back to Selec
 
 test('the eraser deletes a shape with a click, and undo brings it back', async ({ page }) => {
   await tool(page, 'Eraser').click()
-  await node(page, 'e879e4').click()
+  // Through the eraser's layer, which takes every press while it is on.
+  await node(page, 'e879e4').click({ force: true })
   await expect(shapes(page)).toHaveCount(4)
 
   await history(page).getByRole('button', { name: 'Undo' }).click()

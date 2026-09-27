@@ -27,6 +27,7 @@ import {
   useUpdateEdge,
   useStyleEdge,
   useUpdateNode,
+  useReplaceDocument,
 } from '@/composables/useNodeMutations.js'
 import { useCanvasClipboard } from '@/composables/useCanvasClipboard.js'
 import { useFlowHistory } from '@/composables/useFlowHistory.js'
@@ -40,8 +41,12 @@ import { isInView, panDuration } from '@/domain/motion.js'
 import { isSketch } from '@/domain/sketch.js'
 import { GRID } from '@/domain/arrange.js'
 import { TOOL } from '@/domain/tools.js'
+import { withConnectedShape, withErased } from '@/domain/quickShapes.js'
+import { generateNodeId } from '@/api/flowApi.js'
 import SelectionToolbar from './SelectionToolbar.vue'
 import PenLayer from './PenLayer.vue'
+import EraserLayer from './EraserLayer.vue'
+import LaserLayer from './LaserLayer.vue'
 import { useToastStore } from '@/stores/toasts.js'
 import { ROUTE } from '@/router/index.js'
 import { nodeComponents } from './nodeComponents.js'
@@ -74,6 +79,8 @@ const updateNode = useUpdateNode()
 const updateEdge = useUpdateEdge()
 const styleEdge = useStyleEdge()
 const resizeNode = useResizeNode()
+const eraseShapes = useReplaceDocument('Erase')
+const addConnected = useReplaceDocument('Add a connected shape')
 /** No room for a minimap on a phone, and pinching does its job. */
 const isPhone = useMediaQuery(PHONE)
 /** Shapes are picked up and changed with Select, and never in the viewer. */
@@ -99,13 +106,34 @@ provide(
 
 /** The shape or edge whose text is being edited in place, or empty. */
 const editingId = ref('')
+/** Whether that text was begun by typing, so the caret goes on from it. */
+const caretAtEnd = ref(false)
+
+/**
+ * Keys typed on a blank diagram before its first shape's title field can take
+ * them: the shape is created asynchronously, and a fast typist is quicker.
+ */
+let typedAhead = { active: false, text: '', enter: false }
+
+function takeTyped() {
+  const { text, enter } = typedAhead
+  typedAhead = { active: false, text: '', enter: false }
+  return { text, enter }
+}
 
 provide(EDIT_TEXT, {
   editingId,
+  caretAtEnd,
+  takeTyped,
   start: (/** @type {string} */ id) => {
-    if (!canvas.isViewing) editingId.value = id
+    if (canvas.isViewing) return
+    caretAtEnd.value = false
+    editingId.value = id
   },
-  stop: () => (editingId.value = ''),
+  stop: () => {
+    editingId.value = ''
+    caretAtEnd.value = false
+  },
   renameNode: (/** @type {string} */ id, /** @type {string} */ name) =>
     updateNode.mutate({ id, patch: { name } }),
   relabelEdge: (/** @type {string} */ id, /** @type {string} */ label) =>
@@ -306,10 +334,6 @@ function drawFromData(list) {
 /** @param {{ node: import('@vue-flow/core').GraphNode, event: MouseEvent | TouchEvent }} event */
 function onNodeClick({ node, event }) {
   if (canvas.tool === TOOL.HAND || canvas.isViewing) return
-  if (canvas.tool === TOOL.ERASER) {
-    removeShapes([node.id])
-    return
-  }
   if (canvas.tool === TOOL.CONNECTOR) {
     connectByClicks(node.id)
     return
@@ -363,11 +387,6 @@ watch(
   () => canvas.tool,
   () => (connectingFrom.value = ''),
 )
-
-/** @param {{ edge: { id: string } }} event */
-function onEdgeClick({ edge }) {
-  if (canvas.tool === TOOL.ERASER) detach(edge.id)
-}
 
 /**
  * The text tool writes where the canvas is clicked, then hands back to Select;
@@ -522,6 +541,17 @@ function onSelectionKeys(event) {
     return
   }
 
+  // Tab adds the next step to the one selected shape, or the focused one.
+  if (event.key === 'Tab' && !event.shiftKey && isEditing.value) {
+    const selected = getSelectedNodes.value
+    const from = selected.length === 1 ? selected[0].id : !selected.length ? focusedId.value : ''
+    if (from) {
+      event.preventDefault()
+      addConnectedShape(from)
+      return
+    }
+  }
+
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'a') {
     event.preventDefault()
     addSelectedNodes(getNodes.value)
@@ -623,7 +653,7 @@ function centreOn(node) {
  *
  * @param {string} shape
  * @param {{ x: number, y: number } | null} at
- * @param {{ exact?: boolean }} [options]
+ * @param {{ exact?: boolean, typed?: boolean }} [options] typed: named by what was typed
  */
 function addShape(shape, at, options = {}) {
   const wanted = at
@@ -636,7 +666,7 @@ function addShape(shape, at, options = {}) {
   const position = options.exact ? wanted : freeSpotNear(wanted, nodes.value)
 
   createNode.mutate(
-    { title: metaFor(shape).label, description: '', shape, position },
+    { title: options.typed ? '' : metaFor(shape).label, description: '', shape, position },
     {
       onSuccess(node) {
         const id = toNodeId(node.id)
@@ -644,10 +674,14 @@ function addShape(shape, at, options = {}) {
         // drawer sliding in, and the canvas moves only if the shape is off it.
         router.push({ name: ROUTE.FLOW })
         canvas.requestFocus(id)
+        caretAtEnd.value = Boolean(options.typed)
         editingId.value = id
         waitForNode(id).then((added) => added && addSelectedNodes([added]))
       },
-      onError: () => toasts.push('The shape could not be added.', { tone: 'danger' }),
+      onError: () => {
+        takeTyped()
+        toasts.push('The shape could not be added.', { tone: 'danger' })
+      },
     },
   )
 }
@@ -690,6 +724,92 @@ watch(
     addShape(shape, viewCentre())
   },
 )
+
+/**
+ * What the eraser went over, gone as one change.
+ * @param {{ nodes: string[], edges: string[] }} erased
+ */
+function erase({ nodes: nodeIds, edges: edgeIds }) {
+  if (!diagram.value) return
+  if (nodeIds.includes(String(route.params.id ?? ''))) router.push({ name: ROUTE.FLOW })
+  const count = nodeIds.length + edgeIds.length
+  eraseShapes.mutate(withErased(diagram.value, nodeIds, edgeIds), {
+    onSuccess: () =>
+      toasts.push(count === 1 ? 'Erased one thing' : `Erased ${count} things`, {
+        action: { label: 'Undo', run: undo },
+      }),
+  })
+}
+
+/**
+ * Tab, as in Whimsical: the next step, below the selected shape, connected
+ * and named in place.
+ * @param {string} fromId
+ */
+function addConnectedShape(fromId) {
+  const from = findNode(fromId)
+  if (!from || !diagram.value) return
+  const id = generateNodeId()
+  const next = withConnectedShape(
+    diagram.value,
+    { id: fromId, position: { x: from.position.x, y: from.position.y } },
+    getNodes.value.map((node) => ({ position: node.position })),
+    id,
+  )
+  addConnected.mutate(next, {
+    async onSuccess() {
+      removeSelectedNodes(getSelectedNodes.value)
+      canvas.requestFocus(id)
+      caretAtEnd.value = false
+      editingId.value = id
+      const added = await waitForNode(id)
+      if (added) addSelectedNodes([added])
+    },
+  })
+}
+
+/**
+ * On a blank diagram, typing starts a shape named with what is typed, ahead
+ * of the one-letter tool keys.
+ * @param {KeyboardEvent} event
+ */
+function onBlankTyping(event) {
+  if (event.ctrlKey || event.metaKey || event.altKey || isBlocked(event)) return
+
+  // Until the title field has the keys, they are kept for it.
+  if (typedAhead.active) {
+    if (event.key === 'Enter') typedAhead.enter = true
+    else if (event.key === 'Backspace') typedAhead.text = typedAhead.text.slice(0, -1)
+    else if (event.key.length === 1) typedAhead.text += event.key
+    else return
+    event.preventDefault()
+    event.stopImmediatePropagation()
+    return
+  }
+
+  if (nodes.value.length || isLoading.value || !isEditing.value) return
+  if (event.key.length !== 1 || !event.key.trim()) return
+  event.preventDefault()
+  event.stopImmediatePropagation()
+  typedAhead = { active: true, text: event.key, enter: false }
+  addShape('process', null, { typed: true })
+}
+
+/**
+ * A double click on empty canvas puts a shape there, ready to name.
+ * @param {MouseEvent} event
+ */
+function onDoubleClick(event) {
+  const target = /** @type {Element} */ (event.target)
+  if (!isEditing.value || !target.closest?.('.vue-flow__pane')) return
+  if (target.closest('.vue-flow__node, .vue-flow__edge')) return
+  addShape('process', screenToFlowCoordinate({ x: event.clientX, y: event.clientY }), {
+    exact: true,
+  })
+}
+
+onMounted(() => window.addEventListener('keydown', onBlankTyping, true))
+onBeforeUnmount(() => window.removeEventListener('keydown', onBlankTyping, true))
 
 /**
  * The context menu: a right click, or a long press on a touch screen.
@@ -787,6 +907,7 @@ watch(
     class="h-full w-full"
     :class="[connectingFrom ? 'is-connecting' : '', `tool-${canvas.tool}`]"
     @dragover="onDragOver"
+    @dblclick="onDoubleClick"
     @drop="onDrop"
   >
     <CanvasState
@@ -824,7 +945,6 @@ watch(
       @node-click="onNodeClick"
       @node-context-menu="onNodeMenu"
       @edge-context-menu="onEdgeMenu"
-      @edge-click="onEdgeClick"
       @pane-click="onPaneClick"
       @node-drag-start="isDragging = true"
       @node-drag-stop="onNodeDragStop"
@@ -847,6 +967,8 @@ watch(
       />
       <SelectionToolbar />
       <PenLayer />
+      <EraserLayer v-if="canvas.tool === TOOL.ERASER" @erase="erase" />
+      <LaserLayer v-if="canvas.tool === TOOL.LASER" />
       <CanvasControls />
 
       <!-- Arrowheads, defined once; their colours follow the theme. -->

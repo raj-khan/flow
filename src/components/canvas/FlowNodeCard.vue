@@ -214,6 +214,8 @@ const strokeWidth = computed(() => (props.selected || isKeyboardFocused.value ? 
       :value="node.name"
       label="Shape title"
       :maxlength="FIELD_LIMIT.TITLE_MAX"
+      :caret-at-end="edit?.caretAtEnd.value"
+      :take-typed="edit?.caretAtEnd.value ? edit.takeTyped : undefined"
       @save="rename"
       @cancel="edit?.stop()"
     />

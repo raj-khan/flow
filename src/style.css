@@ -435,3 +435,9 @@ optgroup {
     min-height: 44px;
   }
 }
+
+/* Marked by the eraser, and gone when the pointer lifts. */
+.vue-flow__node.is-erasing,
+.vue-flow__edge.is-erasing {
+  opacity: 0.25;
+}

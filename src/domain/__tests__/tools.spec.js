@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest'
 import { TOOL, TOOLS, toolForKey } from '../tools.js'
 
 describe('tools', () => {
-  it('numbers the tool bar 1 to 7, in order', () => {
-    expect(TOOLS.map((tool) => tool.keys[0])).toEqual(['1', '2', '3', '4', '5', '6', '7'])
+  it('numbers the tool bar 1 to 8, in order', () => {
+    expect(TOOLS.map((tool) => tool.keys[0])).toEqual(['1', '2', '3', '4', '5', '6', '7', '8'])
   })
 
   it('picks a tool by number or letter, in either case', () => {
@@ -16,7 +16,7 @@ describe('tools', () => {
 
   it('ignores keys that are not a tool', () => {
     expect(toolForKey('x')).toBeNull()
-    expect(toolForKey('8')).toBeNull()
+    expect(toolForKey('9')).toBeNull()
     expect(toolForKey('Enter')).toBeNull()
   })
 })

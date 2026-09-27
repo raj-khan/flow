@@ -12,6 +12,7 @@ import ShareDialog from '@/components/share/ShareDialog.vue'
 import HistoryControls from '@/components/shell/HistoryControls.vue'
 import MainMenu from '@/components/shell/MainMenu.vue'
 import ToolBar from '@/components/shell/ToolBar.vue'
+import CommandPalette from '@/components/shell/CommandPalette.vue'
 import HelpDialog from '@/components/ui/HelpDialog.vue'
 import IconButton from '@/components/ui/IconButton.vue'
 import ToastHost from '@/components/ui/ToastHost.vue'
@@ -22,6 +23,7 @@ import { useHelpDialog } from '@/composables/useHelpDialog.js'
 import { PHONE, useMediaQuery } from '@/composables/useMediaQuery.js'
 import { useOpenSharedLink } from '@/composables/useShareLink.js'
 import { useLaunch } from '@/composables/useLaunch.js'
+import { useCommands } from '@/composables/useCommands.js'
 import { useFlowQuery } from '@/composables/useFlowQuery.js'
 import { useCanvasStore } from '@/stores/canvas.js'
 import { useToastStore } from '@/stores/toasts.js'
@@ -46,6 +48,33 @@ const fullScreen = useFullScreen()
 const isPhone = useMediaQuery(PHONE)
 const toasts = useToastStore()
 useViewKeys({ fullScreen: fullScreen.toggle, zen: canvas.toggleZen })
+
+/** Ctrl+K: every action and shape, by name. */
+const isPaletteOpen = ref(false)
+const commands = useCommands({
+  open: (dialog) => {
+    if (dialog === 'import') isImporting.value = true
+    else if (dialog === 'export') isExporting.value = true
+    else if (dialog === 'compare') isComparing.value = true
+    else if (dialog === 'share') isSharing.value = true
+    else help.open()
+  },
+})
+
+/** @param {KeyboardEvent} event */
+function onPaletteKey(event) {
+  if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'k') return
+  if (event.shiftKey || event.altKey) return
+  // The browser's own Ctrl+K jumps to its search bar.
+  event.preventDefault()
+  if (isPaletteOpen.value) isPaletteOpen.value = false
+  else if (!window.document.querySelector('[role="dialog"][aria-modal="true"]')) {
+    isPaletteOpen.value = true
+  }
+}
+
+window.addEventListener('keydown', onPaletteKey)
+onBeforeUnmount(() => window.removeEventListener('keydown', onPaletteKey))
 
 /** In zen mode, the edge the pointer is near brings back that edge's islands. */
 const EDGE = 96
@@ -115,6 +144,7 @@ onBeforeUnmount(() => window.removeEventListener('pointermove', onPointerMove))
           @import="isImporting = true"
           @compare="isComparing = true"
           @export="isExporting = true"
+          @commands="isPaletteOpen = true"
         />
 
         <HistoryControls v-if="isPhone" class="mr-auto" />
@@ -177,6 +207,7 @@ onBeforeUnmount(() => window.removeEventListener('pointermove', onPointerMove))
     <CompareDialog v-if="isComparing" @close="isComparing = false" />
     <ExportDialog v-if="isExporting" @close="isExporting = false" />
     <ShareDialog v-if="isSharing" @close="isSharing = false" />
+    <CommandPalette v-if="isPaletteOpen" :commands="commands" @close="isPaletteOpen = false" />
     <ToastHost />
   </div>
 </template>

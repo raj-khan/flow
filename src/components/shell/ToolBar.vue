@@ -6,7 +6,8 @@ import { TOOL, TOOLS, toolForKey } from '@/domain/tools.js'
 import { useCanvasStore } from '@/stores/canvas.js'
 
 /**
- * The top-centre island. Number keys and letters pick a tool, as in
+ * The top-centre island; the laser, for presenting, is left off a phone's.
+ * Number keys and letters pick a tool, as in
  * Excalidraw; Escape goes back to Select and closes the library.
  */
 const canvas = useCanvasStore()
@@ -41,6 +42,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
       v-for="tool in TOOLS"
       :key="tool.id"
       class="inline-flex"
+      :class="{ 'max-md:hidden': tool.id === 'laser' }"
       :title="`${tool.hint} (${tool.keys.join(' or ')})`"
     >
       <button
@@ -87,6 +89,10 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
           <template v-else-if="tool.id === 'pen'">
             <path d="M16 3.5a2.1 2.1 0 0 1 3 3L8 17.5l-4 1 1-4Z" />
             <path d="M3 21c3-1 5 1 8 0" />
+          </template>
+          <template v-else-if="tool.id === 'laser'">
+            <circle cx="17" cy="7" r="3" />
+            <path d="M3 21 14.5 9.5" />
           </template>
           <template v-else>
             <path d="m7 21-4-4a2 2 0 0 1 0-3l10-10a2 2 0 0 1 3 0l5 5a2 2 0 0 1 0 3l-8 9" />

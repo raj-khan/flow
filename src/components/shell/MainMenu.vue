@@ -17,7 +17,7 @@ import { useToastStore } from '@/stores/toasts.js'
  * The top-left island: the product, the open file, and a menu of everything
  * that is not drawing. It owns Ctrl+O and Ctrl+S, bound once here.
  */
-const emit = defineEmits(['help', 'import', 'compare', 'export'])
+const emit = defineEmits(['help', 'import', 'compare', 'export', 'commands'])
 
 const canvas = useCanvasStore()
 const file = useFileStore()
@@ -75,6 +75,11 @@ const groups = computed(
         { label: themeLabel.value, run: cycleTheme },
       ],
       [
+        {
+          label: 'Find a command',
+          run: () => emit('commands'),
+          hint: comboLabel(COMBO.COMMANDS, isMac.value),
+        },
         {
           label: 'Keyboard shortcuts',
           run: () => emit('help'),
