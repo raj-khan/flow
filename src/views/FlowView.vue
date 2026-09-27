@@ -14,6 +14,7 @@ import MainMenu from '@/components/shell/MainMenu.vue'
 import ToolBar from '@/components/shell/ToolBar.vue'
 import CommandPalette from '@/components/shell/CommandPalette.vue'
 import FileConflictDialog from '@/components/shell/FileConflictDialog.vue'
+import DraftDialog from '@/components/draft/DraftDialog.vue'
 import HelpDialog from '@/components/ui/HelpDialog.vue'
 import IconButton from '@/components/ui/IconButton.vue'
 import ToastHost from '@/components/ui/ToastHost.vue'
@@ -39,6 +40,7 @@ const isImporting = ref(false)
 const isComparing = ref(false)
 const isExporting = ref(false)
 const isSharing = ref(false)
+const isDrafting = ref(false)
 useOpenSharedLink()
 useLaunch()
 // An agent writing to the open file shows up here as it happens.
@@ -67,6 +69,7 @@ const commands = useCommands({
     else if (dialog === 'export') isExporting.value = true
     else if (dialog === 'compare') isComparing.value = true
     else if (dialog === 'share') isSharing.value = true
+    else if (dialog === 'draft') isDrafting.value = true
     else help.open()
   },
 })
@@ -155,6 +158,7 @@ onBeforeUnmount(() => window.removeEventListener('pointermove', onPointerMove))
           @compare="isComparing = true"
           @export="isExporting = true"
           @commands="isPaletteOpen = true"
+          @draft="isDrafting = true"
         />
 
         <HistoryControls v-if="isPhone" class="mr-auto" />
@@ -217,6 +221,7 @@ onBeforeUnmount(() => window.removeEventListener('pointermove', onPointerMove))
     <CompareDialog v-if="isComparing" @close="isComparing = false" />
     <ExportDialog v-if="isExporting" @close="isExporting = false" />
     <ShareDialog v-if="isSharing" @close="isSharing = false" />
+    <DraftDialog v-if="isDrafting" @close="isDrafting = false" />
     <FileConflictDialog
       v-if="canvas.fileConflict"
       :name="canvas.fileConflict.name"

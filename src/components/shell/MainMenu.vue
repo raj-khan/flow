@@ -17,7 +17,7 @@ import { useToastStore } from '@/stores/toasts.js'
  * The top-left island: the product, the open file, and a menu of everything
  * that is not drawing. It owns Ctrl+O and Ctrl+S, bound once here.
  */
-const emit = defineEmits(['help', 'import', 'compare', 'export', 'commands'])
+const emit = defineEmits(['help', 'import', 'compare', 'export', 'commands', 'draft'])
 
 const canvas = useCanvasStore()
 const file = useFileStore()
@@ -52,6 +52,7 @@ const groups = computed(
         { label: 'Save', run: save, hint: comboLabel(COMBO.SAVE, isMac.value) },
       ],
       [
+        { label: 'Draft with your agent', run: () => emit('draft') },
         { label: 'Import', run: () => emit('import') },
         { label: 'Export', run: () => emit('export') },
         { label: 'Compare', run: () => emit('compare') },

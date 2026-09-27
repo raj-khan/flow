@@ -20,7 +20,7 @@ import { useToastStore } from '@/stores/toasts.js'
  * the view's and one "Add" for each shape in the registry, so a new shape or
  * tool shows up here without a line of its own.
  *
- * @param {{ open: (dialog: 'import' | 'export' | 'compare' | 'share' | 'help') => void }} shell
+ * @param {{ open: (dialog: 'import' | 'export' | 'compare' | 'share' | 'help' | 'draft') => void }} shell
  */
 export function useCommands(shell) {
   const canvas = useCanvasStore()
@@ -66,6 +66,13 @@ export function useCommands(shell) {
     },
     { id: 'open', label: 'Open file', group: 'File', hint: key(COMBO.OPEN), run: open },
     { id: 'save', label: 'Save', group: 'File', hint: key(COMBO.SAVE), run: save },
+    {
+      id: 'draft',
+      label: 'Draft with your agent',
+      group: 'File',
+      keywords: 'describe words ai generate claude chatgpt prompt',
+      run: () => shell.open('draft'),
+    },
     {
       id: 'import',
       label: 'Import',

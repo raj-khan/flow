@@ -74,6 +74,9 @@ nobody hosts it yet: run it yourself, or hand over the `.flow` file or the brief
 - **Frames.** A frame (from the library) is a named region behind the shapes inside it: dragging
   it carries them along, in one undo step. From its menu, copy just that frame for AI or export it
   on its own. The brief groups shapes by frame, and Mermaid draws frames as subgraphs.
+- **Draft with your agent.** Describe a diagram in words, and isketch writes a prompt that teaches
+  the `.flow` format: copy it, or open it straight in Claude or ChatGPT, then paste the answer back
+  and it is drawn, undoably. Your own agent does the drafting; isketch sends nothing anywhere.
 - **Quick to type.** On a blank diagram, just start typing: the first shape takes the words.
   Double-click empty canvas for a shape there. `Tab` adds the next step below the selected shape,
   connected and ready to name, as in Whimsical. `Ctrl+K` finds any action or shape by name.
