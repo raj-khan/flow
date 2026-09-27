@@ -21,6 +21,7 @@ import { useViewKeys } from '@/composables/useViewKeys.js'
 import { useHelpDialog } from '@/composables/useHelpDialog.js'
 import { PHONE, useMediaQuery } from '@/composables/useMediaQuery.js'
 import { useOpenSharedLink } from '@/composables/useShareLink.js'
+import { useLaunch } from '@/composables/useLaunch.js'
 import { useFlowQuery } from '@/composables/useFlowQuery.js'
 import { useCanvasStore } from '@/stores/canvas.js'
 import { useToastStore } from '@/stores/toasts.js'
@@ -35,6 +36,7 @@ const isComparing = ref(false)
 const isExporting = ref(false)
 const isSharing = ref(false)
 useOpenSharedLink()
+useLaunch()
 const { copyBrief } = useCopyBrief()
 const { document } = useFlowQuery()
 // Bound at the shell: a dialog that is not mounted cannot listen for its own key.

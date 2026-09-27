@@ -71,6 +71,9 @@ nobody hosts it yet: run it yourself, or hand over the `.flow` file or the brief
   and Eraser (`7`/`E`, click a shape or connection to delete it). Escape goes back to Select.
 - **New diagram and samples.** Start empty, or from a web app architecture or support flow
   sample. Undo brings back whatever was there.
+- **Installable.** Install isketch from the browser as an app that opens with no connection. The
+  installed app opens `.flow` files from the file manager, and takes text shared to it from other
+  apps (`.flow` text or a Mermaid flowchart) as a new diagram, undoable.
 - **Phones and tablets.** Below 768px the tool bar docks at the bottom and panels and dialogs rise
   as sheets. Pinch to zoom and pan with two fingers anywhere, even over shapes; a long press (or a
   right click) opens a shape's or connection's menu. A stylus draws with its pressure, and a palm

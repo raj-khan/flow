@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath, URL } from 'node:url'
@@ -6,6 +7,7 @@ import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
 
 import { analyticsScript } from './src/api/analytics.js'
+import { serviceWorkerSource, shellFiles } from './src/pwa/serviceWorker.js'
 
 /** Where links point when the head is built; %SITE_URL% in index.html. */
 const SITE_URL = (process.env.VITE_SITE_URL ?? 'https://isketch.online').replace(/\/+$/, '')
@@ -73,6 +75,22 @@ export default defineConfig({
           type: 'asset',
           fileName: 'analytics.js',
           source: analyticsScript(gaId),
+        })
+      },
+    },
+    {
+      // /sw.js, listing this build's files, so the app opens offline.
+      name: 'service-worker',
+      apply: 'build',
+      // After Vite has added the HTML pages to the bundle.
+      enforce: 'post',
+      generateBundle(_options, bundle) {
+        const files = shellFiles(Object.keys(bundle))
+        const version = createHash('sha256').update(files.join('\n')).digest('hex').slice(0, 12)
+        this.emitFile({
+          type: 'asset',
+          fileName: 'sw.js',
+          source: serviceWorkerSource(version, files),
         })
       },
     },

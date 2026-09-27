@@ -23,3 +23,12 @@ createApp(App)
   .use(router)
   .use(VueQueryPlugin, { queryClientConfig })
   .mount('#app')
+
+// Offline and installable: the build writes /sw.js; development has none.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {
+      // No worker, no offline: the app itself works the same.
+    })
+  })
+}

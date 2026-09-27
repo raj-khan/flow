@@ -136,7 +136,7 @@ export function useDiagramFile({ bindKeys = false } = {}) {
     onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown, true))
   }
 
-  return { open, save, fileName: () => file.name }
+  return { open, save, openText: load, fileName: () => file.name }
 }
 
 /** @param {any} handle @param {string} text */
