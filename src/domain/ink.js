@@ -1,7 +1,10 @@
+import { getStroke } from 'perfect-freehand'
+
 /**
  * Pen strokes: marks drawn by hand over the diagram. A stroke is stored as
  * points from 0 to 100 across its own box, so it moves and resizes like any
- * shape, and is drawn by scaling them to whatever size the box has.
+ * shape, and is drawn by scaling them to whatever size the box has. A stylus
+ * adds its pressure to each point (`x,y,p`), and the line swells with it.
  */
 
 /** The box's padding around a stroke, so its line is never clipped. */
@@ -10,7 +13,7 @@ const PAD = 6
 const TOLERANCE = 1.5
 
 /**
- * @typedef {{ x: number, y: number }} Point
+ * @typedef {{ x: number, y: number, p?: number }} Point
  */
 
 /**
@@ -32,14 +35,60 @@ export function strokeToInk(drawn) {
   const height = Math.max(...ys) - top + PAD
   if (width <= 2 * PAD + 2 && height <= 2 * PAD + 2) return null
 
+  const pressed = points.some((point) => point.p !== undefined && point.p > 0)
   const scaled = points
-    .map(({ x, y }) => `${tenth(((x - left) / width) * 100)},${tenth(((y - top) / height) * 100)}`)
+    .map(({ x, y, p }) => {
+      const at = `${tenth(((x - left) / width) * 100)},${tenth(((y - top) / height) * 100)}`
+      return pressed ? `${at},${hundredth(p ?? 0.5)}` : at
+    })
     .join(' ')
   return {
     position: { x: Math.round(left), y: Math.round(top) },
     size: { width: Math.round(width), height: Math.round(height) },
     points: scaled,
   }
+}
+
+/**
+ * @param {string | undefined} points
+ * @param {number} width
+ * @param {number} height
+ * @returns {{ x: number, y: number, p?: number }[]}
+ */
+function scale(points, width, height) {
+  return String(points ?? '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((triple) => triple.split(',').map(Number))
+    .filter(([x, y]) => Number.isFinite(x) && Number.isFinite(y))
+    .map(([x, y, p]) => ({
+      x: tenth((x / 100) * width),
+      y: tenth((y / 100) * height),
+      ...(Number.isFinite(p) ? { p } : {}),
+    }))
+}
+
+/**
+ * A stroke drawn with a stylus, as the outline of a line that swells and thins
+ * with the pressure, to be filled. Empty for a stroke without pressure, which
+ * inkPath draws instead.
+ *
+ * @param {string | undefined} points
+ * @param {number} width
+ * @param {number} height
+ * @returns {string}
+ */
+export function inkOutline(points, width, height) {
+  const at = scale(points, width, height)
+  if (at.length < 2 || !at.every((point) => point.p !== undefined)) return ''
+  const outline = getStroke(
+    at.map(({ x, y, p }) => [x, y, p ?? 0.5]),
+    { size: 5, thinning: 0.6, smoothing: 0.5, streamline: 0.3, simulatePressure: false },
+  )
+  if (outline.length < 3) return ''
+  const [first, ...rest] = outline
+  return `M${tenth(first[0])},${tenth(first[1])} ${rest.map(([x, y]) => `L${tenth(x)},${tenth(y)}`).join(' ')} Z`
 }
 
 /**
@@ -52,13 +101,7 @@ export function strokeToInk(drawn) {
  * @returns {string}
  */
 export function inkPath(points, width, height) {
-  const at = String(points ?? '')
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((pair) => pair.split(',').map(Number))
-    .filter(([x, y]) => Number.isFinite(x) && Number.isFinite(y))
-    .map(([x, y]) => ({ x: tenth((x / 100) * width), y: tenth((y / 100) * height) }))
+  const at = scale(points, width, height)
   if (at.length < 2) return ''
   if (at.length === 2) return `M${at[0].x},${at[0].y} L${at[1].x},${at[1].y}`
 
@@ -114,3 +157,6 @@ function fromLine(point, a, b) {
 
 /** @param {number} value */
 const tenth = (value) => Math.round(value * 10) / 10
+
+/** @param {number} value */
+const hundredth = (value) => Math.round(Math.min(Math.max(value, 0), 1) * 100) / 100

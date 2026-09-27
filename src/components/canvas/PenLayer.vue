@@ -21,9 +21,13 @@ const draw = useReplaceDocument('Draw')
 /** The stroke being drawn, in screen coordinates relative to the layer. */
 /** @type {import('vue').Ref<{ x: number, y: number }[]>} */
 const live = ref([])
-/** The same points on the page, for the diagram's coordinates at the end. */
-/** @type {{ x: number, y: number }[]} */
+/** The same points on the page, with a stylus's pressure, for the diagram at the end. */
+/** @type {{ x: number, y: number, p?: number }[]} */
 let onPage = []
+/** The pointer drawing now; a second one, such as a resting palm, is ignored. */
+let drawing = -1
+/** Once a stylus has drawn, fingers are palms: they never draw. */
+let stylusSeen = false
 const layer = ref(/** @type {HTMLElement | null} */ (null))
 
 const preview = computed(() => live.value.map(({ x, y }) => `${x},${y}`).join(' '))
@@ -31,9 +35,16 @@ const preview = computed(() => live.value.map(({ x, y }) => `${x},${y}`).join(' 
 /** @param {PointerEvent} event */
 function start(event) {
   if (event.button !== 0) return
+  if (event.pointerType === 'pen') stylusSeen = true
+  if ((stylusSeen && event.pointerType === 'touch') || drawing !== -1) return
+  drawing = event.pointerId
   event.preventDefault()
   const surface = /** @type {HTMLElement} */ (event.currentTarget)
-  surface.setPointerCapture(event.pointerId)
+  try {
+    surface.setPointerCapture(event.pointerId)
+  } catch {
+    // A pointer the browser no longer tracks cannot be captured; the stroke still draws.
+  }
   onPage = []
   live.value = []
   add(event)
@@ -41,14 +52,22 @@ function start(event) {
 
 /** @param {PointerEvent} event */
 function add(event) {
-  if (!layer.value || (event.type === 'pointermove' && !onPage.length)) return
+  if (!layer.value || event.pointerId !== drawing) return
+  if (event.type === 'pointermove' && !onPage.length) return
   const box = layer.value.getBoundingClientRect()
-  onPage.push({ x: event.clientX, y: event.clientY })
+  const pressure = event.pointerType === 'pen' && event.pressure > 0 ? { p: event.pressure } : {}
+  onPage.push({ x: event.clientX, y: event.clientY, ...pressure })
   live.value = [...live.value, { x: event.clientX - box.left, y: event.clientY - box.top }]
 }
 
-function finish() {
-  const drawn = onPage.map((point) => screenToFlowCoordinate(point))
+/** @param {PointerEvent} event */
+function finish(event) {
+  if (event.pointerId !== drawing) return
+  drawing = -1
+  const drawn = onPage.map(({ p, ...point }) => ({
+    ...screenToFlowCoordinate(point),
+    ...(p === undefined ? {} : { p }),
+  }))
   onPage = []
   live.value = []
   const ink = strokeToInk(drawn)

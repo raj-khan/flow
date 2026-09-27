@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { inkPath, simplify, strokeToInk } from '../ink.js'
+import { inkOutline, inkPath, simplify, strokeToInk } from '../ink.js'
 
 describe('strokeToInk', () => {
   it('boxes a stroke with room for its line, and keeps its points across the box', () => {
@@ -47,5 +47,32 @@ describe('inkPath', () => {
     expect(inkPath('0,0 50,100 100,0', 100, 100)).toBe('M0,0 Q50,100 75,50 L100,0')
     expect(inkPath('', 10, 10)).toBe('')
     expect(inkPath('nonsense', 10, 10)).toBe('')
+  })
+})
+
+describe('stylus pressure', () => {
+  const pressed = [
+    { x: 0, y: 0, p: 0.2 },
+    { x: 50, y: 20, p: 0.9 },
+    { x: 100, y: 0, p: 0.4 },
+  ]
+
+  it('keeps each point’s pressure, as x,y,p', () => {
+    const ink = strokeToInk(pressed)
+    expect(ink.points.split(' ').every((point) => point.split(',').length === 3)).toBe(true)
+    expect(ink.points).toMatch(/,0\.9\b/)
+  })
+
+  it('leaves a stroke without pressure as x,y pairs', () => {
+    const ink = strokeToInk(pressed.map(({ x, y }) => ({ x, y })))
+    expect(ink.points.split(' ').every((point) => point.split(',').length === 2)).toBe(true)
+  })
+
+  it('draws pressure as a filled outline, and plain strokes as a line', () => {
+    const ink = strokeToInk(pressed)
+    expect(inkOutline(ink.points, ink.size.width, ink.size.height)).toMatch(/^M[\d.,-]+ L.* Z$/)
+    const plain = strokeToInk(pressed.map(({ x, y }) => ({ x, y })))
+    expect(inkOutline(plain.points, 100, 40)).toBe('')
+    expect(inkPath(ink.points, ink.size.width, ink.size.height)).toMatch(/^M/)
   })
 })

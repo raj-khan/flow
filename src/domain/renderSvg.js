@@ -5,7 +5,7 @@ import { metaFor } from './nodeMeta.js'
 import { shapePath, textInset } from './shapes.js'
 import { isSketch, SKETCH_FONT, sketchPath } from './sketch.js'
 import { LINE, routeEdge } from './routes.js'
-import { inkPath } from './ink.js'
+import { inkOutline, inkPath } from './ink.js'
 
 /**
  * The app's colour tokens, copied from `style.css` so the renderer runs where
@@ -143,6 +143,10 @@ export function renderSvg(
  */
 function renderInk(node, position, colours, change) {
   const { width, height } = sizeOf(node)
+  const colour = change ? colours.changes[change] : colours.ink
+  const g = `<g transform="translate(${round(position.x)},${round(position.y)})"${change ? ` data-change="${change}"` : ''}>`
+  const outline = inkOutline(node.data?.points, width, height)
+  if (outline) return `${g}<path d="${outline}" fill="${colour}"/></g>`
   const d = inkPath(node.data?.points, width, height)
   if (!d) return ''
   return `<g transform="translate(${round(position.x)},${round(position.y)})"${change ? ` data-change="${change}"` : ''}><path d="${d}" fill="none" stroke="${change ? colours.changes[change] : colours.ink}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>`

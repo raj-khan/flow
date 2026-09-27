@@ -9,7 +9,7 @@ import { useShiftKey } from '@/composables/useShiftKey.js'
 import { RESIZE_NODE } from './resizeKey.js'
 import { SKETCH } from './sketchKey.js'
 import { sketchPath } from '@/domain/sketch.js'
-import { inkPath } from '@/domain/ink.js'
+import { inkOutline, inkPath } from '@/domain/ink.js'
 import { shapePath, textInset } from '@/domain/shapes.js'
 import { accentClasses } from './accents.js'
 import { FOCUSED_NODE_ID } from './focusKey.js'
@@ -88,6 +88,10 @@ const isDecision = computed(() => node.value.type === SHAPE.DECISION)
 const isTable = computed(() => node.value.type === SHAPE.TABLE)
 /** A pen stroke: just its line, with no text, outline or connections. */
 const isInk = computed(() => node.value.type === SHAPE.INK)
+/** A stylus stroke is a filled outline that swells with the pressure. */
+const inkFill = computed(() =>
+  isInk.value ? inkOutline(node.value.data?.points, size.value.width, size.value.height) : '',
+)
 const inkD = computed(() =>
   isInk.value ? inkPath(node.value.data?.points, size.value.width, size.value.height) : '',
 )
@@ -141,6 +145,14 @@ const strokeWidth = computed(() => (props.selected || isKeyboardFocused.value ? 
       data-testid="ink-stroke"
     >
       <path
+        v-if="inkFill"
+        :d="inkFill"
+        fill="currentColor"
+        :stroke="selected ? 'currentColor' : 'none'"
+        stroke-width="1"
+      />
+      <path
+        v-else
         :d="inkD"
         fill="none"
         stroke="currentColor"

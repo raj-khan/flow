@@ -123,6 +123,26 @@ describe('sizes', () => {
     expect(svg).not.toContain('<text x=')
   })
 
+  it('fills a stylus stroke, whose width follows the pressure', () => {
+    const svg = renderSvg({
+      version: 3,
+      title: 'T',
+      nodes: [
+        {
+          id: 'ink-1',
+          type: 'ink',
+          name: '',
+          data: { points: '0,0,0.2 50,60,0.9 100,100,0.4' },
+          position: { x: 0, y: 0 },
+          size: { width: 100, height: 40 },
+        },
+      ],
+      edges: [],
+    })
+
+    expect(svg).toMatch(/<path d="M[^"]+ Z" fill="#14181f"\/>/)
+  })
+
   it('draws a resized node at its size, and frames it', () => {
     const svg = renderSvg(
       {
