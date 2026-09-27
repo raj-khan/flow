@@ -2,6 +2,7 @@ import { watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { track } from '@/api/analytics.js'
+import { PHONE } from '@/composables/useMediaQuery.js'
 import { useFlowQuery } from '@/composables/useFlowQuery.js'
 import { useFlowHistory } from '@/composables/useFlowHistory.js'
 import { useReplaceDocument } from '@/composables/useNodeMutations.js'
@@ -73,6 +74,10 @@ export function useOpenSharedLink() {
       replace.mutate(shared, {
         onSuccess: () => {
           track('opened_from_link')
+          if (window.matchMedia?.(PHONE).matches) {
+            canvas.setViewing(true)
+            return
+          }
           toasts.push('Opened a shared diagram. Undo brings yours back.', {
             action: { label: 'Undo', run: undo },
           })

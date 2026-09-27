@@ -20,7 +20,7 @@ function run(toast) {
   <Teleport to="body">
     <!-- Polite, not assertive: a confirmation should not interrupt a screen reader. -->
     <div
-      class="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex flex-col items-center gap-2 px-4"
+      class="pointer-events-none fixed inset-x-0 bottom-4 z-50 max-md:bottom-36 flex flex-col items-center gap-2 px-4"
       role="status"
       aria-live="polite"
     >

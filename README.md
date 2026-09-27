@@ -71,6 +71,11 @@ nobody hosts it yet: run it yourself, or hand over the `.flow` file or the brief
   and Eraser (`7`/`E`, click a shape or connection to delete it). Escape goes back to Select.
 - **New diagram and samples.** Start empty, or from a web app architecture or support flow
   sample. Undo brings back whatever was there.
+- **Phones and tablets.** Below 768px the tool bar docks at the bottom and panels and dialogs rise
+  as sheets. Pinch to zoom and pan with two fingers anywhere, even over shapes; a long press (or a
+  right click) opens a shape's or connection's menu. A stylus draws with its pressure, and a palm
+  resting on the screen draws nothing. A link opened on a phone shows the diagram fitted and
+  read-only, with Copy for AI and Edit.
 - **Shape library.** The Shapes tool opens it over the canvas. Drag a shape onto the canvas to drop
   it there, or click it (or press Enter) to add it in a clear spot near the middle.
 - **Resize.** Select a shape and drag its handles; hold Shift to keep its proportions.

@@ -97,3 +97,20 @@ test('the text pane and the details drawer float and close', async ({ page }) =>
   await page.getByRole('button', { name: 'Close details' }).click()
   await expect(page).toHaveURL(/\/new$/)
 })
+
+test('a right click opens the context menu for a shape or a connection', async ({ page }) => {
+  await node(page, 'e879e4').click({ button: 'right' })
+  const menu = page.getByRole('menu', { name: 'Shape' })
+  await expect(menu.getByRole('menuitem').first()).toBeFocused()
+  await menu.getByRole('menuitem', { name: 'Duplicate' }).click()
+  await expect(shapes(page)).toHaveCount(6)
+
+  await page.keyboard.press('Escape')
+  // A step line's box has no line at its centre, so the menu is asked for on the line itself.
+  await page
+    .locator('.vue-flow__edge[data-id="e-d09c08-b6a0c1"] path.cursor-pointer')
+    .dispatchEvent('contextmenu', { bubbles: true, clientX: 10, clientY: 10 })
+  await expect(page.getByRole('menu', { name: 'Connection' })).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('menu')).toHaveCount(0)
+})

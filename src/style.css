@@ -192,6 +192,12 @@ body,
   height: 100%;
 }
 
+/* A pull on the canvas pans it; it never refreshes the page or bounces it. */
+html,
+body {
+  overscroll-behavior: none;
+}
+
 body {
   margin: 0;
   background: var(--canvas);
@@ -390,4 +396,42 @@ optgroup {
 .zen-hidden:not(:focus-within),
 .zen-hidden:not(:focus-within) * {
   pointer-events: none !important;
+}
+
+/*
+ * A phone: panels become sheets that rise from the bottom, full width, and
+ * every control is at least a fingertip wide.
+ */
+@media (max-width: 767px) {
+  .sheet {
+    inset: auto 0 0;
+    height: 65vh;
+    z-index: 40;
+  }
+
+  .sheet > *,
+  .sheet-self {
+    width: 100%;
+    max-width: none;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .sheet > * {
+    height: 100%;
+  }
+
+  .sheet-self {
+    inset: auto 0 0;
+    height: 75vh;
+  }
+}
+
+@media (max-width: 767px), (pointer: coarse) {
+  .island button,
+  .island [role='menuitem'],
+  .island [role='menuitemcheckbox'] {
+    min-width: 44px;
+    min-height: 44px;
+  }
 }

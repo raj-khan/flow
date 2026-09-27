@@ -75,6 +75,12 @@ export function useCanvasClipboard(canvas) {
     if (canvas.isBlocked(event) || !ids.length || !document.value) return
     // The browser's own Ctrl+D bookmarks the page.
     event.preventDefault()
+    duplicateShapes(ids)
+  }
+
+  /** Copies of these shapes, a step along, selected. @param {string[]} ids */
+  function duplicateShapes(ids) {
+    if (!document.value || !ids.length) return
     const result = pasteInto(document.value, copySelection(document.value, ids))
     duplicate.mutate(result.document, { onSuccess: () => canvas.select(result.ids) })
   }
@@ -91,4 +97,6 @@ export function useCanvasClipboard(canvas) {
     window.removeEventListener('paste', onPaste)
     window.removeEventListener('keydown', onKeydown)
   })
+
+  return { duplicate: duplicateShapes }
 }

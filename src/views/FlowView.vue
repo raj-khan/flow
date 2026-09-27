@@ -19,7 +19,9 @@ import { useCopyBrief } from '@/composables/useCopyBrief.js'
 import { useFullScreen } from '@/composables/useFullScreen.js'
 import { useViewKeys } from '@/composables/useViewKeys.js'
 import { useHelpDialog } from '@/composables/useHelpDialog.js'
+import { PHONE, useMediaQuery } from '@/composables/useMediaQuery.js'
 import { useOpenSharedLink } from '@/composables/useShareLink.js'
+import { useFlowQuery } from '@/composables/useFlowQuery.js'
 import { useCanvasStore } from '@/stores/canvas.js'
 import { useToastStore } from '@/stores/toasts.js'
 
@@ -34,9 +36,12 @@ const isExporting = ref(false)
 const isSharing = ref(false)
 useOpenSharedLink()
 const { copyBrief } = useCopyBrief()
+const { document } = useFlowQuery()
 // Bound at the shell: a dialog that is not mounted cannot listen for its own key.
 const help = useHelpDialog()
 const fullScreen = useFullScreen()
+/** A phone keeps the tools at the thumb: the tool bar docks at the bottom. */
+const isPhone = useMediaQuery(PHONE)
 const toasts = useToastStore()
 useViewKeys({ fullScreen: fullScreen.toggle, zen: canvas.toggleZen })
 
@@ -68,59 +73,95 @@ onBeforeUnmount(() => window.removeEventListener('pointermove', onPointerMove))
       <FlowCanvas />
     </main>
 
-    <!-- Islands let the canvas through everywhere they are not. -->
-    <header
-      class="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-start justify-between gap-3 p-3 *:pointer-events-auto"
-      :class="{ 'zen-hidden': canvas.zen && !near.top }"
-    >
-      <MainMenu
-        @help="help.open"
-        @import="isImporting = true"
-        @compare="isComparing = true"
-        @export="isExporting = true"
-      />
-
-      <ToolBar class="absolute left-1/2 -translate-x-1/2" />
-
-      <div class="island flex items-center gap-1 p-1">
-        <IconButton
-          label="Share"
-          variant="bare"
-          title="Share a private link, or publish one an AI can read"
-          @click="isSharing = true"
-        >
-          <circle cx="18" cy="5" r="2.5" />
-          <circle cx="6" cy="12" r="2.5" />
-          <circle cx="18" cy="19" r="2.5" />
-          <path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4" />
-        </IconButton>
+    <!-- A link opened on a phone: to read, hand to an agent, or start editing. -->
+    <template v-if="canvas.isViewing">
+      <header class="pointer-events-none absolute inset-x-0 top-0 z-30 p-3">
+        <div class="island pointer-events-auto inline-flex max-w-full px-3 py-2">
+          <h1 class="truncate text-sm font-semibold">{{ document?.title || 'Shared diagram' }}</h1>
+        </div>
+      </header>
+      <div
+        class="absolute inset-x-3 bottom-3 z-30 flex gap-2"
+        role="toolbar"
+        aria-label="Shared diagram"
+      >
         <button
           type="button"
-          class="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-brand-ink transition-opacity hover:opacity-90"
-          title="Copy the diagram as a Markdown brief for Claude, Copilot or any coding agent"
+          class="island min-h-11 flex-1 px-4 text-sm font-semibold"
+          @click="canvas.setViewing(false)"
+        >
+          Edit
+        </button>
+        <button
+          type="button"
+          class="min-h-11 flex-1 rounded-xl bg-brand px-4 text-sm font-semibold text-brand-ink"
           @click="copyBrief"
         >
           Copy for AI
         </button>
       </div>
-    </header>
+    </template>
 
-    <div v-if="canvas.isTextOpen" class="absolute top-16 bottom-3 left-3 z-10">
-      <TextPanel />
-    </div>
+    <template v-else>
+      <!-- Islands let the canvas through everywhere they are not. -->
+      <header
+        class="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-start justify-between gap-3 p-3 *:pointer-events-auto"
+        :class="{ 'zen-hidden': canvas.zen && !near.top }"
+      >
+        <MainMenu
+          @help="help.open"
+          @import="isImporting = true"
+          @compare="isComparing = true"
+          @export="isExporting = true"
+        />
 
-    <div v-if="canvas.isLibraryOpen" class="absolute top-16 bottom-3 left-3 z-20 flex items-start">
-      <ShapePalette class="max-h-full" @add="canvas.requestShape" />
-    </div>
+        <HistoryControls v-if="isPhone" class="mr-auto" />
+        <ToolBar v-else class="absolute left-1/2 -translate-x-1/2" />
 
-    <div
-      class="absolute bottom-3 left-3 z-20 flex items-center gap-2"
-      :class="{ 'zen-hidden': canvas.zen && !near.bottom }"
-    >
-      <HistoryControls />
-      <!-- CanvasControls teleports here from inside Vue Flow. -->
-      <div id="canvas-controls" />
-    </div>
+        <div class="island flex shrink-0 items-center gap-1 p-1">
+          <IconButton
+            label="Share"
+            variant="bare"
+            title="Share a private link, or publish one an AI can read"
+            @click="isSharing = true"
+          >
+            <circle cx="18" cy="5" r="2.5" />
+            <circle cx="6" cy="12" r="2.5" />
+            <circle cx="18" cy="19" r="2.5" />
+            <path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4" />
+          </IconButton>
+          <button
+            type="button"
+            class="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-brand-ink transition-opacity hover:opacity-90"
+            title="Copy the diagram as a Markdown brief for Claude, Copilot or any coding agent"
+            @click="copyBrief"
+          >
+            Copy for AI
+          </button>
+        </div>
+      </header>
+
+      <div v-if="canvas.isTextOpen" class="sheet absolute top-16 bottom-3 left-3 z-10">
+        <TextPanel />
+      </div>
+
+      <div
+        v-if="canvas.isLibraryOpen"
+        class="sheet absolute top-16 bottom-3 left-3 z-20 flex items-start"
+      >
+        <ShapePalette class="max-h-full" @add="canvas.requestShape" />
+      </div>
+
+      <div
+        class="absolute bottom-3 left-3 z-20 flex items-center gap-2 max-md:right-3 max-md:flex-col"
+        :class="{ 'zen-hidden': canvas.zen && !near.bottom }"
+      >
+        <HistoryControls v-if="!isPhone" />
+        <!-- CanvasControls teleports here from inside Vue Flow. -->
+        <div id="canvas-controls" />
+        <ToolBar v-if="isPhone" />
+      </div>
+    </template>
 
     <!-- Nested, so the drawer mounts over the canvas without unmounting it. -->
     <RouterView v-slot="{ Component }">
@@ -147,5 +188,13 @@ onBeforeUnmount(() => window.removeEventListener('pointermove', onPointerMove))
 .drawer-enter-from,
 .drawer-leave-to {
   transform: translateX(calc(100% + 1rem));
+}
+
+/* On a phone the drawer is a sheet, and rises from the bottom. */
+@media (max-width: 767px) {
+  .drawer-enter-from,
+  .drawer-leave-to {
+    transform: translateY(100%);
+  }
 }
 </style>

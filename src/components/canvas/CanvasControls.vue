@@ -76,6 +76,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
     <div class="island flex items-center gap-0.5 p-1" role="toolbar" aria-label="View">
       <IconButton
         variant="bare"
+        class="max-md:hidden"
         label="Zoom in"
         title="Zoom in to the next step. Scrolling on the canvas zooms freely"
         @click="step(1)"
@@ -85,6 +86,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 
       <IconButton
         variant="bare"
+        class="max-md:hidden"
         label="Zoom out"
         title="Zoom out to the previous step. Scrolling on the canvas zooms freely"
         @click="step(-1)"
@@ -94,6 +96,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 
       <IconButton
         variant="bare"
+        class="max-md:hidden"
         :label="`Lines: ${lines}`"
         :title="`Connections run ${LINE_NAMES[lines]}. Click for ${LINE_NAMES[next]}`"
         @click="cycle"
@@ -105,6 +108,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 
       <IconButton
         variant="bare"
+        class="max-md:hidden"
         label="Tidy up"
         title="Lay out the whole diagram automatically. Undo puts everything back"
         @click="tidy"
@@ -117,6 +121,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 
       <IconButton
         variant="bare"
+        class="max-md:hidden"
         label="Snap to grid"
         :title="canvas.snap ? 'Shapes snap to the grid as you drag them' : 'Shapes move freely'"
         :pressed="canvas.snap"
@@ -141,6 +146,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 
       <IconButton
         variant="bare"
+        class="max-md:hidden"
         label="Minimap"
         :title="canvas.minimap ? 'Hide the minimap' : 'Show a minimap of the whole diagram'"
         :pressed="canvas.minimap"

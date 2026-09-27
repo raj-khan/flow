@@ -33,6 +33,7 @@ import { useFlowHistory } from '@/composables/useFlowHistory.js'
 import { useStartDiagram } from '@/composables/useStartDiagram.js'
 import { useCanvasStore } from '@/stores/canvas.js'
 import { useCanvasKeyboard } from '@/composables/useCanvasKeyboard.js'
+import { PHONE, useMediaQuery } from '@/composables/useMediaQuery.js'
 import { isOpenable, metaFor } from '@/domain/nodeMeta.js'
 import { canConnect, edgeIdFor, toNodeId } from '@/domain/graph.js'
 import { isInView, panDuration } from '@/domain/motion.js'
@@ -55,6 +56,9 @@ import { freeSpotNear } from '@/domain/layout.js'
 import FlowEdge from './FlowEdge.vue'
 import CanvasControls from './CanvasControls.vue'
 import CanvasState from './CanvasState.vue'
+import CanvasContextMenu from './CanvasContextMenu.vue'
+import { useLongPress } from '@/composables/useLongPress.js'
+import { useTwoFingers } from '@/composables/useTwoFingers.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -70,6 +74,10 @@ const updateNode = useUpdateNode()
 const updateEdge = useUpdateEdge()
 const styleEdge = useStyleEdge()
 const resizeNode = useResizeNode()
+/** No room for a minimap on a phone, and pinching does its job. */
+const isPhone = useMediaQuery(PHONE)
+/** Shapes are picked up and changed with Select, and never in the viewer. */
+const isEditing = computed(() => canvas.tool === TOOL.SELECT && !canvas.isViewing)
 
 provide(
   SKETCH,
@@ -94,7 +102,9 @@ const editingId = ref('')
 
 provide(EDIT_TEXT, {
   editingId,
-  start: (/** @type {string} */ id) => (editingId.value = id),
+  start: (/** @type {string} */ id) => {
+    if (!canvas.isViewing) editingId.value = id
+  },
   stop: () => (editingId.value = ''),
   renameNode: (/** @type {string} */ id, /** @type {string} */ name) =>
     updateNode.mutate({ id, patch: { name } }),
@@ -295,7 +305,7 @@ function drawFromData(list) {
 
 /** @param {{ node: import('@vue-flow/core').GraphNode, event: MouseEvent | TouchEvent }} event */
 function onNodeClick({ node, event }) {
-  if (canvas.tool === TOOL.HAND) return
+  if (canvas.tool === TOOL.HAND || canvas.isViewing) return
   if (canvas.tool === TOOL.ERASER) {
     removeShapes([node.id])
     return
@@ -312,8 +322,7 @@ function onNodeClick({ node, event }) {
   if (event && 'shiftKey' in event && (event.shiftKey || event.ctrlKey || event.metaKey)) return
   if (!isOpenable(node.data.node)) return
   focusedByPointer = focusedId.value !== node.id
-  focus(node.id)
-  router.push({ name: ROUTE.NODE_DETAILS, params: { id: node.id } })
+  openDetails(node.id)
 }
 
 /** The node a connection is being dragged from, or empty. */
@@ -483,7 +492,7 @@ function removeShapes(ids) {
   )
 }
 
-useCanvasClipboard({
+const { duplicate } = useCanvasClipboard({
   selectedIds: () => getSelectedNodes.value.map((node) => node.id),
   remove: removeShapes,
   isBlocked,
@@ -682,6 +691,84 @@ watch(
   },
 )
 
+/**
+ * The context menu: a right click, or a long press on a touch screen.
+ * @type {import('vue').Ref<{ x: number, y: number, kind: 'node' | 'edge', id: string } | null>}
+ */
+const contextMenu = ref(null)
+
+const menuItems = computed(() => {
+  const at = contextMenu.value
+  if (!at) return []
+  if (at.kind === 'edge') {
+    return [
+      { label: 'Edit label', run: () => (editingId.value = at.id) },
+      { label: 'Remove connection', run: () => detach(at.id), danger: true },
+    ]
+  }
+  const node = nodes.value.find((candidate) => candidate.id === at.id)?.data.node
+  return [
+    ...(node && isOpenable(node) ? [{ label: 'Open details', run: () => openDetails(at.id) }] : []),
+    { label: 'Rename', run: () => (editingId.value = at.id) },
+    { label: 'Duplicate', run: () => duplicate([at.id]) },
+    { label: 'Delete', run: () => removeShapes([at.id]), danger: true },
+  ]
+})
+
+/** @param {string} id */
+function openDetails(id) {
+  focus(id)
+  router.push({ name: ROUTE.NODE_DETAILS, params: { id } })
+}
+
+/**
+ * @param {'node' | 'edge'} kind
+ * @param {string} id
+ * @param {{ clientX: number, clientY: number, preventDefault?: () => void }} event
+ */
+function openMenu(kind, id, event) {
+  event.preventDefault?.()
+  if (!isEditing.value) return
+  contextMenu.value = { x: event.clientX, y: event.clientY, kind, id }
+}
+
+/** @param {{ event: MouseEvent | TouchEvent, node: { id: string } }} payload */
+const onNodeMenu = ({ event, node }) => openMenu('node', node.id, /** @type {MouseEvent} */ (event))
+
+/** @param {{ event: MouseEvent | TouchEvent, edge: { id: string } }} payload */
+const onEdgeMenu = ({ event, edge }) => openMenu('edge', edge.id, /** @type {MouseEvent} */ (event))
+
+/**
+ * The viewer shows the whole diagram it was sent. Vue Flow is already mounted
+ * with the one it replaced, so it is fitted here, once the shapes are measured.
+ */
+watch(
+  () => canvas.isViewing,
+  async (viewing) => {
+    if (!viewing) return
+    for (let attempt = 0; attempt < 40; attempt += 1) {
+      await nextTick()
+      const all = getNodes.value
+      if (all.length && all.every((node) => node.dimensions?.width)) break
+      await new Promise((resolve) => setTimeout(resolve, 50))
+    }
+    fitView({ padding: 0.12, duration: 0 })
+  },
+)
+
+useTwoFingers(container, {
+  viewport: () => viewport.value,
+  setViewport: (next) => setViewport(next),
+})
+
+useLongPress(container, (event) => {
+  const target = /** @type {Element | null} */ (event.target)
+  const node = target?.closest?.('.vue-flow__node')
+  const edge = target?.closest?.('.vue-flow__edge')
+  const id = (node ?? edge)?.getAttribute('data-id')
+  if (id) openMenu(node ? 'node' : 'edge', id, event)
+})
+
 watch(
   () => canvas.focusNodeId,
   async (id) => {
@@ -721,9 +808,9 @@ watch(
       :snap-grid="[GRID, GRID]"
       :min-zoom="0.2"
       :max-zoom="2"
-      :nodes-connectable="canvas.tool === TOOL.SELECT"
-      :nodes-draggable="canvas.tool === TOOL.SELECT"
-      :elements-selectable="canvas.tool === TOOL.SELECT"
+      :nodes-connectable="isEditing"
+      :nodes-draggable="isEditing"
+      :elements-selectable="isEditing"
       :is-valid-connection="isValidConnection"
       :connection-radius="28"
       :nodes-deletable="false"
@@ -735,6 +822,8 @@ watch(
       class="h-full w-full"
       @nodes-initialized="onNodesInitialized"
       @node-click="onNodeClick"
+      @node-context-menu="onNodeMenu"
+      @edge-context-menu="onEdgeMenu"
       @edge-click="onEdgeClick"
       @pane-click="onPaneClick"
       @node-drag-start="isDragging = true"
@@ -746,7 +835,7 @@ watch(
     >
       <Background :gap="GRID" :size="1.2" />
       <MiniMap
-        v-if="canvas.minimap && !canvas.zen"
+        v-if="canvas.minimap && !canvas.zen && !isPhone"
         class="island minimap"
         pannable
         zoomable
@@ -781,6 +870,15 @@ watch(
           </marker>
         </defs>
       </svg>
+
+      <CanvasContextMenu
+        v-if="contextMenu"
+        :x="contextMenu.x"
+        :y="contextMenu.y"
+        :label="contextMenu.kind === 'node' ? 'Shape' : 'Connection'"
+        :items="menuItems"
+        @close="contextMenu = null"
+      />
 
       <!-- The canvas is a graph, so a screen reader has nothing else to go on. -->
       <div class="sr-only" role="status" aria-live="polite">{{ focusAnnouncement }}</div>

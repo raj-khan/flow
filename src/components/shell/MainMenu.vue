@@ -140,7 +140,7 @@ onBeforeUnmount(() => window.removeEventListener('pointerdown', onOutside))
 </script>
 
 <template>
-  <div class="island relative flex items-center gap-2 p-1 pr-3">
+  <div class="island relative flex items-center gap-2 p-1 md:pr-3">
     <button
       ref="trigger"
       type="button"
@@ -167,7 +167,7 @@ onBeforeUnmount(() => window.removeEventListener('pointerdown', onOutside))
       </svg>
     </button>
 
-    <h1 class="max-w-[40vw] truncate text-sm font-semibold">
+    <h1 class="max-w-[40vw] truncate text-sm font-semibold max-md:sr-only">
       isketch<span v-if="file.name" class="font-normal text-muted"> · {{ file.name }}</span>
     </h1>
 

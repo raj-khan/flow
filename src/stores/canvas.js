@@ -86,6 +86,17 @@ export const useCanvasStore = defineStore('canvas', () => {
     saveSwitch(STORAGE_KEYS.MINIMAP, minimap.value)
   }
 
+  /**
+   * A diagram someone was sent, on a phone: shown fitted and read-only, with
+   * Copy for AI and Edit, since most phone visits are someone reading a link.
+   */
+  const isViewing = ref(false)
+
+  /** @param {boolean} on */
+  function setViewing(on) {
+    isViewing.value = on
+  }
+
   /** Zen mode: every tool hides until the pointer nears an edge. */
   const zen = ref(false)
 
@@ -140,6 +151,8 @@ export const useCanvasStore = defineStore('canvas', () => {
     toggleMinimap,
     zen,
     toggleZen,
+    isViewing,
+    setViewing,
     tool,
     setTool,
     isLibraryOpen,

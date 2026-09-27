@@ -64,7 +64,9 @@ onBeforeUnmount(() => {
 
 <template>
   <Teleport to="body">
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 max-md:items-end max-md:p-0"
+    >
       <div
         data-testid="modal-backdrop"
         class="absolute inset-0 bg-brand/30"
@@ -73,7 +75,7 @@ onBeforeUnmount(() => {
 
       <div
         ref="panel"
-        class="relative w-full max-w-md rounded-xl border border-line bg-surface shadow-xl"
+        class="relative w-full max-w-md rounded-xl border border-line bg-surface shadow-xl max-md:max-h-[90vh] max-md:max-w-none max-md:overflow-y-auto max-md:rounded-b-none"
         role="dialog"
         aria-modal="true"
         :aria-label="title"

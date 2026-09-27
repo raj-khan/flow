@@ -113,7 +113,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 
 <template>
   <aside
-    class="island absolute top-16 right-3 bottom-3 z-20 flex w-[380px] max-w-[calc(100%-1.5rem)] flex-col overflow-hidden"
+    class="island sheet-self absolute top-16 right-3 bottom-3 z-20 flex w-[380px] max-w-[calc(100%-1.5rem)] flex-col overflow-hidden"
     role="dialog"
     aria-modal="false"
     :aria-label="meta ? `${meta.label} details` : 'Node details'"

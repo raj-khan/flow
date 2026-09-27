@@ -16,7 +16,16 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
 
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  // Desktop runs everything but the touch specs; a phone and a tablet run those.
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] }, testIgnore: /mobile\// },
+    { name: 'phone', use: { ...devices['Pixel 7'] }, testMatch: /mobile\/.*\.spec\.js/ },
+    {
+      name: 'tablet',
+      use: { ...devices['Galaxy Tab S4 landscape'] },
+      testMatch: /mobile\/.*\.spec\.js/,
+    },
+  ],
 
   // Against the production build, so E2E exercises what actually ships.
   webServer: {
