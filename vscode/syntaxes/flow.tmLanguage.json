@@ -1,0 +1,64 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "isketch diagram",
+  "scopeName": "source.flow",
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#section" },
+    { "include": "#setting" },
+    { "include": "#shapeNote" },
+    { "include": "#node" },
+    { "include": "#edge" },
+    { "include": "#position" }
+  ],
+  "repository": {
+    "comment": { "match": "^\\s*#.*$", "name": "comment.line.number-sign.flow" },
+    "section": { "match": "^@(layout|ink)\\b", "name": "keyword.control.section.flow" },
+    "setting": {
+      "match": "^(title|note|style|lines)(:)(.*)$",
+      "captures": {
+        "1": { "name": "keyword.other.setting.flow" },
+        "2": { "name": "punctuation.separator.flow" },
+        "3": { "name": "string.unquoted.setting.flow" }
+      }
+    },
+    "shapeNote": {
+      "match": "^([A-Za-z0-9_][\\w-]*)\\s+(note)(:)(.*)$",
+      "captures": {
+        "1": { "name": "variable.other.id.flow" },
+        "2": { "name": "keyword.other.note.flow" },
+        "3": { "name": "punctuation.separator.flow" },
+        "4": { "name": "string.unquoted.note.flow" }
+      }
+    },
+    "node": {
+      "match": "^([A-Za-z0-9_][\\w-]*)\\s*(=)\\s*([A-Za-z][\\w-]*)\\s*(\"(?:[^\"\\\\]|\\\\.)*\")?\\s*(?:(--)(.*))?$",
+      "captures": {
+        "1": { "name": "variable.other.id.flow" },
+        "2": { "name": "keyword.operator.assignment.flow" },
+        "3": { "name": "entity.name.type.shape.flow" },
+        "4": { "name": "string.quoted.double.flow" },
+        "5": { "name": "punctuation.separator.description.flow" },
+        "6": { "name": "comment.block.documentation.description.flow" }
+      }
+    },
+    "edge": {
+      "match": "^([A-Za-z0-9_][\\w-]*)\\s*(<?--?>)\\s*([A-Za-z0-9_][\\w-]*)\\s*(?:(:)(.*))?$",
+      "captures": {
+        "1": { "name": "variable.other.id.flow" },
+        "2": { "name": "keyword.operator.arrow.flow" },
+        "3": { "name": "variable.other.id.flow" },
+        "4": { "name": "punctuation.separator.flow" },
+        "5": { "name": "string.unquoted.label.flow" }
+      }
+    },
+    "position": {
+      "match": "^([A-Za-z0-9_][\\w-]*)\\s+(-?[\\d.]+,-?[\\d.]+)(?:\\s+(\\d+x\\d+))?$",
+      "captures": {
+        "1": { "name": "variable.other.id.flow" },
+        "2": { "name": "constant.numeric.position.flow" },
+        "3": { "name": "constant.numeric.size.flow" }
+      }
+    }
+  }
+}

@@ -113,7 +113,9 @@ export default defineConfig({
     environment: 'happy-dom',
     globals: true,
     setupFiles: ['./src/tests/setup.js'],
-    include: ['src/**/*.spec.js'],
+    include: ['src/**/*.spec.js', 'vscode/src/**/*.spec.js'],
+    // The VS Code extension's tests run against a fake of the editor's API.
+    alias: { vscode: fileURLToPath(new URL('./vscode/test/fakeVscode.js', import.meta.url)) },
     coverage: {
       provider: 'v8',
       include: ['src/**/*.{js,vue}'],

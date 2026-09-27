@@ -1,0 +1,100 @@
+{
+  "name": "isketch",
+  "displayName": "isketch",
+  "description": "Preview and edit isketch .flow diagrams beside your code: live drawing, syntax colours and errors by line.",
+  "version": "0.1.0",
+  "publisher": "raj-khan",
+  "license": "MIT",
+  "homepage": "https://isketch.online",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/raj-khan/flow",
+    "directory": "vscode"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Visualization"
+  ],
+  "keywords": [
+    "diagram",
+    "architecture",
+    "flow",
+    "isketch",
+    "ai"
+  ],
+  "main": "./dist/extension.cjs",
+  "activationEvents": [
+    "onLanguage:flow"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "flow",
+        "aliases": [
+          "isketch diagram",
+          "flow"
+        ],
+        "extensions": [
+          ".flow"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "flow",
+        "scopeName": "source.flow",
+        "path": "./syntaxes/flow.tmLanguage.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "isketch.openPreviewToSide",
+        "title": "Open Preview to the Side",
+        "category": "isketch",
+        "icon": "$(open-preview)"
+      },
+      {
+        "command": "isketch.openInIsketch",
+        "title": "Open in isketch",
+        "category": "isketch",
+        "icon": "$(link-external)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "isketch.openPreviewToSide",
+          "when": "editorLangId == flow",
+          "group": "navigation"
+        },
+        {
+          "command": "isketch.openInIsketch",
+          "when": "editorLangId == flow",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "isketch.openPreviewToSide",
+          "when": "editorLangId == flow"
+        },
+        {
+          "command": "isketch.openInIsketch",
+          "when": "editorLangId == flow"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "isketch.openPreviewToSide",
+        "key": "ctrl+k v",
+        "mac": "cmd+k v",
+        "when": "editorLangId == flow"
+      }
+    ]
+  }
+}
