@@ -254,9 +254,14 @@ npm run isketch -- check docs/*.flow                    # file:line errors, exit
 npm run isketch -- diff old.flow new.flow -o diff.svg   # what changed, listed and drawn
 npm run isketch -- brief diagram.flow                   # a Markdown brief for a coding agent
 npm run isketch -- import prisma/schema.prisma -o db.flow # any import format, told from the name
+npm run isketch -- scan . -o architecture.flow           # a repo's compose, SQL, Prisma, OpenAPI, Drizzle
 npm run isketch -- mcp docs                             # an MCP server for the diagrams in docs/
 npm run examples                                        # redraw every SVG in examples/
 ```
+
+`scan` gives an agent a first draft instead of a blank page: every compose file, set of SQL
+migrations, Prisma schema, OpenAPI spec and Drizzle schema it finds (dependencies, builds and tests
+skipped) is imported as it would be on its own, laid out, and framed, side by side, in one `.flow`.
 
 It needs only Node: the renderer is the same pure code the app uses, so a docs build or CI can
 draw diagrams that match the editor.

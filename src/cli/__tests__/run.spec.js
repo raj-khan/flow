@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { run, USAGE } from '../run.js'
+import { REPO } from '@/tests/fixtures/repo.js'
 
 /** An in-memory file system and captured output. */
 function fakeIo(files = {}) {
@@ -151,5 +152,30 @@ describe('isketch import', () => {
     expect(vague.err.join('')).toContain('Say it with --from')
     expect(await run(['import', 'missing.prisma'], fakeIo().io)).toBe(1)
     expect(await run(['import'], fakeIo().io)).toBe(2)
+  })
+})
+
+describe('isketch scan', () => {
+  it('draws a repository as one framed diagram', async () => {
+    const files = Object.fromEntries(
+      Object.entries(REPO).map(([path, text]) => [`shop/${path}`, text]),
+    )
+    const fake = fakeIo(files)
+    fake.io.listFiles = async (folder) =>
+      Object.keys(files).map((path) => path.slice(folder.length + 1))
+
+    expect(await run(['scan', 'shop', '-o', 'shop.flow'], fake.io)).toBe(0)
+    const flow = fake.written['shop.flow']
+    expect(flow).toMatch(/^title: shop architecture\n/)
+    expect(flow).toContain('compose-frame = frame "Services: docker-compose.yml"')
+    expect(flow).toContain('table-orders -> table-users : user_id')
+    expect(fake.err.join('')).toMatch(/Scanned shop \(.*\) to shop.flow: \d+ shapes in 5 frames/)
+  })
+
+  it('says so when there is nothing to draw', async () => {
+    const fake = fakeIo({ 'empty/readme.md': '# hi' })
+    fake.io.listFiles = async () => ['readme.md']
+    expect(await run(['scan', 'empty'], fake.io)).toBe(1)
+    expect(fake.err.join('')).toContain('found no compose, SQL, Prisma, OpenAPI or Drizzle files')
   })
 })

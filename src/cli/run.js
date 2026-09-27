@@ -1,5 +1,6 @@
 import { parseFlow, serialiseFlow } from '../domain/flowText.js'
 import { detectFormat, IMPORT_FORMATS, importFormat } from '../domain/importers.js'
+import { combineSources, importSources, PEEKED, pickSources } from '../domain/scan.js'
 import { describeDiff, diffDocuments, isUnchanged, mergeForDiff } from '../domain/diff.js'
 import { renderSvg } from '../domain/renderSvg.js'
 import { toBrief } from '../domain/brief.js'
@@ -12,6 +13,9 @@ export const USAGE = `Usage:
   isketch import <file> [--from <format>] [-o <out.flow>]
                                                        Turn a schema, spec or drawing into .flow
                                                        (${IMPORT_FORMATS.map((format) => format.id).join(', ')})
+  isketch scan [folder] [-o <out.flow>]                A first architecture diagram of a repository,
+                                                       from its compose, SQL, Prisma, OpenAPI and
+                                                       Drizzle files, each in a frame
   isketch mcp [folder]                                 An MCP server for the .flow files in a folder
   isketch diff <before.flow> <after.flow> [-o <out.svg>] [--dark]
                                                        List what changed, and draw it
@@ -27,7 +31,9 @@ export const USAGE = `Usage:
  *   stdout: (text: string) => void,
  *   stderr: (text: string) => void,
  *   sketchFont?: () => Promise<string>,
- * }} io  `sketchFont` gives the handwriting font to embed in a sketch
+ *   listFiles?: (folder: string) => Promise<string[]>,
+ * }} io  `sketchFont` gives the handwriting font to embed in a sketch; `listFiles`
+ *   every file under a folder, relative to it, for `scan`
  * @returns {Promise<number>} the exit code
  */
 export async function run(argv, io) {
@@ -38,6 +44,7 @@ export async function run(argv, io) {
   if (command === 'diff') return diff(rest, io)
   if (command === 'brief') return brief(rest, io)
   if (command === 'import') return importFile(rest, io)
+  if (command === 'scan') return scan(rest, io)
 
   io.stderr(USAGE)
   return command === undefined || command === '--help' || command === '-h' ? 0 : 2
@@ -171,6 +178,64 @@ async function importFile(args, io) {
     await io.writeFile(out, flow)
     io.stderr(
       `Imported ${input} (${format.label}) to ${out}: ${count(document.nodes.length, 'shape')}, ${count(document.edges.length, 'connection')}\n`,
+    )
+  } else io.stdout(flow)
+  return 0
+}
+
+/**
+ * A repository's own files, as one framed diagram.
+ * @param {string[]} args
+ * @param {Parameters<typeof run>[1]} io
+ */
+async function scan(args, io) {
+  const { files, out } = options(args)
+  const folder = files[0] ?? '.'
+  if (files.length > 1 || out === '' || !io.listFiles) {
+    io.stderr(USAGE)
+    return 2
+  }
+
+  let paths
+  try {
+    paths = await io.listFiles(folder)
+  } catch {
+    io.stderr(`${folder}: cannot be read\n`)
+    return 1
+  }
+
+  const join = (/** @type {string} */ path) =>
+    folder === '.' ? path : `${folder.replace(/\/+$/, '')}/${path}`
+  /** @type {Map<string, string>} */
+  const contents = new Map()
+  for (const path of paths.filter((each) => PEEKED.test(each))) {
+    contents.set(path, await io.readFile(join(path)).catch(() => ''))
+  }
+
+  const sources = pickSources(paths, (path) => contents.get(path) ?? '')
+  const { parts, warnings } = await importSources(sources, async (path) =>
+    contents.has(path) ? /** @type {string} */ (contents.get(path)) : io.readFile(join(path)),
+  )
+  warnings.forEach(({ path, line, message }) =>
+    io.stderr(
+      line && !/ files$/.test(path)
+        ? `${join(path)}:${line}: ${message}\n`
+        : `${path}: ${message}\n`,
+    ),
+  )
+  if (!parts.length) {
+    io.stderr(`${folder}: found no compose, SQL, Prisma, OpenAPI or Drizzle files to draw.\n`)
+    return 1
+  }
+
+  const name = folder === '.' ? '' : folder.replace(/\/+$/, '').split('/').pop()
+  const document = combineSources(parts, name ? `${name} architecture` : 'Architecture')
+  const flow = serialiseFlow(document)
+  if (out) {
+    await io.writeFile(out, flow)
+    const found = parts.map(({ source }) => source.paths.join(', ')).join('; ')
+    io.stderr(
+      `Scanned ${folder} (${found}) to ${out}: ${count(document.nodes.length - parts.length, 'shape')} in ${count(parts.length, 'frame')}\n`,
     )
   } else io.stdout(flow)
   return 0
