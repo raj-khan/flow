@@ -106,7 +106,7 @@ export function fromSql(text) {
     id: table.id,
     type: SHAPE.TABLE,
     name: table.name,
-    data: { description: describe(table.columns), origin: SQL_ORIGIN },
+    data: { description: describeColumns(table.columns), origin: SQL_ORIGIN },
   }))
 
   return { document: { version: DOCUMENT_VERSION, title: 'Database', nodes, edges }, warnings }
@@ -158,8 +158,12 @@ function readColumns(inside, table, line, references) {
   return columns
 }
 
-/** @param {{ name: string, pk: boolean, fk: boolean }[]} columns */
-function describe(columns) {
+/**
+ * A table's columns as its description, keys marked, shared by every schema
+ * import so they all read the same.
+ * @param {{ name: string, pk: boolean, fk: boolean }[]} columns
+ */
+export function describeColumns(columns) {
   const shown = columns
     .slice(0, LISTED)
     .map(({ name, pk, fk }) => `${name}${pk ? ' PK' : ''}${fk ? ' FK' : ''}`)

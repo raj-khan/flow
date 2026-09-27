@@ -113,3 +113,43 @@ describe('usage', () => {
     expect(await run(['render', 'a.flow', '-o'], fakeIo().io)).toBe(2)
   })
 })
+
+describe('isketch import', () => {
+  const PRISMA =
+    'model User {\n  id Int @id\n}\n\nmodel Post {\n  id Int @id\n  author User @relation(fields: [authorId], references: [id])\n  authorId Int\n  tag Tagg\n}\n'
+
+  it('reads the format from the name, and writes .flow to a file or stdout', async () => {
+    const toFile = fakeIo({ 'schema.prisma': PRISMA })
+    expect(await run(['import', 'schema.prisma', '-o', 'db.flow'], toFile.io)).toBe(0)
+    expect(toFile.written['db.flow']).toContain('User = table "User" -- id PK')
+    expect(toFile.written['db.flow']).toContain('Post -> User : authorId')
+    expect(toFile.err.join('')).toContain('schema.prisma:9: Post.tag is a Tagg')
+    expect(toFile.err.join('')).toContain(
+      'Imported schema.prisma (Prisma) to db.flow: 2 shapes, 1 connection',
+    )
+
+    const toStdout = fakeIo({
+      'docker-compose.yml': 'services:\n  api:\n    depends_on: [db]\n  db:\n    image: postgres\n',
+    })
+    expect(await run(['import', 'docker-compose.yml'], toStdout.io)).toBe(0)
+    expect(toStdout.out.join('')).toMatch(/api -> db/)
+  })
+
+  it('takes the format outright with --from, and says which there are', async () => {
+    const named = fakeIo({ 'db.txt': 'CREATE TABLE a (id int PRIMARY KEY);' })
+    expect(await run(['import', '--from', 'sql', 'db.txt'], named.io)).toBe(0)
+    expect(named.out.join('')).toContain('a = table "a"')
+
+    const unknown = fakeIo({ 'db.txt': '' })
+    expect(await run(['import', 'db.txt', '--from', 'yaml'], unknown.io)).toBe(2)
+    expect(unknown.err.join('')).toContain('there is no "yaml" import. Try one of: mermaid')
+  })
+
+  it('fails when it cannot tell the format, or cannot read the file', async () => {
+    const vague = fakeIo({ 'notes.txt': 'hello' })
+    expect(await run(['import', 'notes.txt'], vague.io)).toBe(1)
+    expect(vague.err.join('')).toContain('Say it with --from')
+    expect(await run(['import', 'missing.prisma'], fakeIo().io)).toBe(1)
+    expect(await run(['import'], fakeIo().io)).toBe(2)
+  })
+})

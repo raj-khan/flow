@@ -1,8 +1,10 @@
 import { COMPOSE_ORIGIN, fromCompose } from './compose.js'
 import { DRAWIO_ORIGIN, fromDrawio } from './drawio.js'
+import { DRIZZLE_ORIGIN, fromDrizzle } from './drizzle.js'
 import { fromExcalidraw } from './excalidraw.js'
 import { fromMermaid } from './mermaid.js'
 import { fromOpenApi, OPENAPI_ORIGIN } from './openapi.js'
+import { fromPrisma, PRISMA_ORIGIN } from './prisma.js'
 import { fromSql, SQL_ORIGIN } from './sql.js'
 
 /**
@@ -54,6 +56,24 @@ export const IMPORT_FORMATS = Object.freeze([
     read: fromSql,
   },
   {
+    id: 'prisma',
+    label: 'Prisma',
+    accept: '.prisma',
+    placeholder:
+      'model User {\n  id    Int    @id\n  posts Post[]\n}\n\nmodel Post {\n  id       Int  @id\n  author   User @relation(fields: [authorId], references: [id])\n  authorId Int\n}',
+    origin: PRISMA_ORIGIN,
+    read: fromPrisma,
+  },
+  {
+    id: 'drizzle',
+    label: 'Drizzle',
+    accept: '.ts,.js,.mjs',
+    placeholder:
+      "export const users = pgTable('users', {\n  id: serial('id').primaryKey(),\n})\n\nexport const posts = pgTable('posts', {\n  id: serial('id').primaryKey(),\n  authorId: integer('author_id').references(() => users.id),\n})",
+    origin: DRIZZLE_ORIGIN,
+    read: fromDrizzle,
+  },
+  {
     id: 'drawio',
     label: 'draw.io',
     accept: '.drawio,.xml',
@@ -75,3 +95,29 @@ export const IMPORT_FORMATS = Object.freeze([
 
 /** @param {string} id */
 export const importFormat = (id) => IMPORT_FORMATS.find((format) => format.id === id) ?? null
+
+/**
+ * Which import a file is, from its name and, where a name is shared, what is
+ * in it. Null when it is none of them.
+ * @param {string} fileName
+ * @param {string} text
+ * @returns {ImportFormat | null}
+ */
+export function detectFormat(fileName, text) {
+  const name = fileName.toLowerCase()
+  const byExtension = (/** @type {string} */ id) => importFormat(id)
+  if (name.endsWith('.prisma')) return byExtension('prisma')
+  if (name.endsWith('.sql') || name.endsWith('.ddl')) return byExtension('sql')
+  if (name.endsWith('.drawio')) return byExtension('drawio')
+  if (name.endsWith('.excalidraw')) return byExtension('excalidraw')
+  if (/\.(mmd|mermaid)$/.test(name)) return byExtension('mermaid')
+  if (/\.(ts|js|mjs)$/.test(name)) return byExtension('drizzle')
+  if (/\.(ya?ml|json)$/.test(name)) {
+    if (/^\s*\{[\s\S]*"type"\s*:\s*"excalidraw/.test(text)) return byExtension('excalidraw')
+    if (/^\s*["']?(openapi|swagger)["']?\s*:/m.test(text)) return byExtension('openapi')
+    if (/^\s*["']?services["']?\s*:/m.test(text)) return byExtension('compose')
+    return null
+  }
+  if (name.endsWith('.xml')) return byExtension('drawio')
+  return null
+}

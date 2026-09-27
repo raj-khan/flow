@@ -1,4 +1,5 @@
-import { parseFlow } from '../domain/flowText.js'
+import { parseFlow, serialiseFlow } from '../domain/flowText.js'
+import { detectFormat, IMPORT_FORMATS, importFormat } from '../domain/importers.js'
 import { describeDiff, diffDocuments, isUnchanged, mergeForDiff } from '../domain/diff.js'
 import { renderSvg } from '../domain/renderSvg.js'
 import { toBrief } from '../domain/brief.js'
@@ -8,6 +9,9 @@ export const USAGE = `Usage:
   isketch render <file.flow> [-o <out.svg>] [--dark]   Draw a diagram as SVG
   isketch check <file.flow>...                         Report errors, exit 1 if any
   isketch brief <file.flow>                            A Markdown brief for a coding agent
+  isketch import <file> [--from <format>] [-o <out.flow>]
+                                                       Turn a schema, spec or drawing into .flow
+                                                       (${IMPORT_FORMATS.map((format) => format.id).join(', ')})
   isketch mcp [folder]                                 An MCP server for the .flow files in a folder
   isketch diff <before.flow> <after.flow> [-o <out.svg>] [--dark]
                                                        List what changed, and draw it
@@ -33,6 +37,7 @@ export async function run(argv, io) {
   if (command === 'check') return check(rest, io)
   if (command === 'diff') return diff(rest, io)
   if (command === 'brief') return brief(rest, io)
+  if (command === 'import') return importFile(rest, io)
 
   io.stderr(USAGE)
   return command === undefined || command === '--help' || command === '-h' ? 0 : 2
@@ -117,6 +122,62 @@ async function diff(args, io) {
   }
   return 0
 }
+
+/**
+ * A file in any import format, as `.flow` text: to stdout, or to `-o`. The
+ * format is read from the name, and from the content where names are shared;
+ * `--from` says it outright. What was skipped is reported like a check error.
+ * @param {string[]} args
+ * @param {Parameters<typeof run>[1]} io
+ */
+async function importFile(args, io) {
+  const fromIndex = args.findIndex((arg) => arg === '--from')
+  const from = fromIndex === -1 ? '' : (args[fromIndex + 1] ?? '')
+  const { files, out } = options(
+    args.filter((_, index) => fromIndex === -1 || (index !== fromIndex && index !== fromIndex + 1)),
+  )
+  const [input] = files
+  if (!input || out === '' || (fromIndex !== -1 && !from)) {
+    io.stderr(USAGE)
+    return 2
+  }
+
+  let text
+  try {
+    text = await io.readFile(input)
+  } catch {
+    io.stderr(`${input}: cannot be read\n`)
+    return 1
+  }
+
+  const format = from ? importFormat(from) : detectFormat(input, text)
+  if (!format) {
+    io.stderr(
+      from
+        ? `${input}: there is no "${from}" import. Try one of: ${IMPORT_FORMATS.map((each) => each.id).join(', ')}\n`
+        : `${input}: the format cannot be told from the name. Say it with --from.\n`,
+    )
+    return from ? 2 : 1
+  }
+
+  const { document, warnings } = format.read(text)
+  warnings.forEach(({ line, message }) =>
+    io.stderr(line ? `${input}:${line}: ${message}\n` : `${input}: ${message}\n`),
+  )
+  if (!document) return 1
+
+  const flow = serialiseFlow(document)
+  if (out) {
+    await io.writeFile(out, flow)
+    io.stderr(
+      `Imported ${input} (${format.label}) to ${out}: ${count(document.nodes.length, 'shape')}, ${count(document.edges.length, 'connection')}\n`,
+    )
+  } else io.stdout(flow)
+  return 0
+}
+
+/** @param {number} n @param {string} noun */
+const count = (n, noun) => `${n} ${noun}${n === 1 ? '' : 's'}`
 
 /**
  * The font to embed, read only when a sketch needs it.

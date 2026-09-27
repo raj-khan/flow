@@ -40,8 +40,8 @@ isketch aims at that gap:
 - **Git native.** Files diff cleanly, a CLI renders SVG with no browser, and pull requests get a
   visual diff, so the design and the code stop drifting apart.
 - **Start from real files.** Your existing `.drawio` and `.excalidraw` diagrams,
-  `docker-compose.yml`, OpenAPI and SQL DDL, with re-import that keeps your layout. And a `.drawio`
-  or `.excalidraw` back out whenever you want one.
+  `docker-compose.yml`, OpenAPI, SQL DDL, Prisma and Drizzle schemas, with re-import that keeps
+  your layout. And a `.drawio` or `.excalidraw` back out whenever you want one.
 - **Local first.** No account, no server, works offline, shareable as a link.
 - **Written for AI readers.** [/llms.txt](https://isketch.online/llms.txt) and
   [/docs/format](https://isketch.online/docs/format) describe the format, the tools and the CLI
@@ -124,11 +124,12 @@ nobody hosts it yet: run it yourself, or hand over the `.flow` file or the brief
 - **Edit as text.** Open the text pane beside the canvas and edit the diagram in the
   [`.flow` format](#the-flow-format): typing redraws the canvas, and changes on the canvas rewrite
   the text. Errors are listed by line, and the canvas keeps the last valid diagram meanwhile.
-- **Import.** Paste or open a Mermaid flowchart, a `docker-compose.yml`, an OpenAPI spec or
-  SQL `CREATE TABLE` statements. Compose services
+- **Import.** Paste or open a Mermaid flowchart, a `docker-compose.yml`, an OpenAPI spec,
+  SQL `CREATE TABLE` statements, a Prisma schema or Drizzle table definitions. Compose services
   become shapes that fit their image (Postgres a database, RabbitMQ a queue), and dependencies
-  become connections. An OpenAPI spec becomes a map of its tags and the schemas they use, and SQL an entity diagram
-  with keys marked and foreign keys as labelled connections.
+  become connections. An OpenAPI spec becomes a map of its tags and the schemas they use, and SQL,
+  Prisma and Drizzle an entity diagram with keys marked and foreign keys (or relations) as labelled
+  connections. `isketch import` does the same from the command line.
   Re-importing updates the diagram and keeps its layout and anything added by
   hand. Anything skipped is listed by line.
 - **draw.io, both ways.** Import a `.drawio` file, compressed or not, or the XML from Extras > Edit
@@ -252,6 +253,7 @@ npm run isketch -- render diagram.flow -o diagram.svg   # draw it, add --dark fo
 npm run isketch -- check docs/*.flow                    # file:line errors, exit 1 if any
 npm run isketch -- diff old.flow new.flow -o diff.svg   # what changed, listed and drawn
 npm run isketch -- brief diagram.flow                   # a Markdown brief for a coding agent
+npm run isketch -- import prisma/schema.prisma -o db.flow # any import format, told from the name
 npm run isketch -- mcp docs                             # an MCP server for the diagrams in docs/
 npm run examples                                        # redraw every SVG in examples/
 ```
