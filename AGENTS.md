@@ -30,6 +30,9 @@ tests the previous build.
   `VITE_ISKETCH_API` names a server.
 - Per shape behaviour lives in `src/domain/nodeMeta.js`, and each outline in
   `src/domain/shapes.js`. Add an entry there rather than branching on type in a component.
+- `plugin/server/isketch-mcp.mjs` is a bundle of `src/mcp/server.js` and its `src/domain/`
+  dependencies, for the Claude Code plugin. After changing either, run `npm run plugin` and
+  commit the rebuilt bundle; CI fails if it is stale.
 - State has three owners and no copies: TanStack Query owns the document, the route
   owns which node is open, Pinia owns viewport, history, theme and toasts. Do not
   mirror one in another.
