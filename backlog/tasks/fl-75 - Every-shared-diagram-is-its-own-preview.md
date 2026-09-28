@@ -38,7 +38,7 @@ Hosted links (`server/src/diagrams/page.ts`) have one generic description and no
 
 <!-- SECTION:NOTES:BEGIN -->
 
-server/src/diagrams/preview.ts composes a 1200x630 brand canvas with the diagram's own renderSvg output nested (viewBox-parsed, letterboxed) and its title, rasterised with @resvg/resvg-js (DejaVu Sans as the text font — apk font-dejavu added to the server image; letterforms differ from the browser, layout never does). Route GET /d/:id/og.png serves it with ETag id-revision and Cache-Control immutable (one image per revision). renderPage now sets og:title (title · isketch), og:description (the brief's first line), og:image/og:image:alt, twitter:card summary_large_image with twitter:title/description/image, plus canonical and og:url. Verified: 13 server tests against PostgreSQL, including PNG magic bytes and 1200x630 dimensions, tag presence, and a revision bump changing the ETag.
+server/src/diagrams/preview.ts composes a 1200x630 brand canvas with the diagram's own renderSvg output nested (viewBox-parsed, letterboxed) and its title, rasterised with @resvg/resvg-js (DejaVu Sans as the text font; apk font-dejavu added to the server image; letterforms differ from the browser, layout never does). Route GET /d/:id/og.png serves it with ETag id-revision and Cache-Control immutable (one image per revision). renderPage now sets og:title (title · isketch), og:description (the brief's first line), og:image/og:image:alt, twitter:card summary_large_image with twitter:title/description/image, plus canonical and og:url. Verified: 13 server tests against PostgreSQL, including PNG magic bytes and 1200x630 dimensions, tag presence, and a revision bump changing the ETag.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

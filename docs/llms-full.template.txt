@@ -2,14 +2,14 @@
 
 > isketch is a sketchpad for architecture and UI diagrams whose output is agent-ready: every sketch is also `.flow` text a coding agent reads exactly, and can edit back. Sketch the system, hand it to your agent, and the diagram stays true as the code changes.
 
-Site: https://isketch.online — Editor: https://isketch.online/new — Format: https://isketch.online/docs/format
+Site: https://isketch.online · Editor: https://isketch.online/new · Format: https://isketch.online/docs/format
 
 ## What it is
 
 A whiteboard that thinks in text. Draw loosely (hand-drawn look included), and
 the same diagram exists as precise text: `.flow` source, a Markdown brief,
-Mermaid, SVG. A coding agent reads names, kinds, directions and notes exactly —
-no guessing from pixels — and writes the diagram back through the same text, so
+Mermaid, SVG. A coding agent reads names, kinds, directions and notes exactly,
+no guessing from pixels, and writes the diagram back through the same text, so
 the design and the code stop drifting apart.
 
 The loop: **sketch the system → Copy for AI → the agent builds from the brief →

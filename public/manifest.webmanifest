@@ -1,5 +1,5 @@
 {
-  "name": "isketch — sketch it, hand it to your agent",
+  "name": "isketch: sketch it, hand it to your agent",
   "short_name": "isketch",
   "description": "A sketchpad for architecture and UI diagrams whose output is agent-ready: every sketch is also .flow text a coding agent reads exactly, and can edit back.",
   "start_url": "/new",

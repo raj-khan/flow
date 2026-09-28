@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>isketch — sketch it, hand it to your agent</title>
+    <title>isketch: sketch it, hand it to your agent</title>
     <meta
       name="description"
       content="A sketchpad for architecture and UI diagrams whose output is agent-ready: every sketch is also .flow text a coding agent reads exactly, and can edit back."
@@ -14,7 +14,7 @@
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="isketch" />
-    <meta property="og:title" content="isketch — sketch it, hand it to your agent" />
+    <meta property="og:title" content="isketch: sketch it, hand it to your agent" />
     <meta
       property="og:description"
       content="Sketch loosely, structure it precisely: every isketch diagram is also text a coding agent reads exactly, and can edit back."
@@ -251,15 +251,15 @@
         agent reads exactly, and can write back.
       </p>
       <div class="cta">
-        <a class="btn" href="/new">Start drawing — no account</a>
+        <a class="btn" href="/new">Start drawing, no account</a>
         <a class="btn ghost" href="#try">Try it on this page</a>
       </div>
 
       <section id="try">
         <h2>Try it right here</h2>
         <p class="sub">
-          The real editor, one click away. Drag a shape, rename it, connect two — nothing to
-          install, nothing to sign.
+          The real editor, one click away. Drag a shape, rename it, connect two: nothing to install,
+          nothing to sign.
         </p>
         <div class="card try">
           <noscript>
@@ -308,7 +308,7 @@
           <div class="step">
             <b>3 · The agent builds</b>
             <p>
-              Services, tables, components — names and relationships read exactly, not guessed from
+              Services, tables, components: names and relationships read exactly, not guessed from
               pixels.
             </p>
           </div>
@@ -329,9 +329,11 @@
         </p>
         <div class="card">
           <div class="code-head">
-            Copy for AI — the architecture example above
+            Copy for AI: the architecture example above
             <span class="grow"></span>
-            <button class="btn" type="button" data-copy-from="the-brief" data-track="brief_copied">Copy</button>
+            <button class="btn" type="button" data-copy-from="the-brief" data-track="brief_copied">
+              Copy
+            </button>
           </div>
           <pre id="the-brief"># Web app architecture
 
@@ -409,23 +411,37 @@ files 552,880
         </p>
         <div class="card">
           <div class="code-head">
-            Claude Code — local diagrams in this folder
+            Claude Code: local diagrams in this folder
             <span class="grow"></span>
-            <button class="btn" type="button" data-copy-from="mcp-stdio" data-track="mcp_setup_copied">Copy</button>
+            <button
+              class="btn"
+              type="button"
+              data-copy-from="mcp-stdio"
+              data-track="mcp_setup_copied"
+            >
+              Copy
+            </button>
           </div>
           <pre id="mcp-stdio">
 claude mcp add isketch -- node /path/to/isketch/bin/isketch.mjs mcp .</pre>
           <div class="code-head">
-            Any MCP client — the hosted server
+            Any MCP client: the hosted server
             <span class="grow"></span>
-            <button class="btn" type="button" data-copy-from="mcp-http" data-track="mcp_setup_copied">Copy</button>
+            <button
+              class="btn"
+              type="button"
+              data-copy-from="mcp-http"
+              data-track="mcp_setup_copied"
+            >
+              Copy
+            </button>
           </div>
           <pre id="mcp-http">claude mcp add --transport http isketch https://isketch.online/mcp</pre>
         </div>
       </section>
 
       <footer>
-        <span>isketch — sketch it, hand it to your agent.</span>
+        <span>isketch: sketch it, hand it to your agent.</span>
         <a href="/new">Editor</a>
         <a href="https://github.com/raj-khan/flow">GitHub</a>
         <a href="https://github.com/raj-khan/flow#readme">Docs</a>

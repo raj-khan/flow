@@ -58,7 +58,7 @@ author: @pi
 created: 2026-09-25 17:56
 ---
 
-AC#6: Lighthouse SEO 100 verified locally (JSON report); the tags are the documented set Slack/X/LinkedIn/Discord read (og:title, og:description, og:image 1200x630 PNG, twitter:card summary_large_image). The live unfurl in each app needs the deployed URL and an account post — the owner's to confirm after deploy.
+AC#6: Lighthouse SEO 100 verified locally (JSON report); the tags are the documented set Slack/X/LinkedIn/Discord read (og:title, og:description, og:image 1200x630 PNG, twitter:card summary_large_image). The live unfurl in each app needs the deployed URL and an account post: the owner's to confirm after deploy.
 ---
 
 <!-- COMMENTS:END -->

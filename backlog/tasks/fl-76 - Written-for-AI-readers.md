@@ -51,5 +51,5 @@ npm run docs (scripts/make-docs.mjs) builds public/llms.txt and public/llms-full
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 
-Added the AI-reader pages, generated and committed: /llms.txt (the index: what isketch is, links to the format, tools and CLI) and /llms-full.txt (everything in one file: the .flow spec with real examples, the brief, MCP tools over stdio and HTTP with setup lines, the CLI, hosted links), plus /docs/format — a prerendered static page with the full spec, the architecture and signup examples as text beside their renderings, and a live Open-this-diagram link. Verified by e2e on the built site (both files serve their content, the page serves the spec) with the whole 79-test suite green.
+Added the AI-reader pages, generated and committed: /llms.txt (the index: what isketch is, links to the format, tools and CLI) and /llms-full.txt (everything in one file: the .flow spec with real examples, the brief, MCP tools over stdio and HTTP with setup lines, the CLI, hosted links), plus /docs/format, a prerendered static page with the full spec, the architecture and signup examples as text beside their renderings, and a live Open-this-diagram link. Verified by e2e on the built site (both files serve their content, the page serves the spec) with the whole 79-test suite green.
 <!-- SECTION:FINAL_SUMMARY:END -->

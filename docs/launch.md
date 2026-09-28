@@ -34,6 +34,28 @@ https://github.com/raj-khan/flow
 - **First comment:** why screenshots fail agents (names misread, directions lost, nothing to write
   back), the loop in one line, and one ask: which import should come next.
 
+## Peerlist
+
+- **Title:** isketch: sketch it, hand it to your agent
+- **Tagline:** Diagrams your coding agent reads exactly, not guesses from a screenshot.
+- **Description:**
+
+  Screenshotting a diagram into Claude or Copilot makes it guess: names misread, arrow directions
+  lost, and nothing it figures out can go back onto the picture.
+
+  isketch is a sketchpad where every diagram is also plain text. Sketch an architecture, a
+  database or a flow, hand-drawn look included, and it exists as a `.flow` file with ids, kinds,
+  directions and notes that an agent reads exactly, and can edit back.
+
+  - **Copy for AI** puts a Markdown brief on the clipboard in one click.
+  - **An MCP server** lets Claude Code or any agent list, read, validate, render and edit the
+    diagrams in your repo, and the open canvas shows its changes live.
+  - **Bring what you have:** draw.io, Excalidraw, Mermaid, docker-compose, OpenAPI, SQL, Prisma
+    and Drizzle import; `isketch scan` drafts a diagram of a whole repository.
+  - Pull requests get a visual diff, so the design and the code stop drifting apart.
+
+  Works offline, needs no account, MIT licensed.
+
 ## r/ClaudeAI
 
 **Title:** I stopped pasting diagram screenshots into Claude. Now it reads and edits the diagram itself.
