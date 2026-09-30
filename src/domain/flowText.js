@@ -2,6 +2,7 @@ import { DEFAULT_TITLE, DOCUMENT_VERSION, edgeIdFor } from './document.js'
 import { isKnownShape, SHAPE_OPTIONS } from './nodeMeta.js'
 import { LINE, LINES } from './routes.js'
 import { SHAPE } from './constants.js'
+import { COLOR_NAMES, isColor } from './colors.js'
 
 /**
  * The `.flow` text format: a diagram as lines a person can read, write and
@@ -14,6 +15,7 @@ import { SHAPE } from './constants.js'
  *     browser = terminal "Browser" -- Single page app
  *     api = process "API"
  *     api note: Paginate every list endpoint
+ *     api color: blue
  *
  *     browser -> api : HTTPS
  *
@@ -37,6 +39,7 @@ const LAYOUT_LINE = new RegExp(
   String.raw`^(${ID})\s+(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)(?:\s+(\d+)\s*x\s*(\d+))?$`,
 )
 const NOTE_LINE = new RegExp(String.raw`^(${ID})\s+note:\s?(.*)$`)
+const COLOR_LINE = new RegExp(String.raw`^(${ID})\s+colou?r:\s*(\S*)\s*$`)
 const DIAGRAM_NOTE = 'note:'
 const STYLE_LINE = /^style:\s*(\S*)\s*$/
 const STYLES = ['clean', 'sketch']
@@ -103,6 +106,7 @@ export function serialiseFlow(document) {
         : `${node.id} = ${node.type} ${name}`
     return [
       `${head}${tail}`,
+      ...(isColor(node.data?.color) ? [`${node.id} color: ${node.data.color}`] : []),
       ...noteLines(node.data?.notes).map((line) => `${node.id} note: ${line}`),
     ].join('\n')
   })
@@ -161,6 +165,8 @@ export function parseFlow(text) {
   const pendingEdges = []
   /** @type {{ line: number, id: string, text: string }[]} */
   const pendingNotes = []
+  /** @type {{ line: number, id: string, color: string }[]} */
+  const pendingColors = []
   /** @type {string[]} */
   const diagramNotes = []
 
@@ -251,6 +257,15 @@ export function parseFlow(text) {
         return
       }
 
+      const colored = COLOR_LINE.exec(content)
+      if (colored) {
+        if (!isColor(colored[2])) {
+          return fail(`Unknown color "${colored[2]}". Use one of: ${COLOR_NAMES.join(', ')}.`)
+        }
+        pendingColors.push({ line, id: colored[1], color: colored[2] })
+        return
+      }
+
       const edge = EDGE_LINE.exec(content)
       if (edge) {
         pendingEdges.push({
@@ -315,6 +330,12 @@ export function parseFlow(text) {
     const node = byId.get(id)
     if (!node) return errors.push({ line, message: `No node called "${id}".` })
     node.data.notes = node.data.notes ? `${node.data.notes}\n${text}` : text
+  })
+
+  pendingColors.forEach(({ line, id, color }) => {
+    const node = byId.get(id)
+    if (!node) return errors.push({ line, message: `No node called "${id}".` })
+    node.data.color = color
   })
 
   inks.forEach(({ line, id, points }) => {

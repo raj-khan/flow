@@ -4,7 +4,7 @@ import { history } from './helpers.js'
 
 const nodeAt = (page, id) => page.locator(`.vue-flow__node[data-id="${id}"]`)
 const NODE = { start: '1', away: 'b6a0c1', welcome: 'b0653a', comment: 'e879e4' }
-const toolbar = (page) => page.getByRole('toolbar', { name: 'Arrange the selection' })
+const toolbar = (page) => page.getByRole('toolbar', { name: 'Selection' })
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/new')

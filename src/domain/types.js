@@ -4,6 +4,7 @@
  * @typedef {Object} FlowNodeData
  * @property {string} [description] what the shape is
  * @property {string} [notes] what whoever builds it must do, such as "paginate"
+ * @property {string} [color] a ColorName from colors.js; absent for the kind's own look
  * @property {string} [points] a pen stroke's points, 0 to 100 across its box: "x,y x,y"
  * @property {string} [origin] the importer that made it, so a re-import can tell its own from yours
  *

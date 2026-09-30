@@ -84,7 +84,7 @@ function finish(event) {
         id: `ink-${n}`,
         type: SHAPE.INK,
         name: '',
-        data: { points: ink.points },
+        data: { points: ink.points, ...(canvas.penColor ? { color: canvas.penColor } : {}) },
         position: ink.position,
         size: ink.size,
       },
@@ -104,7 +104,11 @@ function finish(event) {
     @pointerup="finish"
     @pointercancel="finish"
   >
-    <svg class="pointer-events-none absolute inset-0 h-full w-full text-ink" aria-hidden="true">
+    <svg
+      class="pointer-events-none absolute inset-0 h-full w-full text-ink"
+      :style="canvas.penColor ? { color: `var(--paint-${canvas.penColor})` } : undefined"
+      aria-hidden="true"
+    >
       <polyline
         v-if="live.length > 1"
         :points="preview"

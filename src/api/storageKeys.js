@@ -5,6 +5,7 @@ export const STORAGE_KEYS = Object.freeze({
   SNAP: 'flow:snap',
   MINIMAP: 'flow:minimap',
   CREDIT: 'flow:credit',
+  PEN_COLOR: 'flow:pen-color',
   PUBLISHED: 'flow:published',
 })
 

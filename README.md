@@ -190,6 +190,7 @@ db 276,352
   and for wireframes `screen`, `button`, `input`, `card`, `list`, `image`.
 - `note: ...` under the title is a note for the whole diagram, and `id note: ...` a note for one
   shape, one line each: instructions for whoever builds from it, person or agent.
+- `id color: red` colours a shape or pen stroke: `red`, `orange`, `yellow`, `green`, `teal`, `blue`, `violet`, `pink` or `grey`.
 - `a -> b : label` connects two nodes. The label is optional, and a line may refer to a node
   defined further down. `a --> b` is dashed, `a <-> b` has an arrow at each end, and `a <--> b`
   is both.

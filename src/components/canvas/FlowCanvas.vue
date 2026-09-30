@@ -45,6 +45,7 @@ import { withConnectedShape, withErased } from '@/domain/quickShapes.js'
 import { generateNodeId } from '@/api/flowApi.js'
 import SelectionToolbar from './SelectionToolbar.vue'
 import PenLayer from './PenLayer.vue'
+import PenOptions from './PenOptions.vue'
 import EraserLayer from './EraserLayer.vue'
 import LaserLayer from './LaserLayer.vue'
 import { useToastStore } from '@/stores/toasts.js'
@@ -1051,7 +1052,8 @@ watch(
         mask-color="var(--minimap-mask)"
         :node-border-radius="4"
       />
-      <SelectionToolbar />
+      <SelectionToolbar v-if="!canvas.pen" />
+      <PenOptions />
       <PenLayer />
       <EraserLayer v-if="canvas.tool === TOOL.ERASER" @erase="erase" />
       <LaserLayer v-if="canvas.tool === TOOL.LASER" />

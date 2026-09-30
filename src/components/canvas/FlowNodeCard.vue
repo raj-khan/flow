@@ -12,6 +12,7 @@ import { sketchPath } from '@/domain/sketch.js'
 import { inkOutline, inkPath } from '@/domain/ink.js'
 import { shapePath, textInset } from '@/domain/shapes.js'
 import { accentClasses } from './accents.js'
+import { colorOf } from '@/domain/colors.js'
 import { FOCUSED_NODE_ID } from './focusKey.js'
 import { CONNECT_STATE } from './connectKey.js'
 import { EDIT_TEXT } from './editKey.js'
@@ -56,6 +57,12 @@ const acceptsDrop = computed(() => isDropTarget.value && connect.accepts(props.i
 const node = computed(() => props.data.node)
 const meta = computed(() => metaFor(node.value.type))
 const accent = computed(() => accentClasses(meta.value.accent))
+/** A colour of the person's own: the outline in it, filled with its tint, over the kind's accent. */
+const color = computed(() => colorOf(node.value))
+const paint = computed(() => (color.value ? { color: `var(--paint-${color.value})` } : undefined))
+const tint = computed(() =>
+  color.value ? { fill: `var(--paint-${color.value}-soft)` } : undefined,
+)
 
 const description = computed(() => meta.value.summary(node.value))
 
@@ -150,6 +157,7 @@ const strokeWidth = computed(() => (props.selected || isKeyboardFocused.value ? 
     <svg
       v-if="isInk"
       class="pointer-events-none absolute inset-0 overflow-visible text-ink"
+      :style="paint"
       :width="size.width"
       :height="size.height"
       :viewBox="`0 0 ${size.width} ${size.height}`"
@@ -186,7 +194,9 @@ const strokeWidth = computed(() => (props.selected || isKeyboardFocused.value ? 
     <svg
       v-else-if="outline"
       class="pointer-events-none absolute inset-0 overflow-visible"
-      :class="acceptsDrop ? 'text-node-message' : accent.icon"
+      :class="acceptsDrop ? 'text-node-message' : color ? '' : accent.icon"
+      :style="acceptsDrop ? undefined : paint"
+      :data-color="color || undefined"
       :width="size.width"
       :height="size.height"
       :viewBox="`0 0 ${size.width} ${size.height}`"
@@ -195,7 +205,9 @@ const strokeWidth = computed(() => (props.selected || isKeyboardFocused.value ? 
       <path
         :d="outline"
         class="transition-[stroke-width] duration-150"
-        :class="isFrame ? 'frame-fill' : 'fill-surface'"
+        :class="tint ? '' : isFrame ? 'frame-fill' : 'fill-surface'"
+        :style="tint"
+        :fill-opacity="tint && isFrame ? 0.45 : undefined"
         :stroke="drawn ? 'none' : 'currentColor'"
         :stroke-width="acceptsDrop ? 3 : strokeWidth"
         :stroke-dasharray="isFrame ? '8 5' : undefined"

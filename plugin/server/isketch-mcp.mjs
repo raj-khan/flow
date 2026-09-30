@@ -305,349 +305,6 @@ function anchor(box, side) {
 	};
 }
 //#endregion
-//#region src/domain/flowText.js
-/**
-* The `.flow` text format: a diagram as lines a person can read, write and
-* review in a pull request.
-*
-*     title: Web app architecture
-*     style: sketch
-*     note: Use NestJS and PostgreSQL
-*
-*     browser = terminal "Browser" -- Single page app
-*     api = process "API"
-*     api note: Paginate every list endpoint
-*
-*     browser -> api : HTTPS
-*
-*     @layout
-*     browser 276,0
-*     api 276,176 300x120
-*
-* One node or edge per line, in document order, so a diff shows exactly what
-* changed. Positions sit in their own block at the end: moving a box never
-* touches the lines that say what the system is. Notes are instructions for
-* whoever builds from the diagram, one line each, for the diagram or a shape.
-*
-* @typedef {{ line: number, message: string }} FlowTextError
-*/
-const ID = String.raw`[A-Za-z0-9_][\w-]*`;
-const NODE_LINE = new RegExp(String.raw`^(${ID})\s*=\s*([A-Za-z][\w-]*)\s*(.*)$`);
-const EDGE_LINE = new RegExp(String.raw`^(${ID})\s*(<?--?>)\s*(${ID})\s*(?::\s?(.*))?$`);
-const LINES_LINE = /^lines:\s*(\S*)\s*$/;
-const LAYOUT_LINE = new RegExp(String.raw`^(${ID})\s+(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)(?:\s+(\d+)\s*x\s*(\d+))?$`);
-const NOTE_LINE = new RegExp(String.raw`^(${ID})\s+note:\s?(.*)$`);
-const DIAGRAM_NOTE = "note:";
-const STYLE_LINE = /^style:\s*(\S*)\s*$/;
-const STYLES = ["clean", "sketch"];
-const LAYOUT_HEADER = "@layout";
-const INK_HEADER = "@ink";
-const INK_LINE = new RegExp(String.raw`^(${ID})((?:\s+-?\d+(?:\.\d+)?,-?\d+(?:\.\d+)?)+)$`);
-const DESCRIPTION_MARK = "--";
-/**
-* Descriptions and labels run to the end of their line, so a newline in one is
-* written as `\n`, and a backslash as `\\`.
-* @param {string} text
-*/
-const escapeRest = (text) => text.replace(/\\/g, "\\\\").replace(/\n/g, "\\n");
-/** @param {string} text */
-const unescapeRest = (text) => text.replace(/\\(\\|n)/g, (_match, char) => char === "n" ? "\n" : "\\");
-/**
-* Notes are written one line per line of text, so each reads, and diffs, on
-* its own. Blank lines are dropped.
-* @param {string | undefined} notes
-*/
-const noteLines$1 = (notes) => String(notes ?? "").split("\n").map((line) => line.trim()).filter(Boolean);
-/**
-* `->`, dashed `-->`, both ways `<->`, or both `<-->`.
-* @param {import('./types.js').FlowEdge} edge
-*/
-const arrowOf = (edge) => `${edge.both ? "<" : ""}${edge.dashed ? "--" : "-"}>`;
-/** @param {number} value */
-const coordinate = (value) => String(Math.round(value));
-/**
-* @param {import('./types.js').FlowDocument} document
-* @returns {string}
-*/
-function serialiseFlow(document) {
-	const sections = [[
-		`title: ${escapeRest(document.title ?? "Untitled diagram")}`,
-		...document.style === "sketch" ? ["style: sketch"] : [],
-		...document.lines && LINES.includes(document.lines) && document.lines !== LINE.STEP ? [`lines: ${document.lines}`] : [],
-		...noteLines$1(document.notes).map((line) => `${DIAGRAM_NOTE} ${line}`)
-	].join("\n")];
-	const nodes = document.nodes.map((node) => {
-		const description = node.data?.description;
-		const name = JSON.stringify(node.name ?? "");
-		const tail = description ? ` ${DESCRIPTION_MARK} ${escapeRest(description)}` : "";
-		return [`${node.type === SHAPE.INK && !node.name ? `${node.id} = ${node.type}` : `${node.id} = ${node.type} ${name}`}${tail}`, ...noteLines$1(node.data?.notes).map((line) => `${node.id} note: ${line}`)].join("\n");
-	});
-	if (nodes.length) sections.push(nodes.join("\n"));
-	const edges = document.edges.map((edge) => {
-		const label = edge.label ? ` : ${escapeRest(edge.label)}` : "";
-		return `${edge.source} ${arrowOf(edge)} ${edge.target}${label}`;
-	});
-	if (edges.length) sections.push(edges.join("\n"));
-	const placed = document.nodes.filter((node) => node.position);
-	if (placed.length) sections.push([LAYOUT_HEADER, ...placed.map((node) => `${node.id} ${coordinate(node.position.x)},${coordinate(node.position.y)}${node.size ? ` ${coordinate(node.size.width)}x${coordinate(node.size.height)}` : ""}`)].join("\n"));
-	const inked = document.nodes.filter((node) => node.type === SHAPE.INK && node.data?.points);
-	if (inked.length) sections.push([INK_HEADER, ...inked.map((node) => `${node.id} ${node.data.points}`)].join("\n"));
-	return `${sections.join("\n\n")}\n`;
-}
-/**
-* Every problem is reported, each with its line, rather than stopping at the
-* first: an editor can mark them all at once. The document is null whenever
-* there is any error, so a half-read diagram is never mistaken for the whole.
-*
-* @param {string} text
-* @returns {{ document: import('./types.js').FlowDocument | null, errors: FlowTextError[] }}
-*/
-function parseFlow(text) {
-	/** @type {FlowTextError[]} */
-	const errors = [];
-	/** @type {Record<string, any>[]} */
-	const nodes = [];
-	/** @type {import('./types.js').FlowEdge[]} */
-	const edges = [];
-	/** @type {Map<string, Record<string, any>>} */
-	const byId = /* @__PURE__ */ new Map();
-	/** @type {{ line: number, id: string, x: number, y: number, width?: number, height?: number }[]} */
-	const layout = [];
-	/** @type {{ line: number, source: string, target: string, label: string, dashed: boolean, both: boolean }[]} */
-	const pendingEdges = [];
-	/** @type {{ line: number, id: string, text: string }[]} */
-	const pendingNotes = [];
-	/** @type {string[]} */
-	const diagramNotes = [];
-	let title = DEFAULT_TITLE;
-	/** @type {string} */
-	let style = "clean";
-	/** @type {string} */
-	let lines = LINE.STEP;
-	let inLayout = false;
-	let inInk = false;
-	/** @type {{ line: number, id: string, points: string }[]} */
-	const inks = [];
-	String(text ?? "").split(/\r?\n/).forEach((raw, index) => {
-		const line = index + 1;
-		const content = raw.trim();
-		/** @param {string} message */
-		const fail = (message) => errors.push({
-			line,
-			message
-		});
-		if (!content || content.startsWith("#")) return;
-		if (content === LAYOUT_HEADER) {
-			inLayout = true;
-			inInk = false;
-			return;
-		}
-		if (content === INK_HEADER) {
-			inInk = true;
-			inLayout = false;
-			return;
-		}
-		if (inInk) {
-			const match = INK_LINE.exec(content);
-			if (!match) return fail("Expected a pen stroke, like `m1 0,0 40,20 100,0`.");
-			inks.push({
-				line,
-				id: match[1],
-				points: match[2].trim().split(/\s+/).join(" ")
-			});
-			return;
-		}
-		if (inLayout) {
-			const match = LAYOUT_LINE.exec(content);
-			if (!match) return fail("Expected a position, like `api 120,340`, or `api 120,340 300x120`.");
-			layout.push({
-				line,
-				id: match[1],
-				x: Number(match[2]),
-				y: Number(match[3]),
-				...match[4] ? {
-					width: Number(match[4]),
-					height: Number(match[5])
-				} : {}
-			});
-			return;
-		}
-		if (content.startsWith("title:")) {
-			title = unescapeRest(content.slice(6).trim());
-			return;
-		}
-		const lined = LINES_LINE.exec(content);
-		if (lined) {
-			if (!LINES.includes(lined[1])) return fail(`Unknown lines "${lined[1]}". Use one of: ${LINES.join(", ")}.`);
-			lines = lined[1];
-			return;
-		}
-		const styled = STYLE_LINE.exec(content);
-		if (styled) {
-			if (!STYLES.includes(styled[1])) return fail(`Unknown style "${styled[1]}". Use one of: ${STYLES.join(", ")}.`);
-			style = styled[1];
-			return;
-		}
-		if (content.startsWith(DIAGRAM_NOTE)) {
-			diagramNotes.push(content.slice(5).trim());
-			return;
-		}
-		const note = NOTE_LINE.exec(content);
-		if (note) {
-			pendingNotes.push({
-				line,
-				id: note[1],
-				text: note[2].trim()
-			});
-			return;
-		}
-		const edge = EDGE_LINE.exec(content);
-		if (edge) {
-			pendingEdges.push({
-				line,
-				source: edge[1],
-				target: edge[3],
-				label: unescapeRest((edge[4] ?? "").trim()),
-				dashed: edge[2].includes("--"),
-				both: edge[2].startsWith("<")
-			});
-			return;
-		}
-		const node = NODE_LINE.exec(content);
-		if (!node) return fail("Expected a node, like `api = process \"API\"`, or an edge, like `a -> b`.");
-		const [, id, shape, rest] = node;
-		if (!isKnownShape(shape)) return fail(`Unknown shape "${shape}". Use one of: ${SHAPE_OPTIONS.map((o) => o.value).join(", ")}.`);
-		if (byId.has(id)) return fail(`"${id}" is already defined.`);
-		const parsed = readNameAndDescription(rest);
-		if (parsed.error) return fail(parsed.error);
-		const record = {
-			id,
-			type: shape,
-			name: parsed.name ?? (shape === SHAPE.INK ? "" : id),
-			data: parsed.description ? { description: parsed.description } : {}
-		};
-		nodes.push(record);
-		byId.set(id, record);
-	});
-	pendingEdges.forEach(({ line, source, target, label, dashed, both }) => {
-		const missing = [source, target].find((id) => !byId.has(id));
-		if (missing) return errors.push({
-			line,
-			message: `No node called "${missing}".`
-		});
-		if (source === target) return errors.push({
-			line,
-			message: "A node cannot connect to itself."
-		});
-		const id = edgeIdFor(source, target);
-		if (edges.some((existing) => existing.id === id)) return errors.push({
-			line,
-			message: `${source} -> ${target} is already connected.`
-		});
-		edges.push({
-			id,
-			source,
-			target,
-			...label ? { label } : {},
-			...dashed ? { dashed: true } : {},
-			...both ? { both: true } : {}
-		});
-	});
-	pendingNotes.forEach(({ line, id, text }) => {
-		const node = byId.get(id);
-		if (!node) return errors.push({
-			line,
-			message: `No node called "${id}".`
-		});
-		node.data.notes = node.data.notes ? `${node.data.notes}\n${text}` : text;
-	});
-	inks.forEach(({ line, id, points }) => {
-		const node = byId.get(id);
-		if (!node) return errors.push({
-			line,
-			message: `No node called "${id}".`
-		});
-		if (node.type !== SHAPE.INK) return errors.push({
-			line,
-			message: `"${id}" is not an ink shape, so it has no stroke.`
-		});
-		node.data.points = points;
-	});
-	const positioned = /* @__PURE__ */ new Set();
-	layout.forEach(({ line, id, x, y, width, height }) => {
-		const node = byId.get(id);
-		if (!node) return errors.push({
-			line,
-			message: `No node called "${id}".`
-		});
-		if (positioned.has(id)) return errors.push({
-			line,
-			message: `"${id}" already has a position.`
-		});
-		positioned.add(id);
-		node.position = {
-			x,
-			y
-		};
-		if (width && height) node.size = {
-			width,
-			height
-		};
-	});
-	errors.sort((a, b) => a.line - b.line);
-	return errors.length ? {
-		document: null,
-		errors
-	} : {
-		document: {
-			version: 3,
-			title,
-			...style === "sketch" ? { style: "sketch" } : {},
-			...lines !== LINE.STEP ? { lines } : {},
-			...diagramNotes.length ? { notes: diagramNotes.join("\n") } : {},
-			nodes,
-			edges
-		},
-		errors
-	};
-}
-/**
-* `"Name" -- description`, where both parts are optional.
-* @param {string} rest
-* @returns {{ name?: string, description?: string, error?: string }}
-*/
-function readNameAndDescription(rest) {
-	let remaining = rest.trim();
-	/** @type {string | undefined} */
-	let name;
-	if (remaining.startsWith("\"")) {
-		const end = closingQuote(remaining);
-		if (end === -1) return { error: "The name is missing its closing quote." };
-		try {
-			name = JSON.parse(remaining.slice(0, end + 1));
-		} catch {
-			return { error: "The name has an escape JSON does not allow." };
-		}
-		remaining = remaining.slice(end + 1).trim();
-	}
-	if (!remaining) return { name };
-	if (!remaining.startsWith(DESCRIPTION_MARK)) return { error: "Put the name in quotes, and start a description with `--`." };
-	return {
-		name,
-		description: unescapeRest(remaining.slice(2).trim())
-	};
-}
-/**
-* The index of the quote that closes the one at 0, skipping escaped quotes.
-* @param {string} text
-*/
-function closingQuote(text) {
-	for (let index = 1; index < text.length; index += 1) if (text[index] === "\\") index += 1;
-	else if (text[index] === "\"") return index;
-	return -1;
-}
-const FLOW_EXTENSION = ".flow";
-//#endregion
 //#region src/domain/layout.js
 const STEP_X = NODE_SIZE.WIDTH + NODE_GAP.X;
 const STEP_Y = NODE_SIZE.HEIGHT + NODE_GAP.Y;
@@ -950,6 +607,498 @@ function documentToGraph(document) {
 		edges
 	};
 }
+//#endregion
+//#region src/domain/colors.js
+/**
+* Colours a person can give a shape or a pen stroke. Each is a name, not a hex,
+* so `.flow` stays readable and an agent can make colour mean something. A
+* coloured shape strokes in the colour and fills with its soft tint; a stroke
+* draws in the colour. Values from Open Color (MIT), as Excalidraw uses, with
+* lighter strokes and darker tints for the dark theme. The canvas reads the
+* same values from `--paint-*` in `style.css`: keep the two in step.
+*
+* @typedef {{ stroke: string, fill: string }} Paint
+*/
+const COLORS = Object.freeze({
+	red: {
+		light: {
+			stroke: "#e03131",
+			fill: "#ffe3e3"
+		},
+		dark: {
+			stroke: "#ff8787",
+			fill: "#4a1c1f"
+		}
+	},
+	orange: {
+		light: {
+			stroke: "#e8590c",
+			fill: "#ffe8cc"
+		},
+		dark: {
+			stroke: "#ffa94d",
+			fill: "#4a2c12"
+		}
+	},
+	yellow: {
+		light: {
+			stroke: "#f08c00",
+			fill: "#fff3bf"
+		},
+		dark: {
+			stroke: "#ffd43b",
+			fill: "#4a3f10"
+		}
+	},
+	green: {
+		light: {
+			stroke: "#2f9e44",
+			fill: "#d3f9d8"
+		},
+		dark: {
+			stroke: "#69db7c",
+			fill: "#173d22"
+		}
+	},
+	teal: {
+		light: {
+			stroke: "#099268",
+			fill: "#c3fae8"
+		},
+		dark: {
+			stroke: "#38d9a9",
+			fill: "#10392f"
+		}
+	},
+	blue: {
+		light: {
+			stroke: "#1971c2",
+			fill: "#d0ebff"
+		},
+		dark: {
+			stroke: "#74c0fc",
+			fill: "#13324d"
+		}
+	},
+	violet: {
+		light: {
+			stroke: "#6741d9",
+			fill: "#e5dbff"
+		},
+		dark: {
+			stroke: "#b197fc",
+			fill: "#2c2352"
+		}
+	},
+	pink: {
+		light: {
+			stroke: "#c2255c",
+			fill: "#ffdeeb"
+		},
+		dark: {
+			stroke: "#f783ac",
+			fill: "#4a1c30"
+		}
+	},
+	grey: {
+		light: {
+			stroke: "#495057",
+			fill: "#e9ecef"
+		},
+		dark: {
+			stroke: "#adb5bd",
+			fill: "#2a2f35"
+		}
+	}
+});
+/** @typedef {keyof typeof COLORS} ColorName */
+/** In the order the swatches show. */
+const COLOR_NAMES = Object.keys(COLORS);
+/** @param {unknown} name */
+const isColor = (name) => typeof name === "string" && Object.prototype.hasOwnProperty.call(COLORS, name);
+/**
+* A node's colour, when it has a known one.
+* @param {{ data?: { color?: string } } | null | undefined} node
+* @returns {ColorName | ''}
+*/
+const colorOf = (node) => isColor(node?.data?.color) ? node?.data?.color : "";
+/**
+* @param {string} name
+* @param {'light' | 'dark'} [theme]
+* @returns {Paint | null}
+*/
+function paintOf(name, theme = "light") {
+	return isColor(name) ? COLORS[name][theme] : null;
+}
+//#endregion
+//#region src/domain/flowText.js
+/**
+* The `.flow` text format: a diagram as lines a person can read, write and
+* review in a pull request.
+*
+*     title: Web app architecture
+*     style: sketch
+*     note: Use NestJS and PostgreSQL
+*
+*     browser = terminal "Browser" -- Single page app
+*     api = process "API"
+*     api note: Paginate every list endpoint
+*     api color: blue
+*
+*     browser -> api : HTTPS
+*
+*     @layout
+*     browser 276,0
+*     api 276,176 300x120
+*
+* One node or edge per line, in document order, so a diff shows exactly what
+* changed. Positions sit in their own block at the end: moving a box never
+* touches the lines that say what the system is. Notes are instructions for
+* whoever builds from the diagram, one line each, for the diagram or a shape.
+*
+* @typedef {{ line: number, message: string }} FlowTextError
+*/
+const ID = String.raw`[A-Za-z0-9_][\w-]*`;
+const NODE_LINE = new RegExp(String.raw`^(${ID})\s*=\s*([A-Za-z][\w-]*)\s*(.*)$`);
+const EDGE_LINE = new RegExp(String.raw`^(${ID})\s*(<?--?>)\s*(${ID})\s*(?::\s?(.*))?$`);
+const LINES_LINE = /^lines:\s*(\S*)\s*$/;
+const LAYOUT_LINE = new RegExp(String.raw`^(${ID})\s+(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)(?:\s+(\d+)\s*x\s*(\d+))?$`);
+const NOTE_LINE = new RegExp(String.raw`^(${ID})\s+note:\s?(.*)$`);
+const COLOR_LINE = new RegExp(String.raw`^(${ID})\s+colou?r:\s*(\S*)\s*$`);
+const DIAGRAM_NOTE = "note:";
+const STYLE_LINE = /^style:\s*(\S*)\s*$/;
+const STYLES = ["clean", "sketch"];
+const LAYOUT_HEADER = "@layout";
+const INK_HEADER = "@ink";
+const INK_LINE = new RegExp(String.raw`^(${ID})((?:\s+-?\d+(?:\.\d+)?,-?\d+(?:\.\d+)?)+)$`);
+const DESCRIPTION_MARK = "--";
+/**
+* Descriptions and labels run to the end of their line, so a newline in one is
+* written as `\n`, and a backslash as `\\`.
+* @param {string} text
+*/
+const escapeRest = (text) => text.replace(/\\/g, "\\\\").replace(/\n/g, "\\n");
+/** @param {string} text */
+const unescapeRest = (text) => text.replace(/\\(\\|n)/g, (_match, char) => char === "n" ? "\n" : "\\");
+/**
+* Notes are written one line per line of text, so each reads, and diffs, on
+* its own. Blank lines are dropped.
+* @param {string | undefined} notes
+*/
+const noteLines$1 = (notes) => String(notes ?? "").split("\n").map((line) => line.trim()).filter(Boolean);
+/**
+* `->`, dashed `-->`, both ways `<->`, or both `<-->`.
+* @param {import('./types.js').FlowEdge} edge
+*/
+const arrowOf = (edge) => `${edge.both ? "<" : ""}${edge.dashed ? "--" : "-"}>`;
+/** @param {number} value */
+const coordinate = (value) => String(Math.round(value));
+/**
+* @param {import('./types.js').FlowDocument} document
+* @returns {string}
+*/
+function serialiseFlow(document) {
+	const sections = [[
+		`title: ${escapeRest(document.title ?? "Untitled diagram")}`,
+		...document.style === "sketch" ? ["style: sketch"] : [],
+		...document.lines && LINES.includes(document.lines) && document.lines !== LINE.STEP ? [`lines: ${document.lines}`] : [],
+		...noteLines$1(document.notes).map((line) => `${DIAGRAM_NOTE} ${line}`)
+	].join("\n")];
+	const nodes = document.nodes.map((node) => {
+		const description = node.data?.description;
+		const name = JSON.stringify(node.name ?? "");
+		const tail = description ? ` ${DESCRIPTION_MARK} ${escapeRest(description)}` : "";
+		return [
+			`${node.type === SHAPE.INK && !node.name ? `${node.id} = ${node.type}` : `${node.id} = ${node.type} ${name}`}${tail}`,
+			...isColor(node.data?.color) ? [`${node.id} color: ${node.data.color}`] : [],
+			...noteLines$1(node.data?.notes).map((line) => `${node.id} note: ${line}`)
+		].join("\n");
+	});
+	if (nodes.length) sections.push(nodes.join("\n"));
+	const edges = document.edges.map((edge) => {
+		const label = edge.label ? ` : ${escapeRest(edge.label)}` : "";
+		return `${edge.source} ${arrowOf(edge)} ${edge.target}${label}`;
+	});
+	if (edges.length) sections.push(edges.join("\n"));
+	const placed = document.nodes.filter((node) => node.position);
+	if (placed.length) sections.push([LAYOUT_HEADER, ...placed.map((node) => `${node.id} ${coordinate(node.position.x)},${coordinate(node.position.y)}${node.size ? ` ${coordinate(node.size.width)}x${coordinate(node.size.height)}` : ""}`)].join("\n"));
+	const inked = document.nodes.filter((node) => node.type === SHAPE.INK && node.data?.points);
+	if (inked.length) sections.push([INK_HEADER, ...inked.map((node) => `${node.id} ${node.data.points}`)].join("\n"));
+	return `${sections.join("\n\n")}\n`;
+}
+/**
+* Every problem is reported, each with its line, rather than stopping at the
+* first: an editor can mark them all at once. The document is null whenever
+* there is any error, so a half-read diagram is never mistaken for the whole.
+*
+* @param {string} text
+* @returns {{ document: import('./types.js').FlowDocument | null, errors: FlowTextError[] }}
+*/
+function parseFlow(text) {
+	/** @type {FlowTextError[]} */
+	const errors = [];
+	/** @type {Record<string, any>[]} */
+	const nodes = [];
+	/** @type {import('./types.js').FlowEdge[]} */
+	const edges = [];
+	/** @type {Map<string, Record<string, any>>} */
+	const byId = /* @__PURE__ */ new Map();
+	/** @type {{ line: number, id: string, x: number, y: number, width?: number, height?: number }[]} */
+	const layout = [];
+	/** @type {{ line: number, source: string, target: string, label: string, dashed: boolean, both: boolean }[]} */
+	const pendingEdges = [];
+	/** @type {{ line: number, id: string, text: string }[]} */
+	const pendingNotes = [];
+	/** @type {{ line: number, id: string, color: string }[]} */
+	const pendingColors = [];
+	/** @type {string[]} */
+	const diagramNotes = [];
+	let title = DEFAULT_TITLE;
+	/** @type {string} */
+	let style = "clean";
+	/** @type {string} */
+	let lines = LINE.STEP;
+	let inLayout = false;
+	let inInk = false;
+	/** @type {{ line: number, id: string, points: string }[]} */
+	const inks = [];
+	String(text ?? "").split(/\r?\n/).forEach((raw, index) => {
+		const line = index + 1;
+		const content = raw.trim();
+		/** @param {string} message */
+		const fail = (message) => errors.push({
+			line,
+			message
+		});
+		if (!content || content.startsWith("#")) return;
+		if (content === LAYOUT_HEADER) {
+			inLayout = true;
+			inInk = false;
+			return;
+		}
+		if (content === INK_HEADER) {
+			inInk = true;
+			inLayout = false;
+			return;
+		}
+		if (inInk) {
+			const match = INK_LINE.exec(content);
+			if (!match) return fail("Expected a pen stroke, like `m1 0,0 40,20 100,0`.");
+			inks.push({
+				line,
+				id: match[1],
+				points: match[2].trim().split(/\s+/).join(" ")
+			});
+			return;
+		}
+		if (inLayout) {
+			const match = LAYOUT_LINE.exec(content);
+			if (!match) return fail("Expected a position, like `api 120,340`, or `api 120,340 300x120`.");
+			layout.push({
+				line,
+				id: match[1],
+				x: Number(match[2]),
+				y: Number(match[3]),
+				...match[4] ? {
+					width: Number(match[4]),
+					height: Number(match[5])
+				} : {}
+			});
+			return;
+		}
+		if (content.startsWith("title:")) {
+			title = unescapeRest(content.slice(6).trim());
+			return;
+		}
+		const lined = LINES_LINE.exec(content);
+		if (lined) {
+			if (!LINES.includes(lined[1])) return fail(`Unknown lines "${lined[1]}". Use one of: ${LINES.join(", ")}.`);
+			lines = lined[1];
+			return;
+		}
+		const styled = STYLE_LINE.exec(content);
+		if (styled) {
+			if (!STYLES.includes(styled[1])) return fail(`Unknown style "${styled[1]}". Use one of: ${STYLES.join(", ")}.`);
+			style = styled[1];
+			return;
+		}
+		if (content.startsWith(DIAGRAM_NOTE)) {
+			diagramNotes.push(content.slice(5).trim());
+			return;
+		}
+		const note = NOTE_LINE.exec(content);
+		if (note) {
+			pendingNotes.push({
+				line,
+				id: note[1],
+				text: note[2].trim()
+			});
+			return;
+		}
+		const colored = COLOR_LINE.exec(content);
+		if (colored) {
+			if (!isColor(colored[2])) return fail(`Unknown color "${colored[2]}". Use one of: ${COLOR_NAMES.join(", ")}.`);
+			pendingColors.push({
+				line,
+				id: colored[1],
+				color: colored[2]
+			});
+			return;
+		}
+		const edge = EDGE_LINE.exec(content);
+		if (edge) {
+			pendingEdges.push({
+				line,
+				source: edge[1],
+				target: edge[3],
+				label: unescapeRest((edge[4] ?? "").trim()),
+				dashed: edge[2].includes("--"),
+				both: edge[2].startsWith("<")
+			});
+			return;
+		}
+		const node = NODE_LINE.exec(content);
+		if (!node) return fail("Expected a node, like `api = process \"API\"`, or an edge, like `a -> b`.");
+		const [, id, shape, rest] = node;
+		if (!isKnownShape(shape)) return fail(`Unknown shape "${shape}". Use one of: ${SHAPE_OPTIONS.map((o) => o.value).join(", ")}.`);
+		if (byId.has(id)) return fail(`"${id}" is already defined.`);
+		const parsed = readNameAndDescription(rest);
+		if (parsed.error) return fail(parsed.error);
+		const record = {
+			id,
+			type: shape,
+			name: parsed.name ?? (shape === SHAPE.INK ? "" : id),
+			data: parsed.description ? { description: parsed.description } : {}
+		};
+		nodes.push(record);
+		byId.set(id, record);
+	});
+	pendingEdges.forEach(({ line, source, target, label, dashed, both }) => {
+		const missing = [source, target].find((id) => !byId.has(id));
+		if (missing) return errors.push({
+			line,
+			message: `No node called "${missing}".`
+		});
+		if (source === target) return errors.push({
+			line,
+			message: "A node cannot connect to itself."
+		});
+		const id = edgeIdFor(source, target);
+		if (edges.some((existing) => existing.id === id)) return errors.push({
+			line,
+			message: `${source} -> ${target} is already connected.`
+		});
+		edges.push({
+			id,
+			source,
+			target,
+			...label ? { label } : {},
+			...dashed ? { dashed: true } : {},
+			...both ? { both: true } : {}
+		});
+	});
+	pendingNotes.forEach(({ line, id, text }) => {
+		const node = byId.get(id);
+		if (!node) return errors.push({
+			line,
+			message: `No node called "${id}".`
+		});
+		node.data.notes = node.data.notes ? `${node.data.notes}\n${text}` : text;
+	});
+	pendingColors.forEach(({ line, id, color }) => {
+		const node = byId.get(id);
+		if (!node) return errors.push({
+			line,
+			message: `No node called "${id}".`
+		});
+		node.data.color = color;
+	});
+	inks.forEach(({ line, id, points }) => {
+		const node = byId.get(id);
+		if (!node) return errors.push({
+			line,
+			message: `No node called "${id}".`
+		});
+		if (node.type !== SHAPE.INK) return errors.push({
+			line,
+			message: `"${id}" is not an ink shape, so it has no stroke.`
+		});
+		node.data.points = points;
+	});
+	const positioned = /* @__PURE__ */ new Set();
+	layout.forEach(({ line, id, x, y, width, height }) => {
+		const node = byId.get(id);
+		if (!node) return errors.push({
+			line,
+			message: `No node called "${id}".`
+		});
+		if (positioned.has(id)) return errors.push({
+			line,
+			message: `"${id}" already has a position.`
+		});
+		positioned.add(id);
+		node.position = {
+			x,
+			y
+		};
+		if (width && height) node.size = {
+			width,
+			height
+		};
+	});
+	errors.sort((a, b) => a.line - b.line);
+	return errors.length ? {
+		document: null,
+		errors
+	} : {
+		document: {
+			version: 3,
+			title,
+			...style === "sketch" ? { style: "sketch" } : {},
+			...lines !== LINE.STEP ? { lines } : {},
+			...diagramNotes.length ? { notes: diagramNotes.join("\n") } : {},
+			nodes,
+			edges
+		},
+		errors
+	};
+}
+/**
+* `"Name" -- description`, where both parts are optional.
+* @param {string} rest
+* @returns {{ name?: string, description?: string, error?: string }}
+*/
+function readNameAndDescription(rest) {
+	let remaining = rest.trim();
+	/** @type {string | undefined} */
+	let name;
+	if (remaining.startsWith("\"")) {
+		const end = closingQuote(remaining);
+		if (end === -1) return { error: "The name is missing its closing quote." };
+		try {
+			name = JSON.parse(remaining.slice(0, end + 1));
+		} catch {
+			return { error: "The name has an escape JSON does not allow." };
+		}
+		remaining = remaining.slice(end + 1).trim();
+	}
+	if (!remaining) return { name };
+	if (!remaining.startsWith(DESCRIPTION_MARK)) return { error: "Put the name in quotes, and start a description with `--`." };
+	return {
+		name,
+		description: unescapeRest(remaining.slice(2).trim())
+	};
+}
+/**
+* The index of the quote that closes the one at 0, skipping escaped quotes.
+* @param {string} text
+*/
+function closingQuote(text) {
+	for (let index = 1; index < text.length; index += 1) if (text[index] === "\\") index += 1;
+	else if (text[index] === "\"") return index;
+	return -1;
+}
+const FLOW_EXTENSION = ".flow";
 //#endregion
 //#region src/domain/frames.js
 /**
@@ -3131,6 +3280,8 @@ function inkPath(points, width, height) {
 const tenth = (value) => Math.round(value * 10) / 10;
 //#endregion
 //#region src/domain/renderSvg.js
+/** @param {'light' | 'dark'} theme */
+const paintsFor = (theme) => Object.fromEntries(COLOR_NAMES.map((name) => [name, paintOf(name, theme)]));
 /**
 * The app's colour tokens, copied from `style.css` so the renderer runs where
 * there is no stylesheet: the command line, CI, a docs build. Keep the two in
@@ -3156,7 +3307,8 @@ const SVG_THEMES = Object.freeze({
 			comment: "#0284c7",
 			branch: "#4f46e5",
 			unknown: "#94a3b8"
-		}
+		},
+		paints: paintsFor("light")
 	},
 	dark: {
 		changes: {
@@ -3177,7 +3329,8 @@ const SVG_THEMES = Object.freeze({
 			comment: "#38bdf8",
 			branch: "#a5b4fc",
 			unknown: "#94a3b8"
-		}
+		},
+		paints: paintsFor("dark")
 	}
 });
 const FONT = "ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
@@ -3248,10 +3401,12 @@ function renderSvg(document, { theme = "light", padding = 32, highlight = /* @__
 */
 function renderFrame(node, position, colours, change) {
 	const { width, height } = sizeOf(node);
-	const stroke = change ? colours.changes[change] : colours.muted;
+	const own = colorOf(node);
+	const paint = own ? colours.paints[own] : null;
+	const stroke = change ? colours.changes[change] : paint?.stroke ?? colours.muted;
 	return [
 		`<g transform="translate(${round(position.x)},${round(position.y)})"${change ? ` data-change="${change}"` : ""}>`,
-		`<path d="${shapePath(SHAPE.FRAME, width, height, 1)}" fill="${colours.line}" fill-opacity="0.35" stroke="${stroke}" stroke-width="${change ? 3 : 1.5}" stroke-dasharray="8 5"/>`,
+		`<path d="${shapePath(SHAPE.FRAME, width, height, 1)}" fill="${paint?.fill ?? colours.line}" fill-opacity="${paint ? .45 : .35}" stroke="${stroke}" stroke-width="${change ? 3 : 1.5}" stroke-dasharray="8 5"/>`,
 		`<text x="14" y="24" font-size="${TITLE_SIZE}" font-weight="600" fill="${colours.ink}">${escapeXml(wrap(node.name ?? "", width - 28, TITLE_SIZE, 1)[0] ?? "")}</text>`,
 		"</g>"
 	].join("\n");
@@ -3265,13 +3420,14 @@ function renderFrame(node, position, colours, change) {
 */
 function renderInk(node, position, colours, change) {
 	const { width, height } = sizeOf(node);
-	const colour = change ? colours.changes[change] : colours.ink;
+	const own = colorOf(node);
+	const colour = change ? colours.changes[change] : own ? colours.paints[own].stroke : colours.ink;
 	const g = `<g transform="translate(${round(position.x)},${round(position.y)})"${change ? ` data-change="${change}"` : ""}>`;
 	const outline = inkOutline(node.data?.points, width, height);
 	if (outline) return `${g}<path d="${outline}" fill="${colour}"/></g>`;
 	const d = inkPath(node.data?.points, width, height);
 	if (!d) return "";
-	return `<g transform="translate(${round(position.x)},${round(position.y)})"${change ? ` data-change="${change}"` : ""}><path d="${d}" fill="none" stroke="${change ? colours.changes[change] : colours.ink}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>`;
+	return `<g transform="translate(${round(position.x)},${round(position.y)})"${change ? ` data-change="${change}"` : ""}><path d="${d}" fill="none" stroke="${colour}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>`;
 }
 /**
 * Handwriting runs small and has one weight, so a sketch's text goes a size up
@@ -3328,14 +3484,17 @@ function renderNode(node, position, colours, change, sketch = false) {
 	const accent = colours.accents[meta.accent] ?? colours.accents.unknown;
 	const size = sizeOf(node);
 	const outline = shapePath(node.type, size.width, size.height, 1.5) || (change ? shapePath(SHAPE.PROCESS, size.width, size.height, 1.5) : "");
-	const stroke = change ? colours.changes[change] : accent;
+	const own = colorOf(node);
+	const paint = own ? colours.paints[own] : null;
+	const fill = paint?.fill ?? colours.surface;
+	const stroke = change ? colours.changes[change] : paint?.stroke ?? accent;
 	const style = change ? ` stroke-width="3"${change === "removed" ? " stroke-dasharray=\"7 5\"" : ""}` : " stroke-width=\"1.5\"";
 	const description = meta.summary(node);
 	const body = node.type === SHAPE.TABLE ? tableText(node.name, description, colours, size) : centredText(node, description, colours, size);
 	return [
 		`<g transform="translate(${round(position.x)},${round(position.y)})"${change === "removed" ? " opacity=\"0.6\"" : ""}${change ? ` data-change="${change}"` : ""}>`,
-		outline && sketch ? [`<path d="${outline}" fill="${colours.surface}" stroke="none"/>`, `<path d="${sketchPath(outline, node.id)}" fill="none" stroke="${stroke}"${style} stroke-linecap="round"/>`].join("\n") : "",
-		outline && !sketch ? `<path d="${outline}" fill="${colours.surface}" stroke="${stroke}"${style} stroke-linejoin="round"/>` : "",
+		outline && sketch ? [`<path d="${outline}" fill="${fill}" stroke="none"/>`, `<path d="${sketchPath(outline, node.id)}" fill="none" stroke="${stroke}"${style} stroke-linecap="round"/>`].join("\n") : "",
+		outline && !sketch ? `<path d="${outline}" fill="${fill}" stroke="${stroke}"${style} stroke-linejoin="round"/>` : "",
 		body,
 		"</g>"
 	].filter(Boolean).join("\n");

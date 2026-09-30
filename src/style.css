@@ -40,6 +40,25 @@
   --node-unknown: #94a3b8;
   --node-unknown-soft: #e2e8f0;
 
+  --paint-red: #e03131;
+  --paint-red-soft: #ffe3e3;
+  --paint-orange: #e8590c;
+  --paint-orange-soft: #ffe8cc;
+  --paint-yellow: #f08c00;
+  --paint-yellow-soft: #fff3bf;
+  --paint-green: #2f9e44;
+  --paint-green-soft: #d3f9d8;
+  --paint-teal: #099268;
+  --paint-teal-soft: #c3fae8;
+  --paint-blue: #1971c2;
+  --paint-blue-soft: #d0ebff;
+  --paint-violet: #6741d9;
+  --paint-violet-soft: #e5dbff;
+  --paint-pink: #c2255c;
+  --paint-pink-soft: #ffdeeb;
+  --paint-grey: #495057;
+  --paint-grey-soft: #e9ecef;
+
   --shadow-card: 0 1px 2px rgb(15 23 42 / 0.06), 0 1px 3px rgb(15 23 42 / 0.08);
   --shadow-raised: 0 4px 12px rgb(15 23 42 / 0.1);
   --shadow-panel: -8px 0 24px rgb(15 23 42 / 0.08);
@@ -92,6 +111,25 @@
   --node-unknown: #94a3b8;
   --node-unknown-soft: #2a323d;
 
+  --paint-red: #ff8787;
+  --paint-red-soft: #4a1c1f;
+  --paint-orange: #ffa94d;
+  --paint-orange-soft: #4a2c12;
+  --paint-yellow: #ffd43b;
+  --paint-yellow-soft: #4a3f10;
+  --paint-green: #69db7c;
+  --paint-green-soft: #173d22;
+  --paint-teal: #38d9a9;
+  --paint-teal-soft: #10392f;
+  --paint-blue: #74c0fc;
+  --paint-blue-soft: #13324d;
+  --paint-violet: #b197fc;
+  --paint-violet-soft: #2c2352;
+  --paint-pink: #f783ac;
+  --paint-pink-soft: #4a1c30;
+  --paint-grey: #adb5bd;
+  --paint-grey-soft: #2a2f35;
+
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.5);
   --shadow-raised: 0 4px 14px rgb(0 0 0 / 0.55);
   --shadow-panel: -8px 0 28px rgb(0 0 0 / 0.45);
@@ -139,6 +177,25 @@
     --node-branch-soft: #2a2f55;
     --node-unknown: #94a3b8;
     --node-unknown-soft: #2a323d;
+
+    --paint-red: #ff8787;
+    --paint-red-soft: #4a1c1f;
+    --paint-orange: #ffa94d;
+    --paint-orange-soft: #4a2c12;
+    --paint-yellow: #ffd43b;
+    --paint-yellow-soft: #4a3f10;
+    --paint-green: #69db7c;
+    --paint-green-soft: #173d22;
+    --paint-teal: #38d9a9;
+    --paint-teal-soft: #10392f;
+    --paint-blue: #74c0fc;
+    --paint-blue-soft: #13324d;
+    --paint-violet: #b197fc;
+    --paint-violet-soft: #2c2352;
+    --paint-pink: #f783ac;
+    --paint-pink-soft: #4a1c30;
+    --paint-grey: #adb5bd;
+    --paint-grey-soft: #2a2f35;
 
     --shadow-card: 0 1px 2px rgb(0 0 0 / 0.5);
     --shadow-raised: 0 4px 14px rgb(0 0 0 / 0.55);

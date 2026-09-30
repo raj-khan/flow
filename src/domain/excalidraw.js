@@ -1,4 +1,5 @@
 import { SHAPE, sizeOf } from './constants.js'
+import { colorOf, nearestColor, paintOf } from './colors.js'
 import { DOCUMENT_VERSION, edgeIdFor } from './document.js'
 import { documentPositions } from './graph.js'
 import { strokeToInk } from './ink.js'
@@ -109,6 +110,16 @@ export function fromExcalidraw(text) {
   const skipped = new Map()
   const skip = (/** @type {string} */ what) => skipped.set(what, (skipped.get(what) ?? 0) + 1)
 
+  /**
+   * The named colour nearest what it was drawn in: the fill first, since a
+   * filled shape reads as its fill.
+   * @param {Record<string, any>} element
+   */
+  const colorIn = (element) => {
+    const color = nearestColor(element.backgroundColor) || nearestColor(element.strokeColor)
+    return color ? { color } : {}
+  }
+
   elements.forEach((element) => {
     const own = element.customData?.isketch
     const kind =
@@ -131,6 +142,7 @@ export function fromExcalidraw(text) {
         data: {
           description: String(element.customData?.description ?? ''),
           ...(element.customData?.notes ? { notes: String(element.customData.notes) } : {}),
+          ...colorIn(element),
         },
         position: { x: Math.round(element.x ?? 0), y: Math.round(element.y ?? 0) },
         size: {
@@ -156,7 +168,7 @@ export function fromExcalidraw(text) {
         id: idFor(element.id),
         type: SHAPE.INK,
         name: '',
-        data: { points: ink.points },
+        data: { points: ink.points, ...colorIn(element) },
         position: ink.position,
         size: ink.size,
       })
@@ -323,6 +335,7 @@ export function toExcalidraw(document) {
     const at = positions.get(node.id) ?? { x: 0, y: 0 }
     const { width, height } = sizeOf(node)
     const box = { x: Math.round(at.x), y: Math.round(at.y), width, height }
+    const paint = paintOf(colorOf(node))
 
     if (node.type === SHAPE.INK) {
       const points = String(node.data?.points ?? '')
@@ -343,6 +356,7 @@ export function toExcalidraw(document) {
             pressures,
             simulatePressure: !points.some((point) => Number.isFinite(point[2])),
             customData: { isketch: SHAPE.INK },
+            ...(paint ? { strokeColor: paint.stroke } : {}),
           },
           node.id,
           sketch,
@@ -373,6 +387,7 @@ export function toExcalidraw(document) {
         ...(type === 'rectangle' ? { roundness: { type: 3 } } : {}),
         boundElements: [],
         customData,
+        ...(paint ? { strokeColor: paint.stroke, backgroundColor: paint.fill } : {}),
       },
       node.id,
       sketch,

@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 
 import { STORAGE_KEYS } from '@/api/storageKeys.js'
 import { TOOL } from '@/domain/tools.js'
+import { isColor } from '@/domain/colors.js'
 
 /** How long a change made on disk stays marked on the canvas. */
 export const FLASH_MS = 4000
@@ -26,6 +27,16 @@ function saveSwitch(key, on) {
     localStorage.setItem(key, on ? 'on' : 'off')
   } catch {
     // A private window refuses storage; the choice still holds until reload.
+  }
+}
+
+/** The pen's colour as last chosen, when it is still one of the palette. */
+function savedColor() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.PEN_COLOR)
+    return isColor(saved) ? /** @type {string} */ (saved) : ''
+  } catch {
+    return ''
   }
 }
 
@@ -71,6 +82,19 @@ export const useCanvasStore = defineStore('canvas', () => {
 
   function togglePen() {
     tool.value = pen.value ? TOOL.SELECT : TOOL.PEN
+  }
+
+  /** The colour new pen strokes draw in; empty for ink. Kept in this browser. */
+  const penColor = ref(savedColor())
+
+  /** @param {string} color a ColorName, or '' for ink */
+  function setPenColor(color) {
+    penColor.value = isColor(color) ? color : ''
+    try {
+      localStorage.setItem(STORAGE_KEYS.PEN_COLOR, penColor.value)
+    } catch {
+      // A private window refuses storage; the colour still holds until reload.
+    }
   }
 
   /** Whether dragged shapes snap to the grid of dots. On unless turned off. */
@@ -220,6 +244,8 @@ export const useCanvasStore = defineStore('canvas', () => {
     closeLibrary,
     pen,
     togglePen,
+    penColor,
+    setPenColor,
     setViewport,
     forgetViewport,
     requestFocus,

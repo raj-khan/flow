@@ -6,6 +6,16 @@ import { shapePath, textInset } from './shapes.js'
 import { isSketch, SKETCH_FONT, sketchPath } from './sketch.js'
 import { LINE, routeEdge } from './routes.js'
 import { inkOutline, inkPath } from './ink.js'
+import { colorOf, COLOR_NAMES, paintOf } from './colors.js'
+
+/** @param {'light' | 'dark'} theme */
+const paintsFor = (theme) =>
+  Object.fromEntries(
+    COLOR_NAMES.map((name) => [
+      name,
+      /** @type {import('./colors.js').Paint} */ (paintOf(name, theme)),
+    ]),
+  )
 
 /**
  * The app's colour tokens, copied from `style.css` so the renderer runs where
@@ -29,6 +39,7 @@ export const SVG_THEMES = Object.freeze({
       branch: '#4f46e5',
       unknown: '#94a3b8',
     },
+    paints: paintsFor('light'),
   },
   dark: {
     changes: { added: '#4ade80', removed: '#f87171', changed: '#fbbf24' },
@@ -46,6 +57,7 @@ export const SVG_THEMES = Object.freeze({
       branch: '#a5b4fc',
       unknown: '#94a3b8',
     },
+    paints: paintsFor('dark'),
   },
 })
 
@@ -156,10 +168,12 @@ export function renderSvg(
  */
 function renderFrame(node, position, colours, change) {
   const { width, height } = sizeOf(node)
-  const stroke = change ? colours.changes[change] : colours.muted
+  const own = colorOf(node)
+  const paint = own ? colours.paints[own] : null
+  const stroke = change ? colours.changes[change] : (paint?.stroke ?? colours.muted)
   return [
     `<g transform="translate(${round(position.x)},${round(position.y)})"${change ? ` data-change="${change}"` : ''}>`,
-    `<path d="${shapePath(SHAPE.FRAME, width, height, 1)}" fill="${colours.line}" fill-opacity="0.35" stroke="${stroke}" stroke-width="${change ? 3 : 1.5}" stroke-dasharray="8 5"/>`,
+    `<path d="${shapePath(SHAPE.FRAME, width, height, 1)}" fill="${paint?.fill ?? colours.line}" fill-opacity="${paint ? 0.45 : 0.35}" stroke="${stroke}" stroke-width="${change ? 3 : 1.5}" stroke-dasharray="8 5"/>`,
     `<text x="14" y="24" font-size="${TITLE_SIZE}" font-weight="600" fill="${colours.ink}">${escapeXml(wrap(node.name ?? '', width - 28, TITLE_SIZE, 1)[0] ?? '')}</text>`,
     '</g>',
   ].join('\n')
@@ -174,13 +188,14 @@ function renderFrame(node, position, colours, change) {
  */
 function renderInk(node, position, colours, change) {
   const { width, height } = sizeOf(node)
-  const colour = change ? colours.changes[change] : colours.ink
+  const own = colorOf(node)
+  const colour = change ? colours.changes[change] : own ? colours.paints[own].stroke : colours.ink
   const g = `<g transform="translate(${round(position.x)},${round(position.y)})"${change ? ` data-change="${change}"` : ''}>`
   const outline = inkOutline(node.data?.points, width, height)
   if (outline) return `${g}<path d="${outline}" fill="${colour}"/></g>`
   const d = inkPath(node.data?.points, width, height)
   if (!d) return ''
-  return `<g transform="translate(${round(position.x)},${round(position.y)})"${change ? ` data-change="${change}"` : ''}><path d="${d}" fill="none" stroke="${change ? colours.changes[change] : colours.ink}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>`
+  return `<g transform="translate(${round(position.x)},${round(position.y)})"${change ? ` data-change="${change}"` : ''}><path d="${d}" fill="none" stroke="${colour}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>`
 }
 
 /**
@@ -250,7 +265,10 @@ function renderNode(node, position, colours, change, sketch = false) {
   const outline =
     shapePath(node.type, size.width, size.height, 1.5) ||
     (change ? shapePath(SHAPE.PROCESS, size.width, size.height, 1.5) : '')
-  const stroke = change ? colours.changes[change] : accent
+  const own = colorOf(node)
+  const paint = own ? colours.paints[own] : null
+  const fill = paint?.fill ?? colours.surface
+  const stroke = change ? colours.changes[change] : (paint?.stroke ?? accent)
   const style = change
     ? ` stroke-width="3"${change === 'removed' ? ' stroke-dasharray="7 5"' : ''}`
     : ' stroke-width="1.5"'
@@ -265,12 +283,12 @@ function renderNode(node, position, colours, change, sketch = false) {
     `<g transform="translate(${round(position.x)},${round(position.y)})"${change === 'removed' ? ' opacity="0.6"' : ''}${change ? ` data-change="${change}"` : ''}>`,
     outline && sketch
       ? [
-          `<path d="${outline}" fill="${colours.surface}" stroke="none"/>`,
+          `<path d="${outline}" fill="${fill}" stroke="none"/>`,
           `<path d="${sketchPath(outline, node.id)}" fill="none" stroke="${stroke}"${style} stroke-linecap="round"/>`,
         ].join('\n')
       : '',
     outline && !sketch
-      ? `<path d="${outline}" fill="${colours.surface}" stroke="${stroke}"${style} stroke-linejoin="round"/>`
+      ? `<path d="${outline}" fill="${fill}" stroke="${stroke}"${style} stroke-linejoin="round"/>`
       : '',
     body,
     '</g>',

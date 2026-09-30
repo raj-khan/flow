@@ -1,3 +1,4 @@
+import { COLOR_NAMES } from './colors.js'
 import { parseFlow } from './flowText.js'
 import { SHAPE_OPTIONS } from './nodeMeta.js'
 
@@ -40,6 +41,7 @@ The .flow format, one declaration per line:
 - \`id = shape "Name" -- description\`: a shape. Ids are short, lowercase, letters, digits, _ and -. The description is optional and short.
 - \`a -> b : label\`: a connection, label optional. \`-->\` is dashed (optional or asynchronous), \`<->\` goes both ways.
 - \`note: ...\` under the title for an instruction to whoever builds it; \`id note: ...\` for one shape.
+- \`id color: red\` colours a shape, one of ${COLOR_NAMES.join(', ')}; only where colour means something.
 - A \`table\` lists its columns in its description: \`id PK, email, user_id FK\`.
 - \`id = frame "Name"\` groups the shapes inside it, but only with positions; leave frames out here.
 - Leave out any @layout block: isketch lays the diagram out.
