@@ -85,6 +85,8 @@ nobody hosts it yet: run it yourself, or hand over the `.flow` file or the brief
 - **New diagram and samples.** Start on a blank canvas, ready to draw on, or from a web app
   architecture or support flow sample (New from a sample, or the link on the blank canvas). Undo
   brings back whatever was there.
+- **Discard all.** Clears every shape, stroke and connection and keeps the title, notes, look and
+  open file: a clean sheet of the same diagram. Undo brings it all back.
 - **Installable.** Install isketch from the browser as an app that opens with no connection. The
   installed app opens `.flow` files from the file manager, and takes text shared to it from other
   apps (`.flow` text or a Mermaid flowchart) as a new diagram, undoable.

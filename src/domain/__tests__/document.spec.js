@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { DOCUMENT_VERSION, edgeIdFor, emptyDocument, migrate } from '../document.js'
+import {
+  DOCUMENT_VERSION,
+  edgeIdFor,
+  emptyDocument,
+  migrate,
+  withNothingDrawn,
+} from '../document.js'
 
 const v1 = [
   { id: 1, parentId: -1, type: 'trigger', data: {} },
@@ -118,5 +124,19 @@ describe('migrate', () => {
     expect(() => migrate('nope')).toThrow(/not an isketch document/i)
     expect(() => migrate({ nodes: 'nope' })).toThrow(/not an isketch document/i)
     expect(() => migrate(null)).toThrow(/not an isketch document/i)
+  })
+})
+
+describe('withNothingDrawn', () => {
+  it('clears every shape and connection, and keeps the rest', () => {
+    const doc = {
+      version: 3,
+      title: 'Shop',
+      notes: 'Use Postgres',
+      style: /** @type {'sketch'} */ ('sketch'),
+      nodes: [{ id: 'a', type: 'process', name: 'A', data: {} }],
+      edges: [{ id: 'e', source: 'a', target: 'a' }],
+    }
+    expect(withNothingDrawn(doc)).toEqual({ ...doc, nodes: [], edges: [] })
   })
 })

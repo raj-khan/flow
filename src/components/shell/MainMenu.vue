@@ -2,6 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
 
 import { useDiagramFile } from '@/composables/useDiagramFile.js'
+import { useDiscardAll } from '@/composables/useDiscardAll.js'
 import { useFlowHistory } from '@/composables/useFlowHistory.js'
 import { useFullScreen } from '@/composables/useFullScreen.js'
 import { usePlatform } from '@/composables/usePlatform.js'
@@ -29,6 +30,7 @@ const { sketch, toggle: toggleSketch } = useSketchStyle()
 const { label: themeLabel, cycle: cycleTheme } = useTheme()
 const { isMac } = usePlatform()
 const fullScreen = useFullScreen()
+const { discardAll, isEmpty } = useDiscardAll()
 
 const isOpen = ref(false)
 const trigger = useTemplateRef('trigger')
@@ -47,7 +49,7 @@ function startFromSample() {
 }
 
 /**
- * @typedef {{ label: string, run: () => void, hint?: string, checked?: boolean, disabled?: boolean }} Item
+ * @typedef {{ label: string, run: () => void, hint?: string, checked?: boolean, disabled?: boolean, danger?: boolean }} Item
  */
 const groups = computed(
   () =>
@@ -55,6 +57,7 @@ const groups = computed(
       [
         { label: 'New diagram', run: startEmpty, disabled: isStarting.value },
         { label: 'New from a sample', run: startFromSample, disabled: isStarting.value },
+        { label: 'Discard all', run: discardAll, disabled: isEmpty.value, danger: true },
         { label: 'Open file', run: open, hint: comboLabel(COMBO.OPEN, isMac.value) },
         { label: 'Save', run: save, hint: comboLabel(COMBO.SAVE, isMac.value) },
       ],
@@ -201,7 +204,8 @@ onBeforeUnmount(() => window.removeEventListener('pointerdown', onOutside))
           :role="item.checked === undefined ? 'menuitem' : 'menuitemcheckbox'"
           :aria-checked="item.checked === undefined ? undefined : item.checked ? 'true' : 'false'"
           :disabled="item.disabled"
-          class="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm text-ink transition-colors hover:bg-hover focus:bg-hover focus:outline-none disabled:opacity-40"
+          :class="item.danger ? 'text-danger' : 'text-ink'"
+          class="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-hover focus:bg-hover focus:outline-none disabled:opacity-40"
           @click="choose(item)"
         >
           <span class="w-4 text-xs" aria-hidden="true">{{ item.checked ? '✓' : '' }}</span>

@@ -150,3 +150,12 @@ function fromV1(list) {
 
   return { version: 2, title: DEFAULT_TITLE, nodes, edges }
 }
+
+/**
+ * The same diagram with nothing drawn on it: every shape, stroke and
+ * connection gone, and its title, notes and look kept.
+ *
+ * @param {import('./types.js').FlowDocument} document
+ * @returns {import('./types.js').FlowDocument}
+ */
+export const withNothingDrawn = (document) => ({ ...document, nodes: [], edges: [] })

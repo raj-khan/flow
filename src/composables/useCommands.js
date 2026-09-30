@@ -2,6 +2,7 @@ import { computed } from 'vue'
 
 import { useCopyBrief } from '@/composables/useCopyBrief.js'
 import { useDiagramFile } from '@/composables/useDiagramFile.js'
+import { useDiscardAll } from '@/composables/useDiscardAll.js'
 import { useFlowHistory } from '@/composables/useFlowHistory.js'
 import { useFullScreen } from '@/composables/useFullScreen.js'
 import { useLineStyle } from '@/composables/useLineStyle.js'
@@ -34,6 +35,7 @@ export function useCommands(shell) {
   const { cycle: cycleLines } = useLineStyle()
   const { isMac } = usePlatform()
   const toasts = useToastStore()
+  const { discardAll } = useDiscardAll()
   const startEmpty = () =>
     start(undefined, {
       onSuccess: () =>
@@ -73,6 +75,13 @@ export function useCommands(shell) {
         startEmpty()
         canvas.openSamples()
       },
+    },
+    {
+      id: 'discard',
+      label: 'Discard all',
+      group: 'File',
+      keywords: 'clear reset erase delete everything wipe',
+      run: discardAll,
     },
     { id: 'open', label: 'Open file', group: 'File', hint: key(COMBO.OPEN), run: open },
     { id: 'save', label: 'Save', group: 'File', hint: key(COMBO.SAVE), run: save },

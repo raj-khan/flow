@@ -91,3 +91,25 @@ test('New from a sample lists the samples on a blank canvas', async ({ page }) =
   await history(page).getByRole('button', { name: 'Undo' }).click()
   await expect(shapes(page)).toHaveCount(5)
 })
+
+test('Discard all clears the canvas, keeps the title, and undo brings it back', async ({
+  page,
+}) => {
+  const title = async () =>
+    (await page.evaluate(() => JSON.parse(localStorage.getItem('flow:document')))).title
+  const before = await title()
+  await fromMenu(page, 'Discard all')
+
+  await expect(shapes(page)).toHaveCount(0)
+  await expect(page.getByTestId('blank-hint')).toBeVisible()
+  expect(await title()).toBe(before)
+  await expect(page.getByText('Discarded 5 shapes.')).toBeVisible()
+
+  // Nothing left to discard.
+  await page.getByRole('button', { name: 'Menu', exact: true }).click()
+  await expect(page.getByRole('menuitem', { name: 'Discard all' })).toBeDisabled()
+  await page.keyboard.press('Escape')
+
+  await history(page).getByRole('button', { name: 'Undo' }).click()
+  await expect(shapes(page)).toHaveCount(5)
+})
