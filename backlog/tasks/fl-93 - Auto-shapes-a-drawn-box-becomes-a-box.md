@@ -1,10 +1,11 @@
 ---
 id: FL-93
 title: 'Auto shapes: a drawn box becomes a box'
-status: To Do
+status: Done
 assignee:
   - '@raj-khan'
 created_date: '2026-09-30 13:40'
+updated_date: '2026-09-30 14:32'
 labels:
   - feature
 milestone: m-5
@@ -26,9 +27,16 @@ A pen stroke that is plainly a rectangle, an ellipse or a diamond turns into tha
 
 <!-- AC:BEGIN -->
 
-- [ ] #1 src/domain/recognize.js classifies a stroke as line, arrow, rectangle, ellipse, diamond or nothing, and is tested on drawn samples including wobbly and unclosed ones
-- [ ] #2 With auto shapes on, a closed rectangle becomes a process, an ellipse a terminal and a diamond a decision, at the stroke's box, in the stroke's colour, with its title ready to type
-- [ ] #3 One undo brings back the stroke as drawn; a toast offers Keep as drawn
-- [ ] #4 Auto shapes is a toggle next to the pen colour, on by default, remembered; scribbles and handwriting stay ink
+- [x] #1 src/domain/recognize.js classifies a stroke as line, arrow, rectangle, ellipse, diamond or nothing, and is tested on drawn samples including wobbly and unclosed ones
+- [x] #2 With auto shapes on, a closed rectangle becomes a process, an ellipse a terminal and a diamond a decision, at the stroke's box, in the stroke's colour, with its title ready to type
+- [x] #3 One undo brings back the stroke as drawn; a toast offers Keep as drawn
+- [x] #4 Auto shapes is a toggle next to the pen colour, on by default, remembered; scribbles and handwriting stay ink
 
 <!-- AC:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+
+src/domain/recognize.js reads a stroke by geometry (resampled, closedness, how far round it turns, fit against each outline in its box; straightness and barbs for lines and arrows). src/domain/drawn.js adds strokes and drawn shapes. With Auto shapes on (a remembered toggle in the pen toolbar) a rectangle, ellipse or diamond becomes a process, terminal or decision in the pen colour with its title in edit; a ring round an existing shape stays ink. The toast's Keep as drawn swaps the stroke back.
+<!-- SECTION:FINAL_SUMMARY:END -->

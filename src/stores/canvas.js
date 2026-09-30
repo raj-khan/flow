@@ -97,6 +97,14 @@ export const useCanvasStore = defineStore('canvas', () => {
     }
   }
 
+  /** Whether a stroke that is plainly a box, an ellipse or a diamond becomes one. On unless turned off. */
+  const autoShapes = ref(savedSwitch(STORAGE_KEYS.AUTO_SHAPES))
+
+  function toggleAutoShapes() {
+    autoShapes.value = !autoShapes.value
+    saveSwitch(STORAGE_KEYS.AUTO_SHAPES, autoShapes.value)
+  }
+
   /** Whether dragged shapes snap to the grid of dots. On unless turned off. */
   const snap = ref(savedSwitch(STORAGE_KEYS.SNAP))
 
@@ -246,6 +254,8 @@ export const useCanvasStore = defineStore('canvas', () => {
     togglePen,
     penColor,
     setPenColor,
+    autoShapes,
+    toggleAutoShapes,
     setViewport,
     forgetViewport,
     requestFocus,

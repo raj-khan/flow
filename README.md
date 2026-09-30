@@ -120,7 +120,12 @@ nobody hosts it yet: run it yourself, or hand over the `.flow` file or the brief
   diagram, and undo puts it back.
 - **Pen.** Pick up the pen (`P`) to circle, underline or scribble over the diagram by hand. Each
   stroke moves, resizes and undoes like a shape, clicks pass through it to what it circles, and the
-  brief leaves strokes out: they are marks on the picture, not parts of the design.
+  brief leaves strokes out: they are marks on the picture, not parts of the design. The pen draws
+  in any colour of the palette.
+- **Auto shapes.** With the pen, a box, an ellipse or a diamond drawn by hand becomes a clean
+  process, start / end or decision, ready for its title, so a sketch ends as a diagram an agent
+  reads. A ring drawn round a shape stays a stroke, Keep as drawn undoes it, and one switch turns
+  it off.
 - **Sketch style.** One switch draws the whole diagram by hand, like a whiteboard: wobbly outlines
   (drawn by [Rough.js](https://roughjs.com), as in Excalidraw) and a handwritten font. The
   diagram underneath is the same, so switching back is lossless, and exported SVGs carry the font.

@@ -1,22 +1,30 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, inject, nextTick, ref } from 'vue'
 import { useVueFlow } from '@vue-flow/core'
 
 import { useFlowQuery } from '@/composables/useFlowQuery.js'
 import { useReplaceDocument } from '@/composables/useNodeMutations.js'
 import { SHAPE } from '@/domain/constants.js'
+import { encloses, withDrawnShape, withInk } from '@/domain/drawn.js'
 import { strokeToInk } from '@/domain/ink.js'
+import { recognise } from '@/domain/recognize.js'
 import { useCanvasStore } from '@/stores/canvas.js'
+import { useToastStore } from '@/stores/toasts.js'
+import { EDIT_TEXT } from './editKey.js'
 
 /**
  * The pen: while it is on, dragging on the canvas draws instead of panning.
  * Each stroke becomes a shape of its own, so it moves, resizes, deletes and
- * undoes like any other.
+ * undoes like any other. With auto shapes on, a stroke plainly drawn as a box,
+ * an ellipse or a diamond becomes that shape, ready for its title.
  */
 const canvas = useCanvasStore()
-const { screenToFlowCoordinate } = useVueFlow()
+const { screenToFlowCoordinate, getNodes } = useVueFlow()
 const { document } = useFlowQuery()
 const draw = useReplaceDocument('Draw')
+const shape = useReplaceDocument('Draw a shape')
+const toasts = useToastStore()
+const edit = inject(EDIT_TEXT, null)
 
 /** The stroke being drawn, in screen coordinates relative to the layer. */
 /** @type {import('vue').Ref<{ x: number, y: number }[]>} */
@@ -73,23 +81,49 @@ function finish(event) {
   const ink = strokeToInk(drawn)
   if (!ink || !document.value) return
 
-  const taken = new Set(document.value.nodes.map((node) => String(node.id)))
-  let n = 1
-  while (taken.has(`ink-${n}`)) n += 1
-  draw.mutate({
-    ...document.value,
-    nodes: [
-      ...document.value.nodes,
-      {
-        id: `ink-${n}`,
-        type: SHAPE.INK,
-        name: '',
-        data: { points: ink.points, ...(canvas.penColor ? { color: canvas.penColor } : {}) },
-        position: ink.position,
-        size: ink.size,
+  const color = canvas.penColor
+  const seen = canvas.autoShapes ? recognise(drawn) : null
+  if (seen && 'box' in seen && !encloses(seen.box, shapeBoxes())) {
+    const made = withDrawnShape(document.value, seen, color)
+    shape.mutate(made.document, {
+      onSuccess: async () => {
+        await nextTick()
+        edit?.start(made.id)
       },
-    ],
-  })
+    })
+    toasts.push(`Drawn as ${seen.kind === 'ellipse' ? 'an' : 'a'} ${seen.kind}.`, {
+      action: { label: 'Keep as drawn', run: () => keepAsDrawn(made.id, ink, color) },
+    })
+    return
+  }
+  draw.mutate(withInk(document.value, ink, color).document)
+}
+
+/** Where every shape but a stroke is on the canvas, as drawn now. */
+function shapeBoxes() {
+  return getNodes.value
+    .filter((node) => node.data?.node?.type !== SHAPE.INK)
+    .map((node) => ({
+      x: node.computedPosition?.x ?? node.position.x,
+      y: node.computedPosition?.y ?? node.position.y,
+      width: node.dimensions?.width ?? 0,
+      height: node.dimensions?.height ?? 0,
+    }))
+}
+
+/**
+ * The stroke as it was drawn, in place of the shape it became, whatever was
+ * done since. One undo brings the shape back.
+ * @param {string} id the shape it became
+ * @param {NonNullable<ReturnType<typeof strokeToInk>>} ink
+ * @param {string} color
+ */
+function keepAsDrawn(id, ink, color) {
+  edit?.stop()
+  const current = document.value
+  if (!current?.nodes.some((node) => String(node.id) === id)) return
+  const without = { ...current, nodes: current.nodes.filter((node) => String(node.id) !== id) }
+  draw.mutate(withInk(without, ink, color).document)
 }
 </script>
 
