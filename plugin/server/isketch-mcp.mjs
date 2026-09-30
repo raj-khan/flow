@@ -764,6 +764,8 @@ const EDGE_LINE = new RegExp(String.raw`^(${ID})\s*(<?--?>)\s*(${ID})\s*(?::\s?(
 const LINES_LINE = /^lines:\s*(\S*)\s*$/;
 const LAYOUT_LINE = new RegExp(String.raw`^(${ID})\s+(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)(?:\s+(\d+)\s*x\s*(\d+))?$`);
 const NOTE_LINE = new RegExp(String.raw`^(${ID})\s+note:\s?(.*)$`);
+const ARROW_LINE = new RegExp(String.raw`^(${ID})\s+arrow:\s*(\S*)\s*$`);
+const ARROWS = ["end", "both"];
 const COLOR_LINE = new RegExp(String.raw`^(${ID})\s+colou?r:\s*(\S*)\s*$`);
 const DIAGRAM_NOTE = "note:";
 const STYLE_LINE = /^style:\s*(\S*)\s*$/;
@@ -811,6 +813,7 @@ function serialiseFlow(document) {
 		return [
 			`${node.type === SHAPE.INK && !node.name ? `${node.id} = ${node.type}` : `${node.id} = ${node.type} ${name}`}${tail}`,
 			...isColor(node.data?.color) ? [`${node.id} color: ${node.data.color}`] : [],
+			...node.type === SHAPE.INK && ARROWS.includes(node.data?.arrow) ? [`${node.id} arrow: ${node.data.arrow}`] : [],
 			...noteLines$1(node.data?.notes).map((line) => `${node.id} note: ${line}`)
 		].join("\n");
 	});
@@ -851,6 +854,8 @@ function parseFlow(text) {
 	const pendingNotes = [];
 	/** @type {{ line: number, id: string, color: string }[]} */
 	const pendingColors = [];
+	/** @type {{ line: number, id: string, arrow: string }[]} */
+	const pendingArrows = [];
 	/** @type {string[]} */
 	const diagramNotes = [];
 	let title = DEFAULT_TITLE;
@@ -935,6 +940,16 @@ function parseFlow(text) {
 			});
 			return;
 		}
+		const headed = ARROW_LINE.exec(content);
+		if (headed) {
+			if (!ARROWS.includes(headed[2])) return fail(`Unknown arrow "${headed[2]}". Use one of: ${ARROWS.join(", ")}.`);
+			pendingArrows.push({
+				line,
+				id: headed[1],
+				arrow: headed[2]
+			});
+			return;
+		}
 		const colored = COLOR_LINE.exec(content);
 		if (colored) {
 			if (!isColor(colored[2])) return fail(`Unknown color "${colored[2]}". Use one of: ${COLOR_NAMES.join(", ")}.`);
@@ -1012,6 +1027,18 @@ function parseFlow(text) {
 			message: `No node called "${id}".`
 		});
 		node.data.color = color;
+	});
+	pendingArrows.forEach(({ line, id, arrow }) => {
+		const node = byId.get(id);
+		if (!node) return errors.push({
+			line,
+			message: `No node called "${id}".`
+		});
+		if (node.type !== SHAPE.INK) return errors.push({
+			line,
+			message: `"${id}" is not an ink shape; connect shapes with ->.`
+		});
+		node.data.arrow = arrow;
 	});
 	inks.forEach(({ line, id, points }) => {
 		const node = byId.get(id);
@@ -3278,6 +3305,40 @@ function inkPath(points, width, height) {
 }
 /** @param {number} value */
 const tenth = (value) => Math.round(value * 10) / 10;
+/** An arrowhead's barbs: how long, and how far off the line. */
+const HEAD_LENGTH = 14;
+const HEAD_ANGLE = Math.PI / 7;
+/**
+* Path data for a stroke's arrowheads, open V's at its end, or at both ends,
+* pointing the way the stroke runs there. Empty for a stroke with none.
+*
+* @param {string | undefined} points
+* @param {number} width
+* @param {number} height
+* @param {string | undefined} arrow 'end' or 'both'
+* @returns {string}
+*/
+function inkHeads(points, width, height, arrow) {
+	if (arrow !== "end" && arrow !== "both") return "";
+	const at = scale(points, width, height);
+	if (at.length < 2) return "";
+	const heads = [head(at[at.length - 2], at[at.length - 1])];
+	if (arrow === "both") heads.push(head(at[1], at[0]));
+	return heads.join(" ");
+}
+/**
+* @param {{ x: number, y: number }} from
+* @param {{ x: number, y: number }} tip
+*/
+function head(from, tip) {
+	const angle = Math.atan2(tip.y - from.y, tip.x - from.x);
+	const barb = (side) => ({
+		x: tenth(tip.x - HEAD_LENGTH * Math.cos(angle + side * HEAD_ANGLE)),
+		y: tenth(tip.y - HEAD_LENGTH * Math.sin(angle + side * HEAD_ANGLE))
+	});
+	const [left, right] = [barb(1), barb(-1)];
+	return `M${left.x},${left.y} L${tip.x},${tip.y} L${right.x},${right.y}`;
+}
 //#endregion
 //#region src/domain/renderSvg.js
 /** @param {'light' | 'dark'} theme */
@@ -3425,8 +3486,10 @@ function renderInk(node, position, colours, change) {
 	const g = `<g transform="translate(${round(position.x)},${round(position.y)})"${change ? ` data-change="${change}"` : ""}>`;
 	const outline = inkOutline(node.data?.points, width, height);
 	if (outline) return `${g}<path d="${outline}" fill="${colour}"/></g>`;
-	const d = inkPath(node.data?.points, width, height);
-	if (!d) return "";
+	const line = inkPath(node.data?.points, width, height);
+	if (!line) return "";
+	const heads = inkHeads(node.data?.points, width, height, node.data?.arrow);
+	const d = heads ? `${line} ${heads}` : line;
 	return `<g transform="translate(${round(position.x)},${round(position.y)})"${change ? ` data-change="${change}"` : ""}><path d="${d}" fill="none" stroke="${colour}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>`;
 }
 /**

@@ -160,3 +160,40 @@ const tenth = (value) => Math.round(value * 10) / 10
 
 /** @param {number} value */
 const hundredth = (value) => Math.round(Math.min(Math.max(value, 0), 1) * 100) / 100
+
+/** An arrowhead's barbs: how long, and how far off the line. */
+const HEAD_LENGTH = 14
+const HEAD_ANGLE = Math.PI / 7
+
+/**
+ * Path data for a stroke's arrowheads, open V's at its end, or at both ends,
+ * pointing the way the stroke runs there. Empty for a stroke with none.
+ *
+ * @param {string | undefined} points
+ * @param {number} width
+ * @param {number} height
+ * @param {string | undefined} arrow 'end' or 'both'
+ * @returns {string}
+ */
+export function inkHeads(points, width, height, arrow) {
+  if (arrow !== 'end' && arrow !== 'both') return ''
+  const at = scale(points, width, height)
+  if (at.length < 2) return ''
+  const heads = [head(at[at.length - 2], at[at.length - 1])]
+  if (arrow === 'both') heads.push(head(at[1], at[0]))
+  return heads.join(' ')
+}
+
+/**
+ * @param {{ x: number, y: number }} from
+ * @param {{ x: number, y: number }} tip
+ */
+function head(from, tip) {
+  const angle = Math.atan2(tip.y - from.y, tip.x - from.x)
+  const barb = (/** @type {number} */ side) => ({
+    x: tenth(tip.x - HEAD_LENGTH * Math.cos(angle + side * HEAD_ANGLE)),
+    y: tenth(tip.y - HEAD_LENGTH * Math.sin(angle + side * HEAD_ANGLE)),
+  })
+  const [left, right] = [barb(1), barb(-1)]
+  return `M${left.x},${left.y} L${tip.x},${tip.y} L${right.x},${right.y}`
+}

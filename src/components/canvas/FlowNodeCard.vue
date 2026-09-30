@@ -9,7 +9,7 @@ import { useShiftKey } from '@/composables/useShiftKey.js'
 import { RESIZE_NODE } from './resizeKey.js'
 import { SKETCH } from './sketchKey.js'
 import { sketchPath } from '@/domain/sketch.js'
-import { inkOutline, inkPath } from '@/domain/ink.js'
+import { inkHeads, inkOutline, inkPath } from '@/domain/ink.js'
 import { shapePath, textInset } from '@/domain/shapes.js'
 import { accentClasses } from './accents.js'
 import { colorOf } from '@/domain/colors.js'
@@ -105,9 +105,15 @@ const isInk = computed(() => node.value.type === SHAPE.INK)
 const inkFill = computed(() =>
   isInk.value ? inkOutline(node.value.data?.points, size.value.width, size.value.height) : '',
 )
-const inkD = computed(() =>
-  isInk.value ? inkPath(node.value.data?.points, size.value.width, size.value.height) : '',
-)
+/** The line, with its arrowheads when it has any. */
+const inkD = computed(() => {
+  if (!isInk.value) return ''
+  const { points, arrow } = node.value.data ?? {}
+  const { width, height } = size.value
+  return [inkPath(points, width, height), inkHeads(points, width, height, arrow)]
+    .filter(Boolean)
+    .join(' ')
+})
 /** Notes are for the builder, so the canvas only marks that there are some. */
 const notes = computed(() => node.value.data?.notes?.trim() ?? '')
 

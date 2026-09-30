@@ -5,7 +5,7 @@ import { useVueFlow } from '@vue-flow/core'
 import { useFlowQuery } from '@/composables/useFlowQuery.js'
 import { useReplaceDocument } from '@/composables/useNodeMutations.js'
 import { SHAPE } from '@/domain/constants.js'
-import { encloses, withDrawnShape, withInk } from '@/domain/drawn.js'
+import { encloses, withDrawnArrow, withDrawnShape, withInk, withoutDrawn } from '@/domain/drawn.js'
 import { strokeToInk } from '@/domain/ink.js'
 import { recognise } from '@/domain/recognize.js'
 import { useCanvasStore } from '@/stores/canvas.js'
@@ -23,6 +23,7 @@ const { screenToFlowCoordinate, getNodes } = useVueFlow()
 const { document } = useFlowQuery()
 const draw = useReplaceDocument('Draw')
 const shape = useReplaceDocument('Draw a shape')
+const connect = useReplaceDocument('Draw a connection')
 const toasts = useToastStore()
 const edit = inject(EDIT_TEXT, null)
 
@@ -83,7 +84,9 @@ function finish(event) {
 
   const color = canvas.penColor
   const seen = canvas.autoShapes ? recognise(drawn) : null
-  if (seen && 'box' in seen && !encloses(seen.box, shapeBoxes())) {
+  const shapes = placedShapes()
+  const marks = shapes.filter((placed) => placed.type !== SHAPE.INK)
+  if (seen && 'box' in seen && !encloses(seen.box, marks)) {
     const made = withDrawnShape(document.value, seen, color)
     shape.mutate(made.document, {
       onSuccess: async () => {
@@ -92,37 +95,66 @@ function finish(event) {
       },
     })
     toasts.push(`Drawn as ${seen.kind === 'ellipse' ? 'an' : 'a'} ${seen.kind}.`, {
-      action: { label: 'Keep as drawn', run: () => keepAsDrawn(made.id, ink, color) },
+      action: { label: 'Keep as drawn', run: () => keepAsDrawn({ nodeId: made.id }, ink, color) },
     })
     return
+  }
+  if (seen && !('box' in seen)) {
+    const made = withDrawnArrow(document.value, seen, shapes, color)
+    if (made.made !== 'nothing') {
+      const mutation = made.made === 'stroke' ? draw : connect
+      mutation.mutate(made.document, {
+        onSuccess: async () => {
+          if (made.made !== 'shape' || !made.nodeId) return
+          await nextTick()
+          edit?.start(made.nodeId)
+        },
+      })
+      toasts.push(ARROW_TOASTS[made.made], {
+        action: { label: 'Keep as drawn', run: () => keepAsDrawn(made, ink, color) },
+      })
+      return
+    }
   }
   draw.mutate(withInk(document.value, ink, color).document)
 }
 
-/** Where every shape but a stroke is on the canvas, as drawn now. */
-function shapeBoxes() {
-  return getNodes.value
-    .filter((node) => node.data?.node?.type !== SHAPE.INK)
-    .map((node) => ({
-      x: node.computedPosition?.x ?? node.position.x,
-      y: node.computedPosition?.y ?? node.position.y,
-      width: node.dimensions?.width ?? 0,
-      height: node.dimensions?.height ?? 0,
-    }))
+/** What a drawn line became, said once it has. */
+const ARROW_TOASTS = Object.freeze({
+  connection: 'Connected.',
+  shape: 'Added a connected shape.',
+  stroke: 'Straightened.',
+})
+
+/** Every shape on the canvas, where it is drawn now. */
+function placedShapes() {
+  return getNodes.value.map((node) => ({
+    id: node.id,
+    type: node.data?.node?.type ?? '',
+    x: node.computedPosition?.x ?? node.position.x,
+    y: node.computedPosition?.y ?? node.position.y,
+    width: node.dimensions?.width ?? 0,
+    height: node.dimensions?.height ?? 0,
+  }))
 }
 
 /**
- * The stroke as it was drawn, in place of the shape it became, whatever was
- * done since. One undo brings the shape back.
- * @param {string} id the shape it became
+ * The stroke as it was drawn, in place of what it became, whatever was done
+ * since. One undo brings that back.
+ * @param {{ nodeId?: string, edgeId?: string }} made
  * @param {NonNullable<ReturnType<typeof strokeToInk>>} ink
  * @param {string} color
  */
-function keepAsDrawn(id, ink, color) {
+function keepAsDrawn(made, ink, color) {
   edit?.stop()
   const current = document.value
-  if (!current?.nodes.some((node) => String(node.id) === id)) return
-  const without = { ...current, nodes: current.nodes.filter((node) => String(node.id) !== id) }
+  if (!current) return
+  const without = withoutDrawn(current, made)
+  if (
+    without.nodes.length === current.nodes.length &&
+    without.edges.length === current.edges.length
+  )
+    return
   draw.mutate(withInk(without, ink, color).document)
 }
 </script>

@@ -39,6 +39,8 @@ const LAYOUT_LINE = new RegExp(
   String.raw`^(${ID})\s+(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)(?:\s+(\d+)\s*x\s*(\d+))?$`,
 )
 const NOTE_LINE = new RegExp(String.raw`^(${ID})\s+note:\s?(.*)$`)
+const ARROW_LINE = new RegExp(String.raw`^(${ID})\s+arrow:\s*(\S*)\s*$`)
+const ARROWS = ['end', 'both']
 const COLOR_LINE = new RegExp(String.raw`^(${ID})\s+colou?r:\s*(\S*)\s*$`)
 const DIAGRAM_NOTE = 'note:'
 const STYLE_LINE = /^style:\s*(\S*)\s*$/
@@ -107,6 +109,9 @@ export function serialiseFlow(document) {
     return [
       `${head}${tail}`,
       ...(isColor(node.data?.color) ? [`${node.id} color: ${node.data.color}`] : []),
+      ...(node.type === SHAPE.INK && ARROWS.includes(node.data?.arrow)
+        ? [`${node.id} arrow: ${node.data.arrow}`]
+        : []),
       ...noteLines(node.data?.notes).map((line) => `${node.id} note: ${line}`),
     ].join('\n')
   })
@@ -167,6 +172,8 @@ export function parseFlow(text) {
   const pendingNotes = []
   /** @type {{ line: number, id: string, color: string }[]} */
   const pendingColors = []
+  /** @type {{ line: number, id: string, arrow: string }[]} */
+  const pendingArrows = []
   /** @type {string[]} */
   const diagramNotes = []
 
@@ -257,6 +264,15 @@ export function parseFlow(text) {
         return
       }
 
+      const headed = ARROW_LINE.exec(content)
+      if (headed) {
+        if (!ARROWS.includes(headed[2])) {
+          return fail(`Unknown arrow "${headed[2]}". Use one of: ${ARROWS.join(', ')}.`)
+        }
+        pendingArrows.push({ line, id: headed[1], arrow: headed[2] })
+        return
+      }
+
       const colored = COLOR_LINE.exec(content)
       if (colored) {
         if (!isColor(colored[2])) {
@@ -336,6 +352,18 @@ export function parseFlow(text) {
     const node = byId.get(id)
     if (!node) return errors.push({ line, message: `No node called "${id}".` })
     node.data.color = color
+  })
+
+  pendingArrows.forEach(({ line, id, arrow }) => {
+    const node = byId.get(id)
+    if (!node) return errors.push({ line, message: `No node called "${id}".` })
+    if (node.type !== SHAPE.INK) {
+      return errors.push({
+        line,
+        message: `"${id}" is not an ink shape; connect shapes with ->.`,
+      })
+    }
+    node.data.arrow = arrow
   })
 
   inks.forEach(({ line, id, points }) => {

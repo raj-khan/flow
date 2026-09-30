@@ -71,6 +71,7 @@ db 0,176
 - `note: ...` under the title, and `id note: ...` for a shape, one line each.
 - `id color: red` colours a shape or stroke: `red`, `orange`, `yellow`, `green`, `teal`, `blue`, `violet`, `pink` or `grey`. Use colour to
   mean something, and say what in a note.
+- `id arrow: end` or `both` puts a head on a pen stroke; it is a mark, not a connection.
 - `id = frame "Name"` is a named region; the shapes inside it (by position) belong to it.
 - Under the title, `style: sketch` draws by hand and `lines: curved` or `lines: straight`
   changes how connections run.

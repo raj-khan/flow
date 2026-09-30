@@ -5,7 +5,7 @@ import { metaFor } from './nodeMeta.js'
 import { shapePath, textInset } from './shapes.js'
 import { isSketch, SKETCH_FONT, sketchPath } from './sketch.js'
 import { LINE, routeEdge } from './routes.js'
-import { inkOutline, inkPath } from './ink.js'
+import { inkHeads, inkOutline, inkPath } from './ink.js'
 import { colorOf, COLOR_NAMES, paintOf } from './colors.js'
 
 /** @param {'light' | 'dark'} theme */
@@ -193,8 +193,10 @@ function renderInk(node, position, colours, change) {
   const g = `<g transform="translate(${round(position.x)},${round(position.y)})"${change ? ` data-change="${change}"` : ''}>`
   const outline = inkOutline(node.data?.points, width, height)
   if (outline) return `${g}<path d="${outline}" fill="${colour}"/></g>`
-  const d = inkPath(node.data?.points, width, height)
-  if (!d) return ''
+  const line = inkPath(node.data?.points, width, height)
+  if (!line) return ''
+  const heads = inkHeads(node.data?.points, width, height, node.data?.arrow)
+  const d = heads ? `${line} ${heads}` : line
   return `<g transform="translate(${round(position.x)},${round(position.y)})"${change ? ` data-change="${change}"` : ''}><path d="${d}" fill="none" stroke="${colour}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>`
 }
 

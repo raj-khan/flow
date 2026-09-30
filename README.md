@@ -124,8 +124,10 @@ nobody hosts it yet: run it yourself, or hand over the `.flow` file or the brief
   in any colour of the palette.
 - **Auto shapes.** With the pen, a box, an ellipse or a diamond drawn by hand becomes a clean
   process, start / end or decision, ready for its title, so a sketch ends as a diagram an agent
-  reads. A ring drawn round a shape stays a stroke, Keep as drawn undoes it, and one switch turns
-  it off.
+  reads. An arrow or line drawn from one shape to another connects them; drawn from a shape into
+  open canvas, it adds the next shape there, connected. One that touches no shape straightens and
+  keeps its head. A ring drawn round a shape stays a stroke, Keep as drawn undoes any of it, and
+  one switch turns it off.
 - **Sketch style.** One switch draws the whole diagram by hand, like a whiteboard: wobbly outlines
   (drawn by [Rough.js](https://roughjs.com), as in Excalidraw) and a handwritten font. The
   diagram underneath is the same, so switching back is lossless, and exported SVGs carry the font.
@@ -196,6 +198,7 @@ db 276,352
 - `note: ...` under the title is a note for the whole diagram, and `id note: ...` a note for one
   shape, one line each: instructions for whoever builds from it, person or agent.
 - `id color: red` colours a shape or pen stroke: `red`, `orange`, `yellow`, `green`, `teal`, `blue`, `violet`, `pink` or `grey`.
+- `id arrow: end` (or `both`) gives a pen stroke an arrowhead; shapes connect with `->` instead.
 - `a -> b : label` connects two nodes. The label is optional, and a line may refer to a node
   defined further down. `a --> b` is dashed, `a <-> b` has an arrow at each end, and `a <--> b`
   is both.
