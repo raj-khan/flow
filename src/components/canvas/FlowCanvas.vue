@@ -46,6 +46,7 @@ import { generateNodeId } from '@/api/flowApi.js'
 import SelectionToolbar from './SelectionToolbar.vue'
 import PenLayer from './PenLayer.vue'
 import PenOptions from './PenOptions.vue'
+import BlankHint from './BlankHint.vue'
 import EraserLayer from './EraserLayer.vue'
 import LaserLayer from './LaserLayer.vue'
 import { useToastStore } from '@/stores/toasts.js'
@@ -180,6 +181,8 @@ watch(
   () => nodes.value.length === 0,
   (empty) => {
     if (empty) hasFitted.value = false
+    // A sample picked, or a first shape drawn: the list has done its job.
+    else canvas.closeSamples()
   },
 )
 
@@ -997,12 +1000,11 @@ watch(
     @drop="onDrop"
   >
     <CanvasState
-      v-if="isLoading || isError || !nodes.length"
+      v-if="isLoading || isError"
       :is-loading="isLoading"
       :is-error="isError"
       :message="error?.message"
       @retry="refetch"
-      @sample="start"
     />
 
     <!-- nodes-deletable stays false: deleting a node keeps its confirmation. -->
@@ -1042,7 +1044,7 @@ watch(
     >
       <Background :gap="GRID" :size="1.2" />
       <MiniMap
-        v-if="canvas.minimap && !canvas.zen && !isPhone"
+        v-if="canvas.minimap && !canvas.zen && !isPhone && nodes.length"
         class="island minimap"
         pannable
         zoomable
@@ -1052,6 +1054,7 @@ watch(
         mask-color="var(--minimap-mask)"
         :node-border-radius="4"
       />
+      <BlankHint v-if="!nodes.length" @sample="start" />
       <SelectionToolbar v-if="!canvas.pen" />
       <PenOptions />
       <PenLayer />

@@ -96,7 +96,11 @@ test('Ctrl+K finds any action or shape by name', async ({ page }) => {
   await expect(palette).toHaveCount(0)
   await expect(shapes(page)).toHaveCount(6)
 
-  await page.keyboard.press('Escape')
+  // The new shape opens for naming; Escape leaves it named as it is.
+  const title = page.getByRole('textbox', { name: 'Shape title' })
+  await expect(title).toBeFocused()
+  await title.press('Escape')
+  await expect(title).toHaveCount(0)
   await page.keyboard.press('Control+k')
   await page.keyboard.type('png')
   await page.keyboard.press('Enter')

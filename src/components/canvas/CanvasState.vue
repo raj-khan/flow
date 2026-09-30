@@ -1,13 +1,11 @@
 <script setup>
-import { SAMPLES } from '@/domain/samples.js'
-
 defineProps({
   isLoading: { type: Boolean, default: false },
   isError: { type: Boolean, default: false },
   message: { type: String, default: '' },
 })
 
-defineEmits(['retry', 'sample'])
+defineEmits(['retry'])
 </script>
 
 <template>
@@ -31,25 +29,6 @@ defineEmits(['retry', 'sample'])
       >
         Try again
       </button>
-    </div>
-
-    <div v-else class="pointer-events-auto max-w-sm text-center">
-      <p class="text-sm font-medium">An empty diagram</p>
-      <p class="mt-1 text-xs text-muted">Drag a shape in from the left, or start from a sample.</p>
-
-      <ul class="mt-4 grid gap-2">
-        <li v-for="sample in SAMPLES" :key="sample.id">
-          <button
-            type="button"
-            class="w-full rounded-lg border border-line bg-surface px-3 py-2 text-left transition-colors hover:bg-hover"
-            :title="`Open the ${sample.title.toLowerCase()} sample. Undo brings back the empty diagram`"
-            @click="$emit('sample', sample.id)"
-          >
-            <span class="block text-sm font-medium">{{ sample.title }}</span>
-            <span class="block text-xs text-muted">{{ sample.description }}</span>
-          </button>
-        </li>
-      </ul>
     </div>
   </div>
 </template>

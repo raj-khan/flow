@@ -105,6 +105,17 @@ export const useCanvasStore = defineStore('canvas', () => {
     saveSwitch(STORAGE_KEYS.AUTO_SHAPES, autoShapes.value)
   }
 
+  /** Whether the blank canvas lists the samples to start from. */
+  const samplesOpen = ref(false)
+
+  function openSamples() {
+    samplesOpen.value = true
+  }
+
+  function closeSamples() {
+    samplesOpen.value = false
+  }
+
   /** Whether dragged shapes snap to the grid of dots. On unless turned off. */
   const snap = ref(savedSwitch(STORAGE_KEYS.SNAP))
 
@@ -256,6 +267,9 @@ export const useCanvasStore = defineStore('canvas', () => {
     setPenColor,
     autoShapes,
     toggleAutoShapes,
+    samplesOpen,
+    openSamples,
+    closeSamples,
     setViewport,
     forgetViewport,
     requestFocus,

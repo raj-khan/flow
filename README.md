@@ -82,8 +82,9 @@ nobody hosts it yet: run it yourself, or hand over the `.flow` file or the brief
 - **Quick to type.** On a blank diagram, just start typing: the first shape takes the words.
   Double-click empty canvas for a shape there. `Tab` adds the next step below the selected shape,
   connected and ready to name, as in Whimsical. `Ctrl+K` finds any action or shape by name.
-- **New diagram and samples.** Start empty, or from a web app architecture or support flow
-  sample. Undo brings back whatever was there.
+- **New diagram and samples.** Start on a blank canvas, ready to draw on, or from a web app
+  architecture or support flow sample (New from a sample, or the link on the blank canvas). Undo
+  brings back whatever was there.
 - **Installable.** Install isketch from the browser as an app that opens with no connection. The
   installed app opens `.flow` files from the file manager, and takes text shared to it from other
   apps (`.flow` text or a Mermaid flowchart) as a new diagram, undoable.

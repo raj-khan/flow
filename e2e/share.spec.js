@@ -11,7 +11,7 @@ test('a copied link opens the same diagram in another browser, as an undoable ch
 }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])
   await page.goto('/new')
-  await fromMenu(page, 'New diagram')
+  await fromMenu(page, 'New from a sample')
   await page.getByRole('button', { name: /Web app architecture/ }).click()
   await expect(shapes(page)).toHaveCount(9)
 

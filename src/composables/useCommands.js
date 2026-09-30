@@ -64,6 +64,16 @@ export function useCommands(shell) {
       keywords: 'empty blank start',
       run: startEmpty,
     },
+    {
+      id: 'new-sample',
+      label: 'New from a sample',
+      group: 'File',
+      keywords: 'template example start',
+      run: () => {
+        startEmpty()
+        canvas.openSamples()
+      },
+    },
     { id: 'open', label: 'Open file', group: 'File', hint: key(COMBO.OPEN), run: open },
     { id: 'save', label: 'Save', group: 'File', hint: key(COMBO.SAVE), run: save },
     {

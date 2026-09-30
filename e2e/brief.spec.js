@@ -5,7 +5,7 @@ import { fromMenu } from './helpers.js'
 test('copies the diagram as a brief a coding agent can build from', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])
   await page.goto('/new')
-  await fromMenu(page, 'New diagram')
+  await fromMenu(page, 'New from a sample')
   await page.getByRole('button', { name: /Web app architecture/ }).click()
   await expect(page.locator('.vue-flow__node')).toHaveCount(9)
 

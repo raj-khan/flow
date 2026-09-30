@@ -40,6 +40,12 @@ function startEmpty() {
   })
 }
 
+/** A blank canvas, with the samples listed on it to pick from. */
+function startFromSample() {
+  startEmpty()
+  canvas.openSamples()
+}
+
 /**
  * @typedef {{ label: string, run: () => void, hint?: string, checked?: boolean, disabled?: boolean }} Item
  */
@@ -48,6 +54,7 @@ const groups = computed(
     /** @type {Item[][]} */ ([
       [
         { label: 'New diagram', run: startEmpty, disabled: isStarting.value },
+        { label: 'New from a sample', run: startFromSample, disabled: isStarting.value },
         { label: 'Open file', run: open, hint: comboLabel(COMBO.OPEN, isMac.value) },
         { label: 'Save', run: save, hint: comboLabel(COMBO.SAVE, isMac.value) },
       ],
