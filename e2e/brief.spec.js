@@ -17,6 +17,13 @@ test('copies the diagram as a brief a coding agent can build from', async ({ pag
   expect(brief).toContain('- **PostgreSQL** `db`: a data store.')
   expect(brief).toContain('- **API** → **PostgreSQL**: SQL')
   expect(brief).toContain('api -> db : SQL')
+
+  // The brief links to the diagram, and that link opens it.
+  const link = /Open it to see it: (\S+)/.exec(brief)?.[1] ?? ''
+  expect(brief).toContain('reply with a link to your version')
+  await page.goto(link)
+  await expect(page.getByText(/Opened a shared diagram/)).toBeVisible()
+  await expect(page.locator('.vue-flow__node')).toHaveCount(9)
 })
 
 test('notes for the builder show on the shape and travel with the brief', async ({
@@ -33,6 +40,7 @@ test('notes for the builder show on the shape and travel with the brief', async 
   ).toBeVisible()
 
   await page.getByRole('button', { name: 'Copy for AI' }).click()
+  await expect(page.getByText(/Brief copied/)).toBeVisible()
   const brief = await page.evaluate(() => navigator.clipboard.readText())
   expect(brief).toContain('  - Note: Only between 9pm and 7am\n')
   expect(brief).toContain('b6a0c1 note: Only between 9pm and 7am')

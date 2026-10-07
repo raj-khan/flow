@@ -1,4 +1,4 @@
-import { parseFlow, serialiseFlow } from './flowText.js'
+import { parseFlowForgiving, serialiseFlow } from './flowText.js'
 
 /**
  * A whole diagram in a URL fragment, so sharing needs no server: the fragment
@@ -31,6 +31,16 @@ export async function encodeShare(document) {
  * @returns {Promise<import('./types.js').FlowDocument | null>} null when it is not a diagram
  */
 export async function decodeShare(hash) {
+  return (await readShare(hash))?.document ?? null
+}
+
+/**
+ * A link is often written by an agent, so a line isketch cannot read is left
+ * out rather than refusing the whole diagram.
+ * @param {string} hash
+ * @returns {Promise<{ document: import('./types.js').FlowDocument, skipped: number } | null>}
+ */
+export async function readShare(hash) {
   if (!hash?.startsWith(SHARE_PREFIX)) return null
 
   const body = hash.slice(SHARE_PREFIX.length)
@@ -46,7 +56,10 @@ export async function decodeShare(hash) {
         : null
   if (text === null) return null
 
-  return parseFlow(text).document
+  const { document, skipped } = parseFlowForgiving(text)
+  // Nothing readable at all is not a diagram, not an empty one.
+  if (!document || (skipped.length && !document.nodes.length)) return null
+  return { document, skipped: skipped.length }
 }
 
 /**

@@ -2,7 +2,7 @@ import { DEFAULT_TITLE, DOCUMENT_VERSION, edgeIdFor } from './document.js'
 import { isKnownShape, SHAPE_OPTIONS } from './nodeMeta.js'
 import { LINE, LINES } from './routes.js'
 import { SHAPE } from './constants.js'
-import { COLOR_NAMES, isColor } from './colors.js'
+import { COLOR_NAMES, colorNamed, isColor } from './colors.js'
 
 /**
  * The `.flow` text format: a diagram as lines a person can read, write and
@@ -148,6 +148,29 @@ export function serialiseFlow(document) {
 }
 
 /**
+ * Read as much of the text as makes sense: each line with an error is left out
+ * and the rest read again, so a diagram an agent wrote with one slip still
+ * opens. Leaving out a shape can strand the lines that refer to it, so this
+ * repeats until nothing more fails.
+ * @param {string} text
+ * @returns {{ document: import('./types.js').FlowDocument | null, skipped: FlowTextError[] }}
+ */
+export function parseFlowForgiving(text) {
+  const lines = text.split('\n')
+  /** @type {FlowTextError[]} */
+  const skipped = []
+  for (;;) {
+    const { document, errors } = parseFlow(lines.join('\n'))
+    const failing = errors.filter((error) => lines[error.line - 1]?.trim())
+    if (document || !failing.length) return { document, skipped }
+    for (const error of failing) {
+      skipped.push({ line: error.line, message: error.message })
+      lines[error.line - 1] = ''
+    }
+  }
+}
+
+/**
  * Every problem is reported, each with its line, rather than stopping at the
  * first: an editor can mark them all at once. The document is null whenever
  * there is any error, so a half-read diagram is never mistaken for the whole.
@@ -275,10 +298,11 @@ export function parseFlow(text) {
 
       const colored = COLOR_LINE.exec(content)
       if (colored) {
-        if (!isColor(colored[2])) {
+        const color = colorNamed(colored[2])
+        if (!color) {
           return fail(`Unknown color "${colored[2]}". Use one of: ${COLOR_NAMES.join(', ')}.`)
         }
-        pendingColors.push({ line, id: colored[1], color: colored[2] })
+        pendingColors.push({ line, id: colored[1], color })
         return
       }
 

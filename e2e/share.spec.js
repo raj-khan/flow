@@ -42,3 +42,13 @@ test('a damaged link says so and leaves the diagram alone', async ({ page }) => 
   await expect(shapes(page)).toHaveCount(5)
   await expect(page).toHaveURL(/\/new$/)
 })
+
+test('a link an agent wrote with a slip opens, leaving out what it cannot read', async ({
+  page,
+}) => {
+  const text = 'a = process "A"\na color: gray\nb = process "B"\nb color: mauve\na -> b'
+  await page.goto(`/new#flow=t${Buffer.from(text).toString('base64url')}`)
+  await expect(page.getByText(/1 line isketch could not read was left out/)).toBeVisible()
+  await expect(shapes(page)).toHaveCount(2)
+  await expect(page.locator('[data-color="grey"]')).toHaveCount(1)
+})

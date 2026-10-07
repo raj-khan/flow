@@ -207,7 +207,7 @@ test('a shared link opens read-only and fitted on a phone, with Copy for AI and 
   await expect(page).toHaveURL(/\/new$/)
 
   await viewer.getByRole('button', { name: 'Copy for AI' }).tap()
-  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('Pay')
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toContain('Pay')
 
   await viewer.getByRole('button', { name: 'Edit' }).tap()
   await expect(tools(page)).toBeVisible()

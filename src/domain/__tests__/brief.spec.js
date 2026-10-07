@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
 import { toBrief } from '../brief.js'
-import { parseFlow } from '../flowText.js'
+import { parseFlow, serialiseFlow } from '../flowText.js'
+import { decodeShare } from '../shareLink.js'
+
+/** @param {string} text ASCII */
+const base64url = (text) => btoa(text).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 
 const flow = (text) => parseFlow(text).document
 
@@ -104,5 +108,24 @@ describe('toBrief', () => {
       /^# Untitled diagram\n\nA design sketched in isketch: 0 shapes and 0 connections\./,
     )
     expect(brief).not.toContain('## Shapes')
+  })
+
+  it('with a link, asks for a link back, built the way the brief says', async () => {
+    const document = flow('title: Login\na = process "A"\nb = database "B"\na -> b\n')
+    const brief = toBrief(document, { link: 'https://isketch.online/new#flow=zabc' })
+
+    expect(brief).toContain(
+      'Here is my draft. Open it to see it: https://isketch.online/new#flow=zabc',
+    )
+    expect(brief).toContain('reply with a link to your version')
+
+    // What the suggested one-liner produces opens the same diagram.
+    const hash = `#flow=t${base64url(serialiseFlow(document))}`
+    expect(brief).toContain('https://isketch.online/new#flow=t')
+    expect(serialiseFlow(await decodeShare(hash))).toBe(serialiseFlow(document))
+  })
+
+  it('without a link, is the brief alone', () => {
+    expect(toBrief(flow('a = process "A"\n'))).not.toContain('## My draft')
   })
 })

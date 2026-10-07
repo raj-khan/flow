@@ -60,6 +60,32 @@ export const isColor = (name) =>
   typeof name === 'string' && Object.prototype.hasOwnProperty.call(COLORS, name)
 
 /**
+ * Other names an agent or a person reaches for, read as the nearest swatch, so
+ * `gray` or `purple` does not fail a whole diagram.
+ * @type {Readonly<Record<string, ColorName>>}
+ */
+const ALIASES = Object.freeze({
+  gray: 'grey',
+  purple: 'violet',
+  indigo: 'violet',
+  cyan: 'teal',
+  magenta: 'pink',
+  amber: 'yellow',
+  lime: 'green',
+})
+
+/**
+ * A colour as written, in any case, read as a palette name.
+ * @param {string} written
+ * @returns {ColorName | ''} empty when it names no colour
+ */
+export function colorNamed(written) {
+  const name = written.toLowerCase()
+  if (isColor(name)) return /** @type {ColorName} */ (name)
+  return Object.prototype.hasOwnProperty.call(ALIASES, name) ? ALIASES[name] : ''
+}
+
+/**
  * A node's colour, when it has a known one.
  * @param {{ data?: { color?: string } } | null | undefined} node
  * @returns {ColorName | ''}

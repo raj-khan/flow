@@ -134,177 +134,6 @@ const toNodeId = (id) => String(id);
 */
 const edgeIdFor = (source, target) => `e-${source}-${target}`;
 //#endregion
-//#region src/domain/nodeMeta.js
-/**
-* @typedef {Object} NodeMeta
-* @property {string} label
-* @property {string} hint      what the shape conventionally means
-* @property {string} accent    token name, resolved to classes by the canvas
-* @property {'diagram' | 'wireframe' | 'ink'} group where the palette lists it; ink is drawn with the pen, not picked
-* @property {boolean} openable can the drawer be opened
-* @property {boolean} editable
-* @property {boolean} deletable
-* @property {(node: import('./types.js').FlowNode) => string} summary
-*/
-/** @param {import('./types.js').FlowNode} node */
-const describe = (node) => node.data.description ? truncate(node.data.description) : "";
-/**
-* @param {string} label
-* @param {string} hint
-* @param {string} accent
-* @param {NodeMeta['group']} [group]
-* @returns {NodeMeta}
-*/
-const shape = (label, hint, accent, group = "diagram") => ({
-	label,
-	hint,
-	accent,
-	group,
-	openable: true,
-	editable: true,
-	deletable: true,
-	summary: describe
-});
-/**
-* Every per-shape difference, as data. Components read this instead of
-* branching on type, so adding a shape is one entry here and one outline in
-* `shapes.js`. Order is palette order.
-*
-* @type {Readonly<Record<string, NodeMeta>>}
-*/
-const NODE_META = Object.freeze({
-	[SHAPE.PROCESS]: shape("Process", "A step", "message"),
-	[SHAPE.TERMINAL]: shape("Start / end", "Where a flow begins or ends", "trigger"),
-	[SHAPE.DECISION]: shape("Decision", "A question with more than one way out", "hours"),
-	[SHAPE.DATA]: shape("Input / output", "Data going in or out", "branch"),
-	[SHAPE.DATABASE]: shape("Database", "A store of data", "branch"),
-	[SHAPE.DOCUMENT]: shape("Document", "A file or report", "comment"),
-	[SHAPE.NOTE]: shape("Note", "An annotation", "comment"),
-	[SHAPE.TABLE]: shape("Table", "A database table and its columns", "branch"),
-	[SHAPE.TEXT]: shape("Text", "A label with no outline", "unknown"),
-	[SHAPE.FRAME]: {
-		...shape("Frame", "A named region; the shapes inside it belong to it", "unknown"),
-		openable: false
-	},
-	[SHAPE.SCREEN]: shape("Screen", "A page or screen of the interface", "trigger", "wireframe"),
-	[SHAPE.BUTTON]: shape("Button", "Something to press", "message", "wireframe"),
-	[SHAPE.INPUT]: shape("Input", "A form field", "branch", "wireframe"),
-	[SHAPE.CARD]: shape("Card", "A panel that groups content", "comment", "wireframe"),
-	[SHAPE.LIST]: shape("List", "Repeated items, such as rows or results", "hours", "wireframe"),
-	[SHAPE.IMAGE]: shape("Image", "A picture, video or chart", "comment", "wireframe"),
-	[SHAPE.INK]: shape("Pen stroke", "A mark drawn by hand", "unknown", "ink")
-});
-/**
-* So an unfamiliar type renders instead of crashing the canvas.
-* @type {NodeMeta}
-*/
-const FALLBACK_META = Object.freeze(shape("Unknown", "A shape this version does not know", "unknown"));
-/** @param {string} type @returns {NodeMeta} */
-const metaFor = (type) => NODE_META[type] ?? FALLBACK_META;
-/** @param {string} type */
-const isKnownShape = (type) => Object.hasOwn(NODE_META, type);
-/** Every shape a picker offers, in palette order. A stroke is drawn, not picked. */
-const SHAPE_OPTIONS = Object.freeze(Object.entries(NODE_META).filter(([, meta]) => meta.group !== "ink").map(([value, meta]) => ({
-	value,
-	label: meta.label,
-	hint: meta.hint,
-	group: meta.group
-})));
-//#endregion
-//#region src/domain/routes.js
-/**
-* Where a connection runs between two shapes, shared by the canvas and the SVG
-* renderer so both draw the same line. It leaves from the side that faces the
-* other shape: down to a shape below, across to one beside it.
-*
-* @typedef {{ x: number, y: number, width: number, height: number }} Box
-* @typedef {'top' | 'right' | 'bottom' | 'left'} Side
-* @typedef {{ d: string, label: { x: number, y: number }, from: Side, to: Side }} Route
-*/
-const LINE = Object.freeze({
-	STEP: "step",
-	CURVED: "curved",
-	STRAIGHT: "straight"
-});
-/** @type {readonly string[]} */
-const LINES = Object.freeze(Object.values(LINE));
-/** Shapes closer than this, one above the other, connect side to side instead. */
-const MIN_GAP = 16;
-/** @param {number} value */
-const round$1 = (value) => Math.round(value * 10) / 10;
-/**
-* @param {Box} from
-* @param {Box} to
-* @param {string} [line] one of LINES; anything else is a step
-* @returns {Route}
-*/
-function routeEdge(from, to, line = LINE.STEP) {
-	const below = to.y - (from.y + from.height);
-	const above = from.y - (to.y + to.height);
-	const vertical = below >= MIN_GAP || above >= MIN_GAP;
-	const down = below >= MIN_GAP;
-	const right = to.x + to.width / 2 >= from.x + from.width / 2;
-	/** @type {[Side, Side]} */
-	const sides = vertical ? down ? ["bottom", "top"] : ["top", "bottom"] : right ? ["right", "left"] : ["left", "right"];
-	const start = anchor(from, sides[0]);
-	const end = anchor(to, sides[1]);
-	const middle = {
-		x: (start.x + end.x) / 2,
-		y: (start.y + end.y) / 2
-	};
-	let d;
-	if (line === LINE.STRAIGHT) d = `M${round$1(start.x)},${round$1(start.y)} L${round$1(end.x)},${round$1(end.y)}`;
-	else if (line === LINE.CURVED) {
-		const pull = Math.max(24, Math.abs(vertical ? end.y - start.y : end.x - start.x) / 2);
-		const [c1, c2] = vertical ? [{
-			x: start.x,
-			y: start.y + (down ? pull : -pull)
-		}, {
-			x: end.x,
-			y: end.y + (down ? -pull : pull)
-		}] : [{
-			x: start.x + (right ? pull : -pull),
-			y: start.y
-		}, {
-			x: end.x + (right ? -pull : pull),
-			y: end.y
-		}];
-		d = `M${round$1(start.x)},${round$1(start.y)} C${round$1(c1.x)},${round$1(c1.y)} ${round$1(c2.x)},${round$1(c2.y)} ${round$1(end.x)},${round$1(end.y)}`;
-	} else d = vertical ? `M${round$1(start.x)},${round$1(start.y)} V${round$1(middle.y)} H${round$1(end.x)} V${round$1(end.y)}` : `M${round$1(start.x)},${round$1(start.y)} H${round$1(middle.x)} V${round$1(end.y)} H${round$1(end.x)}`;
-	return {
-		d,
-		label: {
-			x: round$1(middle.x),
-			y: round$1(middle.y)
-		},
-		from: sides[0],
-		to: sides[1]
-	};
-}
-/**
-* The middle of one side of a box.
-* @param {Box} box
-* @param {Side} side
-*/
-function anchor(box, side) {
-	if (side === "top") return {
-		x: box.x + box.width / 2,
-		y: box.y
-	};
-	if (side === "bottom") return {
-		x: box.x + box.width / 2,
-		y: box.y + box.height
-	};
-	if (side === "left") return {
-		x: box.x,
-		y: box.y + box.height / 2
-	};
-	return {
-		x: box.x + box.width,
-		y: box.y + box.height / 2
-	};
-}
-//#endregion
 //#region src/domain/layout.js
 const STEP_X = NODE_SIZE.WIDTH + NODE_GAP.X;
 const STEP_Y = NODE_SIZE.HEIGHT + NODE_GAP.Y;
@@ -717,6 +546,30 @@ const COLOR_NAMES = Object.keys(COLORS);
 /** @param {unknown} name */
 const isColor = (name) => typeof name === "string" && Object.prototype.hasOwnProperty.call(COLORS, name);
 /**
+* Other names an agent or a person reaches for, read as the nearest swatch, so
+* `gray` or `purple` does not fail a whole diagram.
+* @type {Readonly<Record<string, ColorName>>}
+*/
+const ALIASES = Object.freeze({
+	gray: "grey",
+	purple: "violet",
+	indigo: "violet",
+	cyan: "teal",
+	magenta: "pink",
+	amber: "yellow",
+	lime: "green"
+});
+/**
+* A colour as written, in any case, read as a palette name.
+* @param {string} written
+* @returns {ColorName | ''} empty when it names no colour
+*/
+function colorNamed(written) {
+	const name = written.toLowerCase();
+	if (isColor(name)) return name;
+	return Object.prototype.hasOwnProperty.call(ALIASES, name) ? ALIASES[name] : "";
+}
+/**
 * A node's colour, when it has a known one.
 * @param {{ data?: { color?: string } } | null | undefined} node
 * @returns {ColorName | ''}
@@ -729,6 +582,177 @@ const colorOf = (node) => isColor(node?.data?.color) ? node?.data?.color : "";
 */
 function paintOf(name, theme = "light") {
 	return isColor(name) ? COLORS[name][theme] : null;
+}
+//#endregion
+//#region src/domain/nodeMeta.js
+/**
+* @typedef {Object} NodeMeta
+* @property {string} label
+* @property {string} hint      what the shape conventionally means
+* @property {string} accent    token name, resolved to classes by the canvas
+* @property {'diagram' | 'wireframe' | 'ink'} group where the palette lists it; ink is drawn with the pen, not picked
+* @property {boolean} openable can the drawer be opened
+* @property {boolean} editable
+* @property {boolean} deletable
+* @property {(node: import('./types.js').FlowNode) => string} summary
+*/
+/** @param {import('./types.js').FlowNode} node */
+const describe = (node) => node.data.description ? truncate(node.data.description) : "";
+/**
+* @param {string} label
+* @param {string} hint
+* @param {string} accent
+* @param {NodeMeta['group']} [group]
+* @returns {NodeMeta}
+*/
+const shape = (label, hint, accent, group = "diagram") => ({
+	label,
+	hint,
+	accent,
+	group,
+	openable: true,
+	editable: true,
+	deletable: true,
+	summary: describe
+});
+/**
+* Every per-shape difference, as data. Components read this instead of
+* branching on type, so adding a shape is one entry here and one outline in
+* `shapes.js`. Order is palette order.
+*
+* @type {Readonly<Record<string, NodeMeta>>}
+*/
+const NODE_META = Object.freeze({
+	[SHAPE.PROCESS]: shape("Process", "A step", "message"),
+	[SHAPE.TERMINAL]: shape("Start / end", "Where a flow begins or ends", "trigger"),
+	[SHAPE.DECISION]: shape("Decision", "A question with more than one way out", "hours"),
+	[SHAPE.DATA]: shape("Input / output", "Data going in or out", "branch"),
+	[SHAPE.DATABASE]: shape("Database", "A store of data", "branch"),
+	[SHAPE.DOCUMENT]: shape("Document", "A file or report", "comment"),
+	[SHAPE.NOTE]: shape("Note", "An annotation", "comment"),
+	[SHAPE.TABLE]: shape("Table", "A database table and its columns", "branch"),
+	[SHAPE.TEXT]: shape("Text", "A label with no outline", "unknown"),
+	[SHAPE.FRAME]: {
+		...shape("Frame", "A named region; the shapes inside it belong to it", "unknown"),
+		openable: false
+	},
+	[SHAPE.SCREEN]: shape("Screen", "A page or screen of the interface", "trigger", "wireframe"),
+	[SHAPE.BUTTON]: shape("Button", "Something to press", "message", "wireframe"),
+	[SHAPE.INPUT]: shape("Input", "A form field", "branch", "wireframe"),
+	[SHAPE.CARD]: shape("Card", "A panel that groups content", "comment", "wireframe"),
+	[SHAPE.LIST]: shape("List", "Repeated items, such as rows or results", "hours", "wireframe"),
+	[SHAPE.IMAGE]: shape("Image", "A picture, video or chart", "comment", "wireframe"),
+	[SHAPE.INK]: shape("Pen stroke", "A mark drawn by hand", "unknown", "ink")
+});
+/**
+* So an unfamiliar type renders instead of crashing the canvas.
+* @type {NodeMeta}
+*/
+const FALLBACK_META = Object.freeze(shape("Unknown", "A shape this version does not know", "unknown"));
+/** @param {string} type @returns {NodeMeta} */
+const metaFor = (type) => NODE_META[type] ?? FALLBACK_META;
+/** @param {string} type */
+const isKnownShape = (type) => Object.hasOwn(NODE_META, type);
+/** Every shape a picker offers, in palette order. A stroke is drawn, not picked. */
+const SHAPE_OPTIONS = Object.freeze(Object.entries(NODE_META).filter(([, meta]) => meta.group !== "ink").map(([value, meta]) => ({
+	value,
+	label: meta.label,
+	hint: meta.hint,
+	group: meta.group
+})));
+//#endregion
+//#region src/domain/routes.js
+/**
+* Where a connection runs between two shapes, shared by the canvas and the SVG
+* renderer so both draw the same line. It leaves from the side that faces the
+* other shape: down to a shape below, across to one beside it.
+*
+* @typedef {{ x: number, y: number, width: number, height: number }} Box
+* @typedef {'top' | 'right' | 'bottom' | 'left'} Side
+* @typedef {{ d: string, label: { x: number, y: number }, from: Side, to: Side }} Route
+*/
+const LINE = Object.freeze({
+	STEP: "step",
+	CURVED: "curved",
+	STRAIGHT: "straight"
+});
+/** @type {readonly string[]} */
+const LINES = Object.freeze(Object.values(LINE));
+/** Shapes closer than this, one above the other, connect side to side instead. */
+const MIN_GAP = 16;
+/** @param {number} value */
+const round$1 = (value) => Math.round(value * 10) / 10;
+/**
+* @param {Box} from
+* @param {Box} to
+* @param {string} [line] one of LINES; anything else is a step
+* @returns {Route}
+*/
+function routeEdge(from, to, line = LINE.STEP) {
+	const below = to.y - (from.y + from.height);
+	const above = from.y - (to.y + to.height);
+	const vertical = below >= MIN_GAP || above >= MIN_GAP;
+	const down = below >= MIN_GAP;
+	const right = to.x + to.width / 2 >= from.x + from.width / 2;
+	/** @type {[Side, Side]} */
+	const sides = vertical ? down ? ["bottom", "top"] : ["top", "bottom"] : right ? ["right", "left"] : ["left", "right"];
+	const start = anchor(from, sides[0]);
+	const end = anchor(to, sides[1]);
+	const middle = {
+		x: (start.x + end.x) / 2,
+		y: (start.y + end.y) / 2
+	};
+	let d;
+	if (line === LINE.STRAIGHT) d = `M${round$1(start.x)},${round$1(start.y)} L${round$1(end.x)},${round$1(end.y)}`;
+	else if (line === LINE.CURVED) {
+		const pull = Math.max(24, Math.abs(vertical ? end.y - start.y : end.x - start.x) / 2);
+		const [c1, c2] = vertical ? [{
+			x: start.x,
+			y: start.y + (down ? pull : -pull)
+		}, {
+			x: end.x,
+			y: end.y + (down ? -pull : pull)
+		}] : [{
+			x: start.x + (right ? pull : -pull),
+			y: start.y
+		}, {
+			x: end.x + (right ? -pull : pull),
+			y: end.y
+		}];
+		d = `M${round$1(start.x)},${round$1(start.y)} C${round$1(c1.x)},${round$1(c1.y)} ${round$1(c2.x)},${round$1(c2.y)} ${round$1(end.x)},${round$1(end.y)}`;
+	} else d = vertical ? `M${round$1(start.x)},${round$1(start.y)} V${round$1(middle.y)} H${round$1(end.x)} V${round$1(end.y)}` : `M${round$1(start.x)},${round$1(start.y)} H${round$1(middle.x)} V${round$1(end.y)} H${round$1(end.x)}`;
+	return {
+		d,
+		label: {
+			x: round$1(middle.x),
+			y: round$1(middle.y)
+		},
+		from: sides[0],
+		to: sides[1]
+	};
+}
+/**
+* The middle of one side of a box.
+* @param {Box} box
+* @param {Side} side
+*/
+function anchor(box, side) {
+	if (side === "top") return {
+		x: box.x + box.width / 2,
+		y: box.y
+	};
+	if (side === "bottom") return {
+		x: box.x + box.width / 2,
+		y: box.y + box.height
+	};
+	if (side === "left") return {
+		x: box.x,
+		y: box.y + box.height / 2
+	};
+	return {
+		x: box.x + box.width,
+		y: box.y + box.height / 2
+	};
 }
 //#endregion
 //#region src/domain/flowText.js
@@ -952,11 +976,12 @@ function parseFlow(text) {
 		}
 		const colored = COLOR_LINE.exec(content);
 		if (colored) {
-			if (!isColor(colored[2])) return fail(`Unknown color "${colored[2]}". Use one of: ${COLOR_NAMES.join(", ")}.`);
+			const color = colorNamed(colored[2]);
+			if (!color) return fail(`Unknown color "${colored[2]}". Use one of: ${COLOR_NAMES.join(", ")}.`);
 			pendingColors.push({
 				line,
 				id: colored[1],
-				color: colored[2]
+				color
 			});
 			return;
 		}
@@ -1214,10 +1239,15 @@ function fence(text) {
 * every connection in words, then the `.flow` source to edit and hand back.
 * Ids are kept, so an agent can refer to a shape without guessing.
 *
+* Given the diagram's share link, the brief opens as a prompt from whoever
+* sketched it: here is my draft, open it, and send back a link to your
+* version, so they look at a picture rather than read the source.
+*
 * @param {import('./types.js').FlowDocument} document
+* @param {{ link?: string }} [options] a share link that opens this diagram
 * @returns {string}
 */
-function toBrief(document) {
+function toBrief(document, { link } = {}) {
 	const names = new Map(document.nodes.map((node) => [node.id, node.name || node.id]));
 	const label = (id) => `**${escapeMarkdown(names.get(id) ?? id)}**`;
 	const count = (n, noun) => `${n} ${noun}${n === 1 ? "" : "s"}`;
@@ -1229,6 +1259,7 @@ function toBrief(document) {
 		"",
 		`A design sketched in isketch: ${count(shapes.length, "shape")} and ${count(document.edges.length, "connection")}. Build from it, and refer to shapes by their ids. To change the diagram, edit the source at the end and hand it back.`
 	];
+	if (link) lines.push("", ...draftPrompt(link));
 	const notes = noteLines(document.notes);
 	if (notes.length) {
 		lines.push("", "## Notes", "", "From whoever sketched this; follow them.", "");
@@ -1263,8 +1294,28 @@ function toBrief(document) {
 	}
 	const source = serialiseFlow(document).trimEnd();
 	const marks = fence(source);
-	lines.push("", "## Source", "", "The same diagram in the `.flow` format: `id = shape \"Name\" -- description`, `id note: ...`, `a -> b : label` (`-->` dashed, `<->` both ways), and positions under `@layout`.", "", `${marks}text`, source, marks);
+	lines.push("", "## Source", "", `The same diagram in the \`.flow\` format: \`id = shape "Name" -- description\`, \`id note: ...\`, \`id color: blue\` (${COLOR_NAMES.join(", ")}), \`a -> b : label\` (\`-->\` dashed, \`<->\` both ways), and positions under \`@layout\`.`, "", `${marks}text`, source, marks);
 	return `${lines.join("\n")}\n`;
+}
+/**
+* The ask that goes before the brief when it carries a link. The returned link
+* uses the plain form of the fragment, which an agent can build with one line
+* of code, where the compressed form needs a deflate.
+* @param {string} link
+*/
+function draftPrompt(link) {
+	const base = `${link.split("#")[0]}#flow=t`;
+	return [
+		"## My draft",
+		"",
+		`Here is my draft. Open it to see it: ${link}`,
+		"",
+		"Read it, then build from it or improve it as I ask. Whenever you change the diagram, reply with a link to your version, so I can open it and see it rather than read it:",
+		"",
+		`\`${base}<the .flow source, base64url-encoded UTF-8, no padding>\``,
+		"",
+		`For example: \`node -e "process.stdout.write('${base}' + require('fs').readFileSync(0).toString('base64url'))" < diagram.flow\``
+	];
 }
 //#endregion
 //#region src/mcp/protocol.js

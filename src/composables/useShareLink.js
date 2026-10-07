@@ -6,7 +6,7 @@ import { PHONE } from '@/composables/useMediaQuery.js'
 import { useFlowQuery } from '@/composables/useFlowQuery.js'
 import { useFlowHistory } from '@/composables/useFlowHistory.js'
 import { useReplaceDocument } from '@/composables/useNodeMutations.js'
-import { decodeShare, encodeShare, LONG_LINK, SHARE_PREFIX } from '@/domain/shareLink.js'
+import { encodeShare, LONG_LINK, readShare, SHARE_PREFIX } from '@/domain/shareLink.js'
 import { ROUTE } from '@/router/index.js'
 import { useCanvasStore } from '@/stores/canvas.js'
 import { useFileStore } from '@/stores/file.js'
@@ -61,7 +61,7 @@ export function useOpenSharedLink() {
     async ([loading, hash]) => {
       if (loading || !hash.startsWith(SHARE_PREFIX)) return
 
-      const shared = await decodeShare(hash)
+      const shared = await readShare(hash)
       router.replace({ name: ROUTE.FLOW, hash: '' })
 
       if (!shared) {
@@ -71,14 +71,17 @@ export function useOpenSharedLink() {
 
       canvas.forgetViewport()
       file.forget()
-      replace.mutate(shared, {
+      replace.mutate(shared.document, {
         onSuccess: () => {
           track('opened_from_link')
           if (window.matchMedia?.(PHONE).matches) {
             canvas.setViewing(true)
             return
           }
-          toasts.push('Opened a shared diagram. Undo brings yours back.', {
+          const skipped = shared.skipped
+            ? ` ${shared.skipped} line${shared.skipped === 1 ? '' : 's'} isketch could not read ${shared.skipped === 1 ? 'was' : 'were'} left out.`
+            : ''
+          toasts.push(`Opened a shared diagram.${skipped} Undo brings yours back.`, {
             action: { label: 'Undo', run: undo },
           })
         },

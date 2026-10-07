@@ -1,7 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { sampleById } from '../samples.js'
-import { decodeShare, encodeShare, SHARE_PREFIX } from '../shareLink.js'
+import { decodeShare, encodeShare, readShare, SHARE_PREFIX } from '../shareLink.js'
+
+/** @param {string} text ASCII */
+const base64url = (text) => btoa(text).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 
 const architecture = sampleById('architecture').document
 
@@ -38,5 +41,13 @@ describe('share links', () => {
     expect(await decodeShare(`${SHARE_PREFIX}x${btoa('a = process')}`)).toBeNull()
     // Valid bytes, but not a valid diagram.
     expect(await decodeShare(`${SHARE_PREFIX}t${btoa('a = hexagon')}`)).toBeNull()
+  })
+
+  it('opens a link with lines it cannot read, leaving those out', async () => {
+    const text = 'a = process "A"\na color: mauve\nb = blob "B"\nc = database "C"\nb -> c\na -> c'
+    const shared = await readShare(`${SHARE_PREFIX}t${base64url(text)}`)
+    expect(shared?.document.nodes.map((node) => node.id)).toEqual(['a', 'c'])
+    expect(shared?.document.edges).toHaveLength(1)
+    expect(shared?.skipped).toBe(3)
   })
 })

@@ -1,3 +1,4 @@
+import { COLOR_NAMES } from './colors.js'
 import { SHAPE } from './constants.js'
 import { serialiseFlow } from './flowText.js'
 import { frameMembers, isFrame } from './frames.js'
@@ -60,10 +61,15 @@ function fence(text) {
  * every connection in words, then the `.flow` source to edit and hand back.
  * Ids are kept, so an agent can refer to a shape without guessing.
  *
+ * Given the diagram's share link, the brief opens as a prompt from whoever
+ * sketched it: here is my draft, open it, and send back a link to your
+ * version, so they look at a picture rather than read the source.
+ *
  * @param {import('./types.js').FlowDocument} document
+ * @param {{ link?: string }} [options] a share link that opens this diagram
  * @returns {string}
  */
-export function toBrief(document) {
+export function toBrief(document, { link } = {}) {
   const names = new Map(document.nodes.map((node) => [node.id, node.name || node.id]))
   const label = (/** @type {string} */ id) => `**${escapeMarkdown(names.get(id) ?? id)}**`
   const count = (/** @type {number} */ n, /** @type {string} */ noun) =>
@@ -81,6 +87,8 @@ export function toBrief(document) {
       'Build from it, and refer to shapes by their ids. To change the diagram, edit the source at ' +
       'the end and hand it back.',
   ]
+
+  if (link) lines.push('', ...draftPrompt(link))
 
   const notes = noteLines(document.notes)
   if (notes.length) {
@@ -140,8 +148,9 @@ export function toBrief(document) {
     '## Source',
     '',
     'The same diagram in the `.flow` format: `id = shape "Name" -- description`, ' +
-      '`id note: ...`, `a -> b : label` (`-->` dashed, `<->` both ways), and positions under ' +
-      '`@layout`.',
+      '`id note: ...`, `id color: blue` (' +
+      `${COLOR_NAMES.join(', ')}), ` +
+      '`a -> b : label` (`-->` dashed, `<->` both ways), and positions under `@layout`.',
     '',
     `${marks}text`,
     source,
@@ -149,4 +158,27 @@ export function toBrief(document) {
   )
 
   return `${lines.join('\n')}\n`
+}
+
+/**
+ * The ask that goes before the brief when it carries a link. The returned link
+ * uses the plain form of the fragment, which an agent can build with one line
+ * of code, where the compressed form needs a deflate.
+ * @param {string} link
+ */
+function draftPrompt(link) {
+  const base = `${link.split('#')[0]}#flow=t`
+  return [
+    '## My draft',
+    '',
+    `Here is my draft. Open it to see it: ${link}`,
+    '',
+    'Read it, then build from it or improve it as I ask. Whenever you change the diagram, ' +
+      'reply with a link to your version, so I can open it and see it rather than read it:',
+    '',
+    `\`${base}<the .flow source, base64url-encoded UTF-8, no padding>\``,
+    '',
+    'For example: ' +
+      `\`node -e "process.stdout.write('${base}' + require('fs').readFileSync(0).toString('base64url'))" < diagram.flow\``,
+  ]
 }

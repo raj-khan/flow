@@ -83,6 +83,14 @@ describe('colours in .flow', () => {
     })
     expect(errors[1]).toEqual({ line: 3, message: 'No node called "b".' })
   })
+
+  it('reads the names agents reach for as the nearest swatch', () => {
+    const { document, errors } = parseFlow(
+      'a = process "A"\na color: gray\nb = process "B"\nb color: Purple',
+    )
+    expect(errors).toEqual([])
+    expect(document.nodes.map(colorOf)).toEqual(['grey', 'violet'])
+  })
 })
 
 describe('colours drawn and carried', () => {
