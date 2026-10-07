@@ -113,3 +113,40 @@ test('Discard all clears the canvas, keeps the title, and undo brings it back', 
   await history(page).getByRole('button', { name: 'Undo' }).click()
   await expect(shapes(page)).toHaveCount(5)
 })
+
+test('the first shape drawn on a blank canvas stays where it was drawn', async ({ page }) => {
+  await fromMenu(page, 'New diagram')
+  await page.getByRole('button', { name: 'Pen', exact: true }).click()
+  const layer = await page.getByTestId('pen-layer').boundingBox()
+  const corners = [
+    [300, 200],
+    [520, 204],
+    [516, 330],
+    [296, 326],
+    [302, 206],
+  ].map(([x, y]) => [layer.x + x, layer.y + y])
+  await page.mouse.move(...corners[0])
+  await page.mouse.down()
+  for (const corner of corners.slice(1)) await page.mouse.move(...corner, { steps: 12 })
+  await page.mouse.up()
+
+  await expect(shapes(page)).toHaveCount(1)
+  // Give a fit, were there one, time to happen.
+  await page.waitForTimeout(300)
+  const box = await shapes(page).first().boundingBox()
+  expect(Math.abs(box.x - (layer.x + 296))).toBeLessThan(12)
+  expect(Math.abs(box.width - 224)).toBeLessThan(16)
+})
+
+test('a sample opened after drawing on a blank canvas is still fitted', async ({ page }) => {
+  await fromMenu(page, 'New from a sample')
+  await page.getByRole('button', { name: /Web app architecture/ }).click()
+  await expect(shapes(page)).toHaveCount(9)
+  const viewport = page.viewportSize()
+  await expect
+    .poll(async () => {
+      const boxes = await Promise.all((await shapes(page).all()).map((s) => s.boundingBox()))
+      return boxes.every((b) => b.x >= 0 && b.x + b.width <= viewport.width)
+    })
+    .toBe(true)
+})

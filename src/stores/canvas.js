@@ -221,8 +221,15 @@ export const useCanvasStore = defineStore('canvas', () => {
   }
 
   /** A different diagram should be fitted to the screen, not shown where the last one was. */
+  /**
+   * Counts the times a new diagram was loaded, so the canvas fits the next one
+   * it draws, even when there was no viewport to forget.
+   */
+  const fitRequests = ref(0)
+
   function forgetViewport() {
     viewport.value = null
+    fitRequests.value += 1
   }
 
   /** @param {string} id */
@@ -272,6 +279,7 @@ export const useCanvasStore = defineStore('canvas', () => {
     closeSamples,
     setViewport,
     forgetViewport,
+    fitRequests,
     requestFocus,
     clearFocus,
     requestShape,

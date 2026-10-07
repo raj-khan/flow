@@ -176,14 +176,23 @@ const edgeTypes = /** @type {any} */ (markRaw({ flow: FlowEdge }))
 
 const hasFitted = ref(false)
 
-// An emptied canvas unmounts Vue Flow, so whatever fills it next is fitted afresh.
+// A diagram loaded, a sample, a file or an import, is fitted to the screen.
 watch(
-  () => nodes.value.length === 0,
-  (empty) => {
-    if (empty) hasFitted.value = false
+  () => canvas.fitRequests,
+  () => (hasFitted.value = false),
+)
+
+// A blank canvas is already a view: the first shape drawn on it stays where it
+// was drawn, rather than the view jumping to fit it.
+watch(
+  [() => nodes.value.length === 0, isLoading],
+  ([empty, loading]) => {
+    if (loading) return
+    if (empty) hasFitted.value = true
     // A sample picked, or a first shape drawn: the list has done its job.
     else canvas.closeSamples()
   },
+  { immediate: true },
 )
 
 /** Matches the drawer width in NodeDetailsDrawer. */
