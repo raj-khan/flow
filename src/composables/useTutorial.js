@@ -5,8 +5,8 @@ import { STORAGE_KEYS } from '@/api/storageKeys.js'
 import { SHARE_PREFIX } from '@/domain/shareLink.js'
 import { youtubeId } from '@/domain/youtube.js'
 
-/** Set at build time; with none, there is no tutorial and nothing shows. */
-const VIDEO = youtubeId(import.meta.env.VITE_TUTORIAL_VIDEO)
+/** isketch's own tutorial on YouTube, unless the build names another. */
+const VIDEO = youtubeId(import.meta.env.VITE_TUTORIAL_VIDEO ?? 'capRfYtliec')
 
 function seen() {
   try {
