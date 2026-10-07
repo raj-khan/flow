@@ -8,6 +8,7 @@ export const STORAGE_KEYS = Object.freeze({
   PEN_COLOR: 'flow:pen-color',
   AUTO_SHAPES: 'flow:auto-shapes',
   PUBLISHED: 'flow:published',
+  TUTORIAL_SEEN: 'flow:tutorial-seen',
 })
 
 /**

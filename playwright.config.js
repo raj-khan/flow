@@ -16,6 +16,16 @@ export default defineConfig({
     serviceWorkers: 'block',
     baseURL: 'http://localhost:4173',
     trace: 'on-first-retry',
+    // Everyone here has seen the tutorial; its own spec starts as someone new.
+    storageState: {
+      cookies: [],
+      origins: [
+        {
+          origin: 'http://localhost:4173',
+          localStorage: [{ name: 'flow:tutorial-seen', value: 'yes' }],
+        },
+      ],
+    },
   },
 
   // Desktop runs everything but the touch specs; a phone and a tablet run those.
@@ -32,7 +42,7 @@ export default defineConfig({
   // Against the production build, so E2E exercises what actually ships.
   webServer: {
     command:
-      'VITE_ISKETCH_API=https://api.isketch.test npm run build && npm run preview -- --port 4173',
+      'VITE_ISKETCH_API=https://api.isketch.test VITE_TUTORIAL_VIDEO=https://youtu.be/aaaaaaaaaaa npm run build && npm run preview -- --port 4173',
     url: 'http://localhost:4173',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

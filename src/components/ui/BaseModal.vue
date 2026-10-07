@@ -2,7 +2,11 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 /** Hand rolled: a UI library would be a large dependency for one dialog. */
-defineProps({ title: { type: String, required: true } })
+defineProps({
+  title: { type: String, required: true },
+  /** Room for a video rather than a form. */
+  wide: { type: Boolean, default: false },
+})
 
 const emit = defineEmits(['close'])
 
@@ -75,7 +79,8 @@ onBeforeUnmount(() => {
 
       <div
         ref="panel"
-        class="relative w-full max-w-md rounded-xl border border-line bg-surface shadow-xl max-md:max-h-[90vh] max-md:max-w-none max-md:overflow-y-auto max-md:rounded-b-none"
+        class="relative w-full rounded-xl border border-line bg-surface shadow-xl max-md:max-h-[90vh] max-md:max-w-none max-md:overflow-y-auto max-md:rounded-b-none"
+        :class="wide ? 'max-w-3xl' : 'max-w-md'"
         role="dialog"
         aria-modal="true"
         :aria-label="title"

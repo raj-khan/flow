@@ -16,12 +16,14 @@ import CommandPalette from '@/components/shell/CommandPalette.vue'
 import FileConflictDialog from '@/components/shell/FileConflictDialog.vue'
 import DraftDialog from '@/components/draft/DraftDialog.vue'
 import HelpDialog from '@/components/ui/HelpDialog.vue'
+import TutorialDialog from '@/components/ui/TutorialDialog.vue'
 import IconButton from '@/components/ui/IconButton.vue'
 import ToastHost from '@/components/ui/ToastHost.vue'
 import { useCopyBrief } from '@/composables/useCopyBrief.js'
 import { useFullScreen } from '@/composables/useFullScreen.js'
 import { useViewKeys } from '@/composables/useViewKeys.js'
 import { useHelpDialog } from '@/composables/useHelpDialog.js'
+import { useTutorial } from '@/composables/useTutorial.js'
 import { PHONE, useMediaQuery } from '@/composables/useMediaQuery.js'
 import { useOpenSharedLink } from '@/composables/useShareLink.js'
 import { useLaunch } from '@/composables/useLaunch.js'
@@ -49,6 +51,7 @@ const { copyBrief } = useCopyBrief()
 const { document } = useFlowQuery()
 // Bound at the shell: a dialog that is not mounted cannot listen for its own key.
 const help = useHelpDialog()
+const tutorial = useTutorial()
 const fullScreen = useFullScreen()
 /** A phone keeps the tools at the thumb: the tool bar docks at the bottom. */
 const isPhone = useMediaQuery(PHONE)
@@ -166,6 +169,16 @@ onBeforeUnmount(() => window.removeEventListener('pointermove', onPointerMove))
 
         <div class="island flex shrink-0 items-center gap-1 p-1">
           <IconButton
+            v-if="tutorial.video"
+            label="Tutorial"
+            variant="bare"
+            title="Watch how isketch works"
+            @click="tutorial.open"
+          >
+            <circle cx="12" cy="12" r="9" />
+            <path d="m10 8.5 5 3.5-5 3.5z" />
+          </IconButton>
+          <IconButton
             label="Share"
             variant="bare"
             title="Share a private link, or publish one an AI can read"
@@ -217,6 +230,7 @@ onBeforeUnmount(() => window.removeEventListener('pointermove', onPointerMove))
     </RouterView>
 
     <HelpDialog v-if="help.isOpen.value" @close="help.close" />
+    <TutorialDialog v-if="tutorial.isOpen.value" :video="tutorial.video" @close="tutorial.close" />
     <ImportDialog v-if="isImporting" @close="isImporting = false" />
     <CompareDialog v-if="isComparing" @close="isComparing = false" />
     <ExportDialog v-if="isExporting" @close="isExporting = false" />
