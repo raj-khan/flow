@@ -13,9 +13,13 @@ test.beforeEach(async ({ page }) => {
   await expect(shapes(page)).toHaveCount(5)
 })
 
-test('the canvas fills the screen, with the tools floating over it', async ({ page }) => {
+test('the canvas fills the screen beside the folded side panel, with the tools floating over it', async ({
+  page,
+}) => {
   const pane = await page.locator('.vue-flow__pane').boundingBox()
-  expect(pane).toMatchObject({ x: 0, y: 0, ...page.viewportSize() })
+  const rail = await page.getByTestId('side-dock').boundingBox()
+  const { width, height } = page.viewportSize()
+  expect(pane).toMatchObject({ x: rail.width, y: 0, width: width - rail.width, height })
 
   for (const name of ['Select', 'Hand', 'Shapes', 'Connector', 'Text', 'Pen', 'Eraser']) {
     await expect(tool(page, name)).toBeVisible()

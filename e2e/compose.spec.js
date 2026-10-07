@@ -49,13 +49,21 @@ test('re-importing updates the diagram and keeps where things were put', async (
   await dialog.getByRole('button', { name: 'Import' }).click()
   await expect(shapes(page)).toHaveCount(3)
 
-  // Move the database somewhere deliberate.
+  // Move the database somewhere deliberate, once the view has finished fitting the import.
   const db = page.locator('.vue-flow__node[data-id="db"]')
-  const box = await db.boundingBox()
-  await page.mouse.move(box.x + box.width / 2, box.y + 12)
+  let box = null
+  await expect
+    .poll(async () => {
+      const last = box
+      box = await db.boundingBox()
+      return JSON.stringify(last) === JSON.stringify(box)
+    })
+    .toBe(true)
+  // By its middle: the top edge is where a connection starts.
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
   await page.mouse.down()
-  await page.mouse.move(box.x + box.width / 2 + 20, box.y + 30, { steps: 5 })
-  await page.mouse.move(box.x + box.width / 2 + 260, box.y + 160, { steps: 10 })
+  await page.mouse.move(box.x + box.width / 2 + 20, box.y + box.height / 2 + 20, { steps: 5 })
+  await page.mouse.move(box.x + box.width / 2 + 260, box.y + box.height / 2 + 60, { steps: 10 })
   await page.mouse.up()
   const saved = () =>
     page.evaluate(

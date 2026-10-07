@@ -16,13 +16,17 @@ export default defineConfig({
     serviceWorkers: 'block',
     baseURL: 'http://localhost:4173',
     trace: 'on-first-retry',
-    // Everyone here has seen the tutorial; its own spec starts as someone new.
+    // Everyone here has seen the tutorial and folded the side panel, so each
+    // control has one name on screen; their own specs start as someone new.
     storageState: {
       cookies: [],
       origins: [
         {
           origin: 'http://localhost:4173',
-          localStorage: [{ name: 'flow:tutorial-seen', value: 'yes' }],
+          localStorage: [
+            { name: 'flow:tutorial-seen', value: 'yes' },
+            { name: 'flow:dock', value: 'off' },
+          ],
         },
       ],
     },

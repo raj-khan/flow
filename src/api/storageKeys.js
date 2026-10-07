@@ -9,6 +9,8 @@ export const STORAGE_KEYS = Object.freeze({
   AUTO_SHAPES: 'flow:auto-shapes',
   PUBLISHED: 'flow:published',
   TUTORIAL_SEEN: 'flow:tutorial-seen',
+  DOCK: 'flow:dock',
+  DOCK_FOLDED: 'flow:dock-folded',
 })
 
 /**

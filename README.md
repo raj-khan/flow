@@ -66,9 +66,12 @@ over the `.flow` file or the brief.
   go with Copy for AI, the `.flow` file and MCP as instructions to follow.
 - **Wireframes.** Screen, button, input, card, list and image, to sketch an interface next to the
   architecture behind it. The brief reads them as a UI to build: "a screen", "a form field", "a button".
-- **Canvas first.** The canvas fills the screen and the tools float over it, as in Excalidraw:
-  the menu (file, import, export, view, help) at the top left, the tool bar at the top centre,
-  Share and Copy for AI at the top right, undo and the view controls at the bottom left.
+- **Canvas first.** The tools float over the canvas, as in Excalidraw: the tool bar at the top
+  centre, Share and Copy for AI at the top right, undo and the view controls at the bottom left.
+- **Every action in view.** A side panel at the left lists File, Agent, View and Help, with the
+  selection's colours and alignment on top while shapes are selected. Each section folds away,
+  and the whole panel folds to a rail of icons, as Photoshop's panels do; this browser remembers
+  both. It runs the same actions as the menu and `Ctrl+K`, from one list. Phones keep the menu.
 - **Tools** on number keys and letters: Select (`1`/`V`), Hand (`2`/`H`), Shapes (`3`), Connector
   (`4`/`C`, click one shape then another), Text (`5`/`T`, click the canvas to write), Pen (`6`/`P`),
   Eraser (`7`/`E`, click or drag over shapes and connections to delete them, in one undo step)

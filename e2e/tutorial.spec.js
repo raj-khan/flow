@@ -24,7 +24,7 @@ test('plays the tutorial once for someone new, and again from its button', async
   await expect(page.locator('.vue-flow')).toBeVisible()
   await expect(dialog).toBeHidden()
 
-  await page.getByRole('button', { name: 'Tutorial' }).click()
+  await page.getByRole('button', { name: 'Tutorial', exact: true }).click()
   await expect(dialog).toBeVisible()
   await dialog.getByRole('button', { name: 'Close dialog' }).click()
   await expect(dialog).toBeHidden()

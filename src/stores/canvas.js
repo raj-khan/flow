@@ -124,6 +124,14 @@ export const useCanvasStore = defineStore('canvas', () => {
     saveSwitch(STORAGE_KEYS.SNAP, snap.value)
   }
 
+  /** Whether the side panel is open, rather than folded to a rail of icons. On unless turned off. */
+  const dockOpen = ref(savedSwitch(STORAGE_KEYS.DOCK))
+
+  function toggleDock() {
+    dockOpen.value = !dockOpen.value
+    saveSwitch(STORAGE_KEYS.DOCK, dockOpen.value)
+  }
+
   /** Whether the minimap shows, bottom right. On unless turned off. */
   const minimap = ref(savedSwitch(STORAGE_KEYS.MINIMAP))
 
@@ -251,6 +259,8 @@ export const useCanvasStore = defineStore('canvas', () => {
     toggleSnap,
     minimap,
     toggleMinimap,
+    dockOpen,
+    toggleDock,
     zen,
     toggleZen,
     isViewing,

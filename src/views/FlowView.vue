@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { RouterView } from 'vue-router'
 
 import FlowCanvas from '@/components/canvas/FlowCanvas.vue'
@@ -12,6 +12,7 @@ import ShareDialog from '@/components/share/ShareDialog.vue'
 import HistoryControls from '@/components/shell/HistoryControls.vue'
 import MainMenu from '@/components/shell/MainMenu.vue'
 import ToolBar from '@/components/shell/ToolBar.vue'
+import SideDock from '@/components/shell/SideDock.vue'
 import CommandPalette from '@/components/shell/CommandPalette.vue'
 import FileConflictDialog from '@/components/shell/FileConflictDialog.vue'
 import DraftDialog from '@/components/draft/DraftDialog.vue'
@@ -20,6 +21,7 @@ import TutorialDialog from '@/components/ui/TutorialDialog.vue'
 import IconButton from '@/components/ui/IconButton.vue'
 import ToastHost from '@/components/ui/ToastHost.vue'
 import { useCopyBrief } from '@/composables/useCopyBrief.js'
+import { useDock } from '@/composables/useDock.js'
 import { useFullScreen } from '@/composables/useFullScreen.js'
 import { useViewKeys } from '@/composables/useViewKeys.js'
 import { useHelpDialog } from '@/composables/useHelpDialog.js'
@@ -66,6 +68,11 @@ watch(
 
 /** Ctrl+K: every action and shape, by name. */
 const isPaletteOpen = ref(false)
+
+const dock = useDock()
+const showDock = computed(() => dock.shown.value && !canvas.isViewing && !canvas.zen)
+/** What sits at the left edge moves over for the side panel; the canvas starts after it. */
+const dockStyle = computed(() => ({ '--dock': `${showDock.value ? dock.width.value : 0}px` }))
 const commands = useCommands({
   open: (dialog) => {
     if (dialog === 'import') isImporting.value = true
@@ -115,8 +122,39 @@ onBeforeUnmount(() => window.removeEventListener('pointermove', onPointerMove))
 </script>
 
 <template>
-  <div class="relative h-full w-full overflow-hidden bg-canvas">
-    <main class="absolute inset-0">
+  <div class="relative h-full w-full overflow-hidden bg-canvas" :style="dockStyle">
+    <!-- Before the canvas, so its Selection slot exists when the canvas teleports into it. -->
+    <SideDock
+      v-if="showDock"
+      :commands="commands"
+      :help="[
+        {
+          id: 'palette',
+          label: 'Find a command',
+          title: 'Search every action and shape by name',
+          hint: 'Ctrl+K',
+          run: () => (isPaletteOpen = true),
+        },
+        {
+          id: 'help',
+          label: 'Keyboard shortcuts',
+          title: 'List every shortcut',
+          hint: '?',
+          run: help.open,
+        },
+        ...(tutorial.video
+          ? [
+              {
+                id: 'tutorial',
+                label: 'Watch the tutorial',
+                title: 'A short video of how isketch works',
+                run: tutorial.open,
+              },
+            ]
+          : []),
+      ]"
+    />
+    <main class="absolute inset-y-0 right-0 left-(--dock)">
       <FlowCanvas />
     </main>
 
@@ -200,19 +238,22 @@ onBeforeUnmount(() => window.removeEventListener('pointermove', onPointerMove))
         </div>
       </header>
 
-      <div v-if="canvas.isTextOpen" class="sheet absolute top-16 bottom-3 left-3 z-10">
+      <div
+        v-if="canvas.isTextOpen"
+        class="sheet absolute top-16 bottom-3 left-[calc(var(--dock)+0.75rem)] z-10"
+      >
         <TextPanel />
       </div>
 
       <div
         v-if="canvas.isLibraryOpen"
-        class="sheet absolute top-16 bottom-3 left-3 z-20 flex items-start"
+        class="sheet absolute top-16 bottom-3 left-[calc(var(--dock)+0.75rem)] z-20 flex items-start"
       >
         <ShapePalette class="max-h-full" @add="canvas.requestShape" />
       </div>
 
       <div
-        class="absolute bottom-3 left-3 z-20 flex items-center gap-2 max-md:right-3 max-md:flex-col"
+        class="absolute bottom-3 left-[calc(var(--dock)+0.75rem)] z-20 flex items-center gap-2 max-md:right-3 max-md:flex-col"
         :class="{ 'zen-hidden': canvas.zen && !near.bottom }"
       >
         <HistoryControls v-if="!isPhone" />

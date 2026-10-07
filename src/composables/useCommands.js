@@ -29,13 +29,13 @@ export function useCommands(shell) {
   const { open, save } = useDiagramFile()
   const { start } = useStartDiagram()
   const { undo, redo } = useFlowHistory()
-  const { toggle: toggleSketch } = useSketchStyle()
+  const { sketch, toggle: toggleSketch } = useSketchStyle()
   const { label: themeLabel, cycle: cycleTheme } = useTheme()
   const fullScreen = useFullScreen()
   const { cycle: cycleLines } = useLineStyle()
   const { isMac } = usePlatform()
   const toasts = useToastStore()
-  const { discardAll } = useDiscardAll()
+  const { discardAll, isEmpty } = useDiscardAll()
   const startEmpty = () =>
     start(undefined, {
       onSuccess: () =>
@@ -81,6 +81,7 @@ export function useCommands(shell) {
       label: 'Discard all',
       group: 'File',
       keywords: 'clear reset erase delete everything wipe',
+      disabled: isEmpty.value,
       run: discardAll,
     },
     { id: 'open', label: 'Open file', group: 'File', hint: key(COMBO.OPEN), run: open },
@@ -162,18 +163,21 @@ export function useCommands(shell) {
       id: 'snap',
       label: canvas.snap ? 'Turn off snap to grid' : 'Snap to grid',
       group: 'View',
+      checked: canvas.snap,
       run: canvas.toggleSnap,
     },
     {
       id: 'minimap',
       label: canvas.minimap ? 'Hide the minimap' : 'Show the minimap',
       group: 'View',
+      checked: canvas.minimap,
       run: canvas.toggleMinimap,
     },
     {
       id: 'text',
       label: canvas.isTextOpen ? 'Hide the text' : 'Edit as text',
       group: 'View',
+      checked: canvas.isTextOpen,
       keywords: 'flow source code',
       run: canvas.toggleText,
     },
@@ -182,6 +186,7 @@ export function useCommands(shell) {
       label: 'Sketch style',
       group: 'View',
       keywords: 'hand drawn rough',
+      checked: sketch.value,
       run: toggleSketch,
     },
     {
@@ -204,7 +209,15 @@ export function useCommands(shell) {
       group: 'View',
       hint: key(COMBO.ZEN),
       keywords: 'focus hide',
+      checked: canvas.zen,
       run: canvas.toggleZen,
+    },
+    {
+      id: 'dock',
+      label: canvas.dockOpen ? 'Fold the side panel' : 'Open the side panel',
+      group: 'View',
+      keywords: 'sidebar panel dock rail collapse expand',
+      run: canvas.toggleDock,
     },
     {
       id: 'help',

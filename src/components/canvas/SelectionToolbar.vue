@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useVueFlow } from '@vue-flow/core'
 
+import { useDock } from '@/composables/useDock.js'
 import { useFlowQuery } from '@/composables/useFlowQuery.js'
 import { useMoveNodes, useReplaceDocument } from '@/composables/useNodeMutations.js'
 import { ALIGN, alignBoxes, distributeBoxes } from '@/domain/arrange.js'
@@ -15,6 +16,12 @@ const { document } = useFlowQuery()
 const recolor = useReplaceDocument('Colour')
 
 const count = computed(() => getSelectedNodes.value.length)
+
+/**
+ * With the side panel open, these sit in it; folded, they float at the left
+ * edge, clear of the middle of the canvas. A phone keeps them at the top.
+ */
+const { docked, shown } = useDock()
 
 /** The selection's colour when they share one, else null. */
 const color = computed(() => {
@@ -70,76 +77,91 @@ const DISTRIBUTIONS = [
 </script>
 
 <template>
-  <div
-    v-if="count >= 1"
-    role="toolbar"
-    aria-label="Selection"
-    class="nodrag nopan absolute top-16 left-1/2 z-10 flex max-w-[calc(100%-2rem)] -translate-x-1/2 items-center gap-0.5 overflow-x-auto rounded-xl border border-line bg-surface p-1 shadow-sm"
-  >
-    <span v-if="count >= 2" class="px-2 text-xs whitespace-nowrap text-muted"
-      >{{ count }} selected</span
+  <Teleport :key="String(docked)" defer to="#dock-selection" :disabled="!docked">
+    <div
+      v-if="count >= 1"
+      role="toolbar"
+      aria-label="Selection"
+      class="nodrag nopan flex items-center gap-0.5"
+      :class="
+        docked
+          ? 'flex-wrap border-b border-line px-1 py-2'
+          : shown
+            ? 'absolute top-16 left-3 z-10 w-[220px] flex-wrap rounded-xl border border-line bg-surface p-1 shadow-sm'
+            : 'absolute top-16 left-1/2 z-10 max-w-[calc(100%-2rem)] -translate-x-1/2 overflow-x-auto rounded-xl border border-line bg-surface p-1 shadow-sm'
+      "
     >
-    <ColorSwatches
-      label="Colour"
-      action="Colour the selection"
-      plain="The shape's own colour"
-      :value="color"
-      @pick="paint"
-    />
-    <template v-if="count >= 2">
-      <span class="mx-1 h-5 w-px shrink-0 bg-line" aria-hidden="true" />
-      <button
-        v-for="option in ALIGNMENTS"
-        :key="option.mode"
-        type="button"
-        class="flex h-7 w-7 items-center justify-center rounded-lg text-muted hover:bg-hover hover:text-ink"
-        :aria-label="option.label"
-        :title="option.label"
-        @click="move(alignBoxes(boxes(), option.mode))"
+      <p
+        v-if="docked"
+        class="w-full px-1 pb-1 text-[11px] font-semibold tracking-wide text-muted uppercase"
       >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          aria-hidden="true"
-        >
-          <path :d="option.d" />
-        </svg>
-      </button>
-      <span class="mx-1 h-5 w-px bg-line" aria-hidden="true" />
-      <button
-        v-for="option in DISTRIBUTIONS"
-        :key="option.axis"
-        type="button"
-        class="flex h-7 w-7 items-center justify-center rounded-lg text-muted hover:bg-hover hover:text-ink disabled:opacity-40"
-        :aria-label="option.label"
-        :title="
-          count < 3
-            ? `${option.label}: select three or more shapes`
-            : `${option.label}, with equal gaps`
-        "
-        :disabled="count < 3"
-        @click="
-          move(distributeBoxes(boxes(), /** @type {'horizontal' | 'vertical'} */ (option.axis)))
-        "
+        Selection
+      </p>
+      <span v-if="count >= 2" class="px-2 text-xs whitespace-nowrap text-muted"
+        >{{ count }} selected</span
       >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          aria-hidden="true"
+      <ColorSwatches
+        label="Colour"
+        action="Colour the selection"
+        plain="The shape's own colour"
+        :value="color"
+        @pick="paint"
+      />
+      <template v-if="count >= 2">
+        <span class="mx-1 h-5 w-px shrink-0 bg-line" aria-hidden="true" />
+        <button
+          v-for="option in ALIGNMENTS"
+          :key="option.mode"
+          type="button"
+          class="flex h-7 w-7 items-center justify-center rounded-lg text-muted hover:bg-hover hover:text-ink"
+          :aria-label="option.label"
+          :title="option.label"
+          @click="move(alignBoxes(boxes(), option.mode))"
         >
-          <path :d="option.d" />
-        </svg>
-      </button>
-    </template>
-  </div>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <path :d="option.d" />
+          </svg>
+        </button>
+        <span class="mx-1 h-5 w-px bg-line" aria-hidden="true" />
+        <button
+          v-for="option in DISTRIBUTIONS"
+          :key="option.axis"
+          type="button"
+          class="flex h-7 w-7 items-center justify-center rounded-lg text-muted hover:bg-hover hover:text-ink disabled:opacity-40"
+          :aria-label="option.label"
+          :title="
+            count < 3
+              ? `${option.label}: select three or more shapes`
+              : `${option.label}, with equal gaps`
+          "
+          :disabled="count < 3"
+          @click="
+            move(distributeBoxes(boxes(), /** @type {'horizontal' | 'vertical'} */ (option.axis)))
+          "
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <path :d="option.d" />
+          </svg>
+        </button>
+      </template>
+    </div>
+  </Teleport>
 </template>

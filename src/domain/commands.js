@@ -1,5 +1,5 @@
 /**
- * @typedef {{ id: string, label: string, group: string, hint?: string, keywords?: string, run: () => void }} Command
+ * @typedef {{ id: string, label: string, group: string, hint?: string, keywords?: string, checked?: boolean, disabled?: boolean, run: () => void }} Command
  */
 
 /**

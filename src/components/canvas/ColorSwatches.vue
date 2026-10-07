@@ -18,7 +18,7 @@ const title = (name) => (name ? name[0].toUpperCase() + name.slice(1) : 'Default
 </script>
 
 <template>
-  <div role="radiogroup" :aria-label="label" class="flex items-center gap-0.5">
+  <div role="radiogroup" :aria-label="label" class="flex max-w-full flex-wrap items-center gap-0.5">
     <button
       v-for="name in ['', ...COLOR_NAMES]"
       :key="name || 'default'"
