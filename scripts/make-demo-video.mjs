@@ -44,9 +44,14 @@ let t0 = 0
 const cue = (name, extra = {}) => cues.push({ at: Date.now() - t0, name, ...extra })
 const pause = (ms) => new Promise((done) => setTimeout(done, ms))
 
-const preview = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], {
-  stdio: 'ignore',
-})
+// Vite itself, not through npx, so stopping it at the end stops the server.
+const preview = spawn(
+  'node_modules/.bin/vite',
+  ['preview', '--port', String(PORT), '--strictPort'],
+  {
+    stdio: 'ignore',
+  },
+)
 const browser = await chromium.launch()
 const take = await mkdtemp(join(tmpdir(), 'isketch-video-'))
 /** @type {import('@playwright/test').Page | undefined} */
