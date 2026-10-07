@@ -24,6 +24,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="%SITE_URL%/og.png" />
 
+    <link rel="alternate" type="text/markdown" href="/llms.txt" title="isketch, for AI agents" />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
     <style>
@@ -339,11 +340,21 @@
         </div>
       </section>
 
+      <section id="for-agents">
+        <h2>Ask any agent for a sketch</h2>
+        <p class="sub">
+          Ask your agent to explain something with an isketch sketch, and point it at this site. It
+          writes the diagram as text, puts it in a link, and you open the link to see it. No
+          account, no API key, no install. Agents: read
+          <a href="/llms.txt">/llms.txt</a>; it says how.
+        </p>
+      </section>
+
       <section>
         <h2>Or meet your agent where it works</h2>
         <p class="sub">
           An MCP server gives the agent the diagrams itself: list, read, update, redraw. Locally
-          over stdio, or over HTTP for the hosted links.
+          over stdio, or over HTTP from the server in the repository, run on your own host.
         </p>
         <div class="card">
           <div class="code-head">
@@ -361,7 +372,7 @@
           <pre id="mcp-stdio">
 claude mcp add isketch -- node /path/to/isketch/bin/isketch.mjs mcp .</pre>
           <div class="code-head">
-            Any MCP client: the hosted server
+            Any MCP client: a server you host
             <span class="grow"></span>
             <button
               class="btn"
@@ -372,7 +383,7 @@ claude mcp add isketch -- node /path/to/isketch/bin/isketch.mjs mcp .</pre>
               Copy
             </button>
           </div>
-          <pre id="mcp-http">claude mcp add --transport http isketch %SITE_URL%/mcp</pre>
+          <pre id="mcp-http">claude mcp add --transport http isketch https://your-server/mcp</pre>
         </div>
       </section>
 

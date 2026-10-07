@@ -43,6 +43,7 @@
     <link rel="icon" href="/icon-32.png" type="image/png" sizes="32x32" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="alternate" type="text/markdown" href="/llms.txt" title="isketch, for AI agents" />
 
     <script type="application/ld+json">
       {
@@ -62,7 +63,38 @@
     <script src="/analytics.js" defer></script>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <!--
+        The editor replaces this when it starts. Until then, and for an agent
+        that fetches the page without running it, it says how to use isketch.
+      -->
+      <section
+        style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)"
+      >
+        <h1>isketch: sketch it, hand it to your agent</h1>
+        <p>
+          The diagram editor. It runs in the browser, so this page alone holds no diagram. For AI
+          agents: read %SITE_URL%/llms.txt first.
+        </p>
+        <h2>For AI agents: show someone a diagram</h2>
+        <ol>
+          <li>
+            Write the diagram as .flow text: <code>id = process "Name"</code> for a shape,
+            <code>a -&gt; b : label</code> for a connection. The format: %SITE_URL%/docs/format
+          </li>
+          <li>
+            Link it as <code>%SITE_URL%/new#flow=t</code> followed by the .flow text as
+            base64url-encoded UTF-8 with no padding.
+          </li>
+          <li>Give the person that link. Opening it draws the diagram, ready to edit.</li>
+        </ol>
+        <p>
+          No account, API or server is needed, and isketch.online hosts no publish API. To read a
+          link: after <code>#flow=</code> comes <code>t</code> and base64url text, or
+          <code>z</code> and base64url of raw DEFLATE-compressed text.
+        </p>
+      </section>
+    </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

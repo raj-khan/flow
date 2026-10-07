@@ -41,6 +41,17 @@ After changing code a diagram describes (a new service, table, screen or connect
 
 If the person has the file open in isketch, they see your change as it happens.
 
+## Showing someone a diagram as a link
+
+When the person wants to see a sketch rather than a file ("explain it with a sketch", "draw this
+in isketch"), or sent an isketch link, answer with a link they open:
+
+1. Write the `.flow` text.
+2. Link it as `https://isketch.online/new#flow=t` followed by the text as base64url UTF-8 with no
+   padding: `node -e "process.stdout.write('https://isketch.online/new#flow=t' + require('fs').readFileSync(0).toString('base64url'))" < diagram.flow`
+3. Give them the link. To read one, the part after `#flow=` is `t` plus base64url text, or `z`
+   plus base64url of raw DEFLATE.
+
 ## The .flow format
 
 ```text

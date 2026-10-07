@@ -81,3 +81,23 @@ test('the landing and the app are both reachable on one server', async ({ page }
   expect(app.status()).toBe(200)
   expect(await app.text()).toContain('id="app"')
 })
+
+test('an agent that fetches the editor or llms.txt learns to answer with a link', async ({
+  page,
+  request,
+}) => {
+  const llms = await (await request.get('/llms.txt')).text()
+  expect(llms).toContain('## For AI agents: show someone a diagram')
+
+  // The editor's own page, as a fetcher that runs no script sees it.
+  const shell = await (await request.get('/new')).text()
+  expect(shell).toContain('For AI agents: show someone a diagram')
+  expect(shell).toContain('/new#flow=t')
+
+  // The recipe's link, made the way it says, opens the diagram.
+  const text =
+    'title: Robots\nqueue = database "Job queue"\nbot = process "Robot"\nqueue -> bot : assigns'
+  const encoded = btoa(text).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+  await page.goto(`/new#flow=t${encoded}`)
+  await expect(page.locator('.vue-flow__node')).toHaveCount(2)
+})

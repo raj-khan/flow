@@ -16,6 +16,26 @@ The loop: **sketch the system → Copy for AI → the agent builds from the brie
 the agent updates the `.flow` file as the code changes → pull requests show the
 diagram diff.**
 
+## For AI agents: show someone a diagram
+
+When a person asks you to sketch, diagram or explain something "with isketch",
+or hands you an isketch link, do this. No account, API or server is needed:
+
+1. Write the diagram as `.flow` text (the format is below, and in full at
+   https://isketch.online/docs/format).
+2. Make a link: `https://isketch.online/new#flow=t` followed by the `.flow`
+   text as base64url-encoded UTF-8, with no padding. For example:
+   `node -e "process.stdout.write('https://isketch.online/new#flow=t' + require('fs').readFileSync(0).toString('base64url'))" < diagram.flow`
+   or in Python: `'https://isketch.online/new#flow=t' + base64.urlsafe_b64encode(text.encode()).decode().rstrip('=')`
+3. Give the person that link. Opening it draws the diagram, ready to edit.
+
+To read a link you are given: the part after `#flow=` is `t` plus base64url
+`.flow` text, or `z` plus base64url of raw DEFLATE-compressed `.flow` text.
+Shapes use `id = process "Name"`, connections `a -> b : label`; colours are
+red, orange, yellow, green, teal, blue, violet, pink and grey. A line isketch
+cannot read is skipped, not fatal. Do not look for a publish API on
+isketch.online: it does not host one yet.
+
 ## The `.flow` format
 
 A diagram is plain text that reads well and diffs cleanly. One node or edge per
@@ -112,7 +132,8 @@ A local server for the `.flow` files in a folder (`isketch mcp .`):
 | `render_diagram` | Draw one as SVG                                             |
 | `diff_diagrams`  | Compare a diagram with a proposed version                   |
 
-The hosted server speaks Streamable HTTP at `/mcp`: `read_diagram` by its
+The server in `server/`, where someone hosts it (isketch.online does not yet),
+speaks Streamable HTTP at `/mcp`: `read_diagram` by its
 public link, `publish_diagram` returning the link and an edit token, and
 `update_diagram` with that token, saying what changed. Anyone with a link can
 read a diagram; only its edit token can change it.
@@ -121,7 +142,7 @@ Setup:
 
 ```bash
 claude mcp add isketch -- node /path/to/isketch/bin/isketch.mjs mcp .
-claude mcp add --transport http isketch https://isketch.online/mcp
+claude mcp add --transport http isketch https://your-server/mcp
 ```
 
 ## The CLI

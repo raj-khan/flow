@@ -8,9 +8,29 @@ Links:
 - [The .flow format](https://isketch.online/docs/format): the whole text format, with examples. This is the page an agent should read before writing a diagram.
 - [The brief](https://isketch.online/#what-your-agent-receives): what "Copy for AI" puts on the clipboard.
 - [MCP over stdio](https://github.com/raj-khan/isketch#connect-your-agent-mcp): `isketch mcp`: list, read, write, render and diff the `.flow` files in a folder.
-- [MCP over HTTP](https://github.com/raj-khan/isketch#the-same-tools-over-http): the hosted server at `/mcp`: read a diagram by its link, publish, update with its edit token.
+- [MCP over HTTP](https://github.com/raj-khan/isketch#hosted-links-for-agents): the server in `server/`, once you host it, at `/mcp`: read a diagram by its link, publish, update with its edit token. isketch.online does not host it yet.
 - [The CLI](https://github.com/raj-khan/isketch#command-line): render, check, import and export from a terminal or CI.
 - [Hosted links](https://github.com/raj-khan/isketch#hosted-links-for-agents): every diagram behind one link, as a page, `.md`, `.flow`, `.svg`, `.json` or a PNG preview.
+
+## For AI agents: show someone a diagram
+
+When a person asks you to sketch, diagram or explain something "with isketch",
+or hands you an isketch link, do this. No account, API or server is needed:
+
+1. Write the diagram as `.flow` text (the format is below, and in full at
+   https://isketch.online/docs/format).
+2. Make a link: `https://isketch.online/new#flow=t` followed by the `.flow`
+   text as base64url-encoded UTF-8, with no padding. For example:
+   `node -e "process.stdout.write('https://isketch.online/new#flow=t' + require('fs').readFileSync(0).toString('base64url'))" < diagram.flow`
+   or in Python: `'https://isketch.online/new#flow=t' + base64.urlsafe_b64encode(text.encode()).decode().rstrip('=')`
+3. Give the person that link. Opening it draws the diagram, ready to edit.
+
+To read a link you are given: the part after `#flow=` is `t` plus base64url
+`.flow` text, or `z` plus base64url of raw DEFLATE-compressed `.flow` text.
+Shapes use `id = process "Name"`, connections `a -> b : label`; colours are
+red, orange, yellow, green, teal, blue, violet, pink and grey. A line isketch
+cannot read is skipped, not fatal. Do not look for a publish API on
+isketch.online: it does not host one yet.
 
 ## The format in ten lines
 
@@ -33,7 +53,7 @@ style, is at [/docs/format](https://isketch.online/docs/format) and in
 
 `list_diagrams`, `read_diagram` (brief or `.flow` text), `write_diagram`
 (refuses invalid text, with line numbers), `render_diagram` (SVG),
-`diff_diagrams`, the local server for the diagrams in a folder. The hosted
-endpoint at `/mcp` answers `read_diagram` by link, `publish_diagram` and
+`diff_diagrams`, the local server for the diagrams in a folder. The server in
+`server/`, where someone hosts it, answers at `/mcp` `read_diagram` by link, `publish_diagram` and
 `update_diagram` with the diagram's edit token. Setup lines for both are in
 llms-full.txt.
