@@ -28,7 +28,7 @@ It imports draw.io, Excalidraw, Mermaid, docker-compose, OpenAPI, SQL, Prisma an
 `isketch scan` drafts a diagram of a whole repository, and pull requests get a visual diff. It works
 offline, needs no account, and is MIT licensed.
 
-https://github.com/raj-khan/flow
+https://github.com/raj-khan/isketch
 
 ## Product Hunt
 
@@ -70,7 +70,7 @@ https://github.com/raj-khan/flow
 people would want Claude to do with a diagram next.
 
 ```text
-/plugin marketplace add raj-khan/flow
+/plugin marketplace add raj-khan/isketch
 /plugin install isketch@isketch
 ```
 
@@ -103,13 +103,13 @@ screenshot against a brief.
 3. Or skip the clipboard: the MCP server lets Claude Code read, write and render your diagrams,
    and the open canvas shows its edits live.
 4. Bring what you have: draw.io, Excalidraw, Mermaid, compose, OpenAPI, SQL, Prisma, Drizzle.
-5. MIT, offline, no account: github.com/raj-khan/flow
+5. MIT, offline, no account: github.com/raj-khan/isketch
 
 ## Listings
 
 Ready to paste; the MCP registry and marketplaces are in [listings.md](listings.md).
 
-- **awesome-mcp-servers:** `- [raj-khan/flow](https://github.com/raj-khan/flow) - isketch: read,
+- **awesome-mcp-servers:** `- [raj-khan/isketch](https://github.com/raj-khan/isketch) - isketch: read,
 write, validate, render and diff .flow architecture diagrams an agent reads exactly.`
 - **awesome-claude-code:** under plugins, `isketch: the .flow diagram format as a skill, with an MCP
 server to read, write and render diagrams in your repo.`

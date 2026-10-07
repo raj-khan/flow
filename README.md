@@ -10,7 +10,7 @@ Claude, Copilot or any coding agent reads without guessing, and can edit back.
 
 [Backlog](BACKLOG.md) · [Security](SECURITY.md) · [Agent rules](AGENTS.md)
 
-[![CI](https://github.com/raj-khan/flow/actions/workflows/ci.yml/badge.svg)](https://github.com/raj-khan/flow/actions/workflows/ci.yml)
+[![CI](https://github.com/raj-khan/isketch/actions/workflows/ci.yml/badge.svg)](https://github.com/raj-khan/isketch/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-ff5a2c.svg)](LICENSE)
 
 ![Sketching in isketch, Copy for AI, and an agent building from the brief](docs/loop.gif)
@@ -301,7 +301,7 @@ a screenshot. It has five tools:
 install) and a skill that teaches Claude the `.flow` format and when to read or update a diagram.
 
 ```text
-/plugin marketplace add raj-khan/flow
+/plugin marketplace add raj-khan/isketch
 /plugin install isketch@isketch
 ```
 
@@ -407,7 +407,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: raj-khan/flow/.github/actions/diagram-report@main
+      - uses: raj-khan/isketch/.github/actions/diagram-report@main
 ```
 
 The action needs only git and Node, with nothing to install.

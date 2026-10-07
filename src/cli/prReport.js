@@ -24,7 +24,7 @@ export function prReport(files) {
     '### Diagrams in this pull request',
     '',
     ...sections,
-    '<sub>Green was added, red dashed was removed, amber changed. Drawn by <a href="https://github.com/raj-khan/flow">isketch</a> from the <code>.flow</code> files.</sub>',
+    '<sub>Green was added, red dashed was removed, amber changed. Drawn by <a href="https://github.com/raj-khan/isketch">isketch</a> from the <code>.flow</code> files.</sub>',
     '',
   ].join('\n')
 }

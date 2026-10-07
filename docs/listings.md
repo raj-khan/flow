@@ -9,7 +9,7 @@ the listings point at it.
 Already installable from this repository, which is its own marketplace:
 
 ```text
-/plugin marketplace add raj-khan/flow
+/plugin marketplace add raj-khan/isketch
 /plugin install isketch@isketch
 ```
 

@@ -362,7 +362,7 @@ ${STYLES}
   <a class="btn" href="/new">Open the editor</a>
 </header>
 ${body}
-<footer>isketch: sketch it, hand it to your agent · <a href="/">Home</a> · <a href="https://github.com/raj-khan/flow#readme">Docs</a> · MIT licence</footer>
+<footer>isketch: sketch it, hand it to your agent · <a href="/">Home</a> · <a href="https://github.com/raj-khan/isketch#readme">Docs</a> · MIT licence</footer>
 </div>
 <script>
   for (const button of document.querySelectorAll('[data-copy-from]')) {

@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "author": { "name": "raj-khan", "url": "https://github.com/raj-khan" },
   "homepage": "https://isketch.online",
-  "repository": "https://github.com/raj-khan/flow",
+  "repository": "https://github.com/raj-khan/isketch",
   "license": "MIT",
   "keywords": ["diagram", "architecture", "mcp", "flow", "excalidraw", "drawio"]
 }

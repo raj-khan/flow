@@ -44,6 +44,10 @@ db 276,352
 - `note: ...` under the title is a note for the whole diagram, and
   `id note: ...` a note for one shape, one line each: instructions for whoever
   builds from it, person or agent.
+- `id color: red` colours a shape or pen stroke, one of `red`, `orange`,
+  `yellow`, `green`, `teal`, `blue`, `violet`, `pink` or `grey`.
+- `id arrow: end` or `both` puts an arrowhead on a pen stroke; shapes
+  connect with `->` instead.
 - `a -> b : label` connects two nodes; the label is optional, and a line may
   refer to a node defined further down. `a --> b` is dashed, `a <-> b` has an
   arrow at each end, and `a <--> b` is both.

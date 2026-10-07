@@ -5,6 +5,6 @@
   "description": "Diagrams your agent reads exactly and edits back: read an isketch link as a brief or .flow text, publish a diagram, and update it with its edit token.",
   "version": "0.1.0",
   "websiteUrl": "https://isketch.online",
-  "repository": { "url": "https://github.com/raj-khan/flow", "source": "github" },
+  "repository": { "url": "https://github.com/raj-khan/isketch", "source": "github" },
   "remotes": [{ "type": "streamable-http", "url": "https://isketch.online/mcp" }]
 }

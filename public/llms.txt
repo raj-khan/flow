@@ -7,10 +7,10 @@ Links:
 - [The editor](https://isketch.online/new): start drawing, no account.
 - [The .flow format](https://isketch.online/docs/format): the whole text format, with examples. This is the page an agent should read before writing a diagram.
 - [The brief](https://isketch.online/#what-your-agent-receives): what "Copy for AI" puts on the clipboard.
-- [MCP over stdio](https://github.com/raj-khan/flow#connect-your-agent-mcp): `isketch mcp`: list, read, write, render and diff the `.flow` files in a folder.
-- [MCP over HTTP](https://github.com/raj-khan/flow#the-same-tools-over-http): the hosted server at `/mcp`: read a diagram by its link, publish, update with its edit token.
-- [The CLI](https://github.com/raj-khan/flow#command-line): render, check, import and export from a terminal or CI.
-- [Hosted links](https://github.com/raj-khan/flow#hosted-links-for-agents): every diagram behind one link, as a page, `.md`, `.flow`, `.svg`, `.json` or a PNG preview.
+- [MCP over stdio](https://github.com/raj-khan/isketch#connect-your-agent-mcp): `isketch mcp`: list, read, write, render and diff the `.flow` files in a folder.
+- [MCP over HTTP](https://github.com/raj-khan/isketch#the-same-tools-over-http): the hosted server at `/mcp`: read a diagram by its link, publish, update with its edit token.
+- [The CLI](https://github.com/raj-khan/isketch#command-line): render, check, import and export from a terminal or CI.
+- [Hosted links](https://github.com/raj-khan/isketch#hosted-links-for-agents): every diagram behind one link, as a page, `.md`, `.flow`, `.svg`, `.json` or a PNG preview.
 
 ## The format in ten lines
 

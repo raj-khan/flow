@@ -59,6 +59,14 @@ jobs:
           npm run -s plugin
           git diff --exit-code plugin/
 
+      # The docs, llms.txt and SEO pages are generated from templates: they must match them.
+      - name: Generated pages
+        if: '!cancelled()'
+        run: |
+          npm run -s docs
+          npm run -s pages
+          git diff --exit-code public/
+
       - name: VS Code extension builds
         if: '!cancelled()'
         run: npm run -s vscode
