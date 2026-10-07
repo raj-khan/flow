@@ -70,6 +70,7 @@ test('every generated page has its own title, description and OG image', async (
   for (const path of [
     '/templates',
     '/templates/url-shortener',
+    '/vs',
     '/vs/drawio',
     '/convert',
     '/convert/openapi-to-diagram',
@@ -85,5 +86,16 @@ test('every generated page has its own title, description and OG image', async (
     const image = await request.get(`${path}/og.png`)
     expect(image.status(), path).toBe(200)
     expect(image.headers()['content-type'], path).toContain('image/png')
+  }
+})
+
+test('every page the sitemap lists is there', async ({ request }) => {
+  const sitemap = await (await request.get('/sitemap.xml')).text()
+  const paths = [...sitemap.matchAll(/<loc>https?:\/\/[^/<]+([^<]*)<\/loc>/g)].map(
+    ([, path]) => path || '/',
+  )
+  expect(paths.length).toBeGreaterThan(10)
+  for (const path of paths) {
+    expect((await request.get(path)).status(), path).toBe(200)
   }
 })

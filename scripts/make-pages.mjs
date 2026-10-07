@@ -268,6 +268,26 @@ async function writeVersus(entries) {
   <p><a class="btn" href="/new">Sketch something in isketch</a></p>`,
     })
   }
+
+  await page('vs', {
+    title: 'isketch compared, honestly · isketch',
+    description:
+      'Fair comparisons of isketch with Excalidraw, draw.io, Eraser and tldraw: where each is better, and what isketch adds for handing diagrams to coding agents.',
+    body: `
+  <h1>isketch compared</h1>
+  <p class="sub">Each of these is good at what it does. Each page says where it is the better choice, and where isketch adds something it does not.</p>
+  <div class="grid">
+    ${entries
+      .map(
+        (entry) => `
+    <a class="step" href="/vs/${entry.slug}">
+      <b>isketch vs ${entry.name}</b>
+      <p>Where ${entry.name} is better, and what isketch adds.</p>
+    </a>`,
+      )
+      .join('')}
+  </div>`,
+  })
 }
 
 async function writeConvert(tools) {
