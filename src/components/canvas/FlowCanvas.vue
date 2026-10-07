@@ -40,7 +40,7 @@ import { canConnect, edgeIdFor, toNodeId } from '@/domain/graph.js'
 import { isInView, panDuration } from '@/domain/motion.js'
 import { isSketch } from '@/domain/sketch.js'
 import { GRID } from '@/domain/arrange.js'
-import { TOOL } from '@/domain/tools.js'
+import { TOOL, toolForKey } from '@/domain/tools.js'
 import { withConnectedShape, withErased } from '@/domain/quickShapes.js'
 import { generateNodeId } from '@/api/flowApi.js'
 import SelectionToolbar from './SelectionToolbar.vue'
@@ -840,8 +840,9 @@ function addConnectedShape(fromId) {
 }
 
 /**
- * On a blank diagram, typing starts a shape named with what is typed, ahead
- * of the one-letter tool keys.
+ * On a blank diagram, typing starts a shape named with what is typed. A tool's
+ * own key still picks the tool, since a blank canvas is where someone new
+ * reaches for one; a capital starts a name, so "Payments" is still typed.
  * @param {KeyboardEvent} event
  */
 function onBlankTyping(event) {
@@ -859,7 +860,9 @@ function onBlankTyping(event) {
   }
 
   if (nodes.value.length || isLoading.value || !isEditing.value) return
+  if (canvas.tool !== TOOL.SELECT || canvas.isLibraryOpen) return
   if (event.key.length !== 1 || !event.key.trim()) return
+  if (event.key === event.key.toLowerCase() && toolForKey(event.key)) return
   event.preventDefault()
   event.stopImmediatePropagation()
   typedAhead = { active: true, text: event.key, enter: false }

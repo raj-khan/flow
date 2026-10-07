@@ -58,6 +58,22 @@ test('typing on a blank diagram starts a shape named with what is typed', async 
   await expect(tool(page, 'Select')).toHaveAttribute('aria-pressed', 'true')
 })
 
+test('on a blank diagram, a tool key still picks its tool', async ({ page }) => {
+  await fromMenu(page, 'New diagram')
+  await expect(shapes(page)).toHaveCount(0)
+
+  await page.keyboard.press('p')
+  await expect(tool(page, 'Pen')).toHaveAttribute('aria-pressed', 'true')
+  await page.keyboard.press('v')
+  await expect(tool(page, 'Select')).toHaveAttribute('aria-pressed', 'true')
+  await expect(shapes(page)).toHaveCount(0)
+
+  // Any other letter starts a name.
+  await page.keyboard.type('api')
+  await page.keyboard.press('Enter')
+  await expect(shapes(page).first()).toContainText('api')
+})
+
 test('a double click on empty canvas puts a shape there, ready to name', async ({ page }) => {
   await page.locator('.vue-flow__pane').dblclick({ position: { x: 200, y: 620 } })
   await expect(shapes(page)).toHaveCount(6)
