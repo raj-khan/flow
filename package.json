@@ -25,6 +25,7 @@
     "sitemap": "node scripts/make-sitemap.mjs",
     "landing": "node scripts/make-landing.mjs",
     "clip": "npm run build && node scripts/make-demo-clip.mjs",
+    "video": "npm run build && node scripts/make-demo-video.mjs",
     "docs": "node scripts/make-docs.mjs",
     "pages": "node scripts/make-pages.mjs",
     "plugin": "node scripts/make-plugin.mjs",

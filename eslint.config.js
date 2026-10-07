@@ -29,6 +29,8 @@ export default [
       'e2e/**/*.js',
       '.claude/hooks/*.mjs',
       'scripts/*.mjs',
+      'scripts/video/*.mjs',
+      'scripts/video/*.js',
       'bin/*.mjs',
       'vscode/src/**/*.js',
       'vscode/test/*.js',

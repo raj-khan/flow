@@ -4,6 +4,11 @@ Drafts to post, in the owner's voice. Each points at the README, whose hero GIF 
 Post after isketch.online serves the app and the hosted server, so every link works, and after the
 60 second demo video (made with idemo.video) is uploaded to the README.
 
+`npm run video` records a 70 second demo with sound (sketch, Copy for AI, an agent editing the
+diagram, a remote agent publishing one by URL). It needs the production build, a local isketch
+server with `PUBLIC_URL` and `APP_URL` set to `https://isketch.online`, and ffmpeg: see the
+comment at the top of `scripts/make-demo-video.mjs`.
+
 ## Show HN
 
 **Title:** Show HN: isketch, a sketchpad your coding agent reads exactly
