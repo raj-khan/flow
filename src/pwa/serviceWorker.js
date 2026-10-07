@@ -17,7 +17,7 @@ export function serviceWorkerSource(version, files) {
   return `// isketch service worker, build ${version}. Written by the build; do not edit.
 const CACHE = ${JSON.stringify(`isketch-${version}`)}
 const SHELL = ${JSON.stringify(files)}
-const APP = '/index.html'
+const APP = '/app.html'
 // A module import sends Origin and the install did not; the names are hashed, so Vary is moot.
 const MATCH = { ignoreVary: true }
 

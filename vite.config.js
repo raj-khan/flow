@@ -9,8 +9,11 @@ import tailwindcss from '@tailwindcss/vite'
 import { analyticsScript } from './src/api/analytics.js'
 import { serviceWorkerSource, shellFiles } from './src/pwa/serviceWorker.js'
 
-/** Where links point when the head is built; %SITE_URL% in index.html. */
+/** Where links point when the head is built; %SITE_URL% in app.html. */
 const SITE_URL = (process.env.VITE_SITE_URL ?? 'https://isketch.online').replace(/\/+$/, '')
+
+/** The editor's routes, served app.html as vercel.json and nginx do. */
+const APP_ROUTE = /^\/(new|flow)(\/|$)/
 
 /** Serve the landing at / and content pages at their clean URL, as production does. */
 function serveLanding(server) {
@@ -18,6 +21,10 @@ function serveLanding(server) {
     const url = new URL(req.url ?? '/', 'http://localhost')
     if (url.pathname === '/' || url.pathname.startsWith('/?')) {
       req.url = '/landing.html' + url.search
+      return next()
+    }
+    if (APP_ROUTE.test(url.pathname)) {
+      req.url = '/app.html' + url.search
       return next()
     }
     // A directory with an index, such as /docs/format: its page, not the SPA.
@@ -103,7 +110,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        index: fileURLToPath(new URL('./index.html', import.meta.url)),
+        app: fileURLToPath(new URL('./app.html', import.meta.url)),
         convert: fileURLToPath(new URL('./convert.html', import.meta.url)),
       },
     },

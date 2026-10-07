@@ -39,9 +39,12 @@ jobs:
         if: '!cancelled()'
         run: npm run test:coverage
 
+      # Vercel serves a file before any rewrite, so a dist/index.html would take / from the landing.
       - name: Build
         if: '!cancelled()'
-        run: npm run build
+        run: |
+          npm run build
+          test -f dist/landing.html && test -f dist/app.html && test ! -e dist/index.html
 
       # The examples are Flow's own diagrams: they must parse, and the SVGs next
       # to them must be what the renderer draws today.

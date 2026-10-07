@@ -498,8 +498,10 @@ production build in another.
 
 ## Deployment
 
-The build is a static single page app, so any static host works as long as unknown paths fall back
-to `index.html`. `docker/nginx.conf` does that for the container and `vercel.json` for Vercel.
+The build is static, so any static host works as long as `/` serves `landing.html` and the
+editor's routes (`/new`, `/flow` and below them) fall back to `app.html`. There is deliberately no
+`index.html`: Vercel serves a file before any rewrite, so one would take `/` from the landing.
+`docker/nginx.conf` does this for the container and `vercel.json` for Vercel.
 
 ## Known limits
 
