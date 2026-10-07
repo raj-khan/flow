@@ -48,9 +48,11 @@ isketch aims at that gap:
   for agents and crawlers that fetch them.
 
 What is honestly not there yet: a private share link keeps the diagram after the `#`, which
-browsers never send to a server, so an AI that fetches it sees nothing. Public links an agent can
-read come from the [server](#hosted-links-for-agents), which is built and wired into Share, but
-nobody hosts it yet: run it yourself, or hand over the `.flow` file or the brief.
+browsers never send to a server, so an AI that only fetches it sees nothing; one that can run code
+decodes it, and [llms.txt](https://isketch.online/llms.txt) says how, and how to answer with a link
+of its own. Public links an agent can read come from the [server](#hosted-links-for-agents), which
+is built and wired into Share, but isketch.online does not host it yet: run it yourself, or hand
+over the `.flow` file or the brief.
 
 > **Status: early.** isketch started as a flow chart exercise called Flow. The canvas, text
 > format, importers, CLI and pull request diffs below work today.
@@ -77,7 +79,8 @@ nobody hosts it yet: run it yourself, or hand over the `.flow` file or the brief
 - **Draft with your agent.** Describe a diagram in words, and isketch writes a prompt that teaches
   the `.flow` format: copy it, or open it straight in Claude or ChatGPT, then paste the answer back
   and it is drawn, undoably. Your own agent does the drafting; isketch sends nothing anywhere.
-- **Quick to type.** On a blank diagram, just start typing: the first shape takes the words.
+- **Quick to type.** On a blank diagram, just start typing: the first shape takes the words. A
+  tool's own key (`p`, `v`, `1`...) still picks the tool; start with a capital to type one.
   Double-click empty canvas for a shape there. `Tab` adds the next step below the selected shape,
   connected and ready to name, as in Whimsical. `Ctrl+K` finds any action or shape by name.
 - **New diagram and samples.** Start on a blank canvas, ready to draw on, or from a web app
@@ -139,7 +142,7 @@ nobody hosts it yet: run it yourself, or hand over the `.flow` file or the brief
   the text. Errors are listed by line, and the canvas keeps the last valid diagram meanwhile.
 - **Import.** Paste or open a Mermaid flowchart, a `docker-compose.yml`, an OpenAPI spec,
   SQL `CREATE TABLE` statements, a Prisma schema or Drizzle table definitions. Compose services
-  become shapes that fit their image (Postgres a database, RabbitMQ a queue), and dependencies
+  become shapes that fit their image (Postgres a database, RabbitMQ an input / output), and dependencies
   become connections. An OpenAPI spec becomes a map of its tags and the schemas they use, and SQL,
   Prisma and Drizzle an entity diagram with keys marked and foreign keys (or relations) as labelled
   connections. `isketch import` does the same from the command line.
@@ -154,10 +157,11 @@ nobody hosts it yet: run it yourself, or hand over the `.flow` file or the brief
   their text, arrows bound at both ends become connections, and free drawing becomes pen strokes.
   What cannot come in is listed. _Export_ writes a `.excalidraw` file whose shapes carry their
   isketch kind, description and notes, so it comes back unchanged.
-- **Copy for AI.** One button copies a Markdown brief for Claude, Copilot or any coding agent: each
-  shape with its id and what it means ("a data store", "a branch the code must handle"), each
-  connection in words, and the `.flow` source at the end so the agent can change the diagram and
-  hand it back. `isketch brief` prints the same from the command line.
+- **Copy for AI.** One button copies a Markdown brief for Claude, Copilot or any coding agent. It
+  opens as a prompt: here is my draft, with a link to it, and asks the agent to reply with a link
+  to its version, so you open a picture instead of reading text. Then each shape with its id and
+  what it means ("a data store", "a branch the code must handle"), each connection in words, and
+  the `.flow` source. `isketch brief` prints the brief from the command line.
 - **Export** as PNG (at twice the size, for slides and chat), SVG, a draw.io or an Excalidraw file, light or
   dark, with a preview. Sketches carry their handwriting font inside the file.
 - **Copy as Mermaid** from the text pane, for a README.
@@ -168,10 +172,13 @@ nobody hosts it yet: run it yourself, or hand over the `.flow` file or the brief
   other version, and see what was added, removed and changed, as a list and as a marked-up
   picture.
 - **Share.** A private link carries the whole diagram in the link itself, compressed, so nothing is
-  uploaded; opening one gives the visitor their own copy, and undo brings back theirs. With a
+  uploaded; opening one gives the visitor their own copy, and undo brings back theirs. A line in a
+  link that isketch cannot read (an agent's slip) is left out, and the rest opens. With a
   server configured (`VITE_ISKETCH_API`, see `.env.example`), Share also publishes a public link an
   AI can read, updates it in place, or unpublishes it; the edit token stays in this browser.
-- **Works offline.** The samples are bundled, so the app makes no network requests.
+- **Tutorial.** Someone new sees a short video once; _Tutorial_, top right, plays it again.
+- **Works offline.** The samples are bundled, so drawing needs no network. The tutorial video
+  (YouTube, privacy-enhanced) and analytics (production only, cookieless) are the only requests.
 
 ## The `.flow` format
 
