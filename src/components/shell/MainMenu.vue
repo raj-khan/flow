@@ -16,8 +16,10 @@ import { useToastStore } from '@/stores/toasts.js'
 
 /**
  * The top-left island: the product, the open file, and a menu of everything
- * that is not drawing. It owns Ctrl+O and Ctrl+S, bound once here.
+ * that is not drawing. It owns Ctrl+O and Ctrl+S, bound once here. Where the
+ * side panel shows, it lists all of this already, so the menu button goes.
  */
+defineProps({ menu: { type: Boolean, default: true } })
 const emit = defineEmits(['help', 'import', 'compare', 'export', 'commands', 'draft'])
 
 const canvas = useCanvasStore()
@@ -156,8 +158,9 @@ onBeforeUnmount(() => window.removeEventListener('pointerdown', onOutside))
 </script>
 
 <template>
-  <div class="island relative flex items-center gap-2 p-1 md:pr-3">
+  <div class="island relative flex items-center gap-2" :class="menu ? 'p-1 md:pr-3' : 'px-3 py-2'">
     <button
+      v-if="menu"
       ref="trigger"
       type="button"
       class="rounded-lg px-2.5 py-2 text-ink transition-colors hover:bg-hover"
@@ -188,7 +191,7 @@ onBeforeUnmount(() => window.removeEventListener('pointerdown', onOutside))
     </h1>
 
     <div
-      v-if="isOpen"
+      v-if="menu && isOpen"
       ref="list"
       role="menu"
       aria-label="Menu"

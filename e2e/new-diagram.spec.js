@@ -106,9 +106,8 @@ test('Discard all clears the canvas, keeps the title, and undo brings it back', 
   await expect(page.getByText('Discarded 5 shapes.')).toBeVisible()
 
   // Nothing left to discard.
-  await page.getByRole('button', { name: 'Menu', exact: true }).click()
-  await expect(page.getByRole('menuitem', { name: 'Discard all' })).toBeDisabled()
-  await page.keyboard.press('Escape')
+  await page.getByRole('button', { name: 'Open the side panel' }).click()
+  await expect(page.getByRole('button', { name: 'Discard all' })).toBeDisabled()
 
   await history(page).getByRole('button', { name: 'Undo' }).click()
   await expect(shapes(page)).toHaveCount(5)

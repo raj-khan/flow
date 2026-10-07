@@ -194,6 +194,7 @@ onBeforeUnmount(() => window.removeEventListener('pointermove', onPointerMove))
         :class="{ 'zen-hidden': canvas.zen && !near.top }"
       >
         <MainMenu
+          :menu="!showDock"
           @help="help.open"
           @import="isImporting = true"
           @compare="isComparing = true"

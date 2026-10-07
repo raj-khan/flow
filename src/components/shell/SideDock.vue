@@ -95,7 +95,7 @@ const sections = computed(() =>
     items: section.rows
       .map(([id, label, tip]) => {
         const command = byId.value.get(id)
-        return command && { ...command, tip, label: label || command.label.replace(/^Theme: /, '') }
+        return command && { ...command, tip, label: label || command.label }
       })
       .filter((item) => item !== undefined),
   })),

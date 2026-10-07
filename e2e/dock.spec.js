@@ -36,6 +36,9 @@ test('every action is in view at the left, and the canvas starts beside it', asy
     await expect(dock(page).getByRole('button', { name })).toBeVisible()
   }
 
+  // The panel lists all the menu held, so there is no menu button to repeat it.
+  await expect(page.getByRole('button', { name: 'Menu', exact: true })).toHaveCount(0)
+
   const panel = await dock(page).boundingBox()
   const pane = await page.locator('.vue-flow__pane').boundingBox()
   expect(pane.x).toBe(panel.width)
@@ -87,6 +90,7 @@ test('a section folds away, and stays folded', async ({ page }) => {
 test('a phone keeps the menu, with no side panel', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 800 })
   await expect(dock(page)).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Menu', exact: true })).toBeVisible()
   const pane = await page.locator('.vue-flow__pane').boundingBox()
   expect(pane.x).toBe(0)
 })

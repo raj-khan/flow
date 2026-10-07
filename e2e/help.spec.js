@@ -5,7 +5,7 @@ import { fromMenu } from './helpers.js'
 test('opens the shortcut reference with ? and from the toolbar', async ({ page }) => {
   await page.goto('/new')
   // The shell binds the key on mount.
-  await expect(page.getByRole('button', { name: 'Menu', exact: true })).toBeVisible()
+  await expect(page.getByTestId('side-dock')).toBeVisible()
 
   await page.keyboard.press('?')
   const dialog = page.getByRole('dialog', { name: 'Keyboard shortcuts' })

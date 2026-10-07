@@ -71,7 +71,8 @@ over the `.flow` file or the brief.
 - **Every action in view.** A side panel at the left lists File, Agent, View and Help, with the
   selection's colours and alignment on top while shapes are selected. Each section folds away,
   and the whole panel folds to a rail of icons, as Photoshop's panels do; this browser remembers
-  both. It runs the same actions as the menu and `Ctrl+K`, from one list. Phones keep the menu.
+  both. It runs the same actions as `Ctrl+K`, from one list, and replaces the ☰ menu, which only
+  phones and zen mode keep.
 - **Tools** on number keys and letters: Select (`1`/`V`), Hand (`2`/`H`), Shapes (`3`), Connector
   (`4`/`C`, click one shape then another), Text (`5`/`T`, click the canvas to write), Pen (`6`/`P`),
   Eraser (`7`/`E`, click or drag over shapes and connections to delete them, in one undo step)
